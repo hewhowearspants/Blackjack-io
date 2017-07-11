@@ -4,7 +4,6 @@
 
 ### What is Blackjack?
 
-(Brief description of the game, why you're choosing to make it)
 Blackjack is also known as 21, is a card game where a player (or players) face off against a dealer. The dealer and each player initially gets two cards. The player(s) can only see one of the dealer's cards. Their values are face value, except Aces and face cards (J, Q, K), which are 1 or 11 and 10, respectively. 
 
 The player's goal is to get the sum of their cards higher than the sum of the dealer's cards, without that sum going over 21. The player can request additional cards (or 'hit') if they want to increase their chances of beating the dealer. When the player is satisfied, and have not gone over 21, they can end their turn (or 'stand').
@@ -26,7 +25,6 @@ The initial game logic should be fairly straightforward, creating a deck of card
 
 ### Phases of Completion
 
-(The steps or phases you expect to go through, and the tasks that you'll need to accomplish to reach each step. These should resemble the acceptance criteria we were working through earlier.)
 First phase will be to create a deck of cards in JS, using an Object constructor, pulling from arrays of suits and values. The Card object will be comprised of suit, value, realValue (the numerical value of the card for adding purposes), and an image url. I'll then randomize the deck using the Fisher-Yates algorithm. 
 
 Second phase, on the HTML side (maybe dynamically with jQuery, create a container div (the 'card table'), divs for the player and dealer hands, buttons to implement player actions, and a message box. Basic CSS rules will need to be in place to get the correct structure in place.
