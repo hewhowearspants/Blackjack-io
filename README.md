@@ -1,4 +1,4 @@
-# [Name of Game]
+# Blackjack
 
 [screenshot]
 
