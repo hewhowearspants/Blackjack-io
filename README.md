@@ -17,7 +17,8 @@ Blackjack is frequently played in casinos, and players usually bet on winning. I
 
 ### Wireframe
 
-(Your wireframes go here. Preferably two or more)
+![Wireframes](./projectassets/...JPG)
+![All DOM components](./projectassets/...JPG)
 
 ### Initial thoughts on game structure
 
