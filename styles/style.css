@@ -1,5 +1,14 @@
 body {
-  background-color: green;
+  background-color: black;
+  background-image: url('../assets/bodyBackground.png');
+  /*min-height: 100vw;
+  width: 100%;
+  min-width: 100%;*/
+  background-size: auto auto;
+  background-position: top center;
+  background-repeat: no-repeat;
+  text-align: center;
+  color: white;
 }
 
 .container {
@@ -7,14 +16,21 @@ body {
   max-width: 1000px;
   margin: 20px auto;
   box-sizing: border-box;
-  background-color: brown;
+  border-radius: 20px;
+  /*background-color: brown;*/
   padding: 10px;
   text-align: center;
+  background-image: url('../assets/tableBackground.png');
+  background-size: cover;
+  background-position: bottom center;
+  background-repeat: no-repeat;*/
 }
 
 .banner {
   margin: 20px;
-  background-color: grey;
+  /*background-color: grey;*/
+  opacity: .75;
+  color: white;
 }
 
 .button {
@@ -28,14 +44,17 @@ body {
   text-align: center;
   height: 200px;
   margin: 10px;
+  border-radius: 10px;
 }
 
 #dealer-hand {
-  background-color: yellow;
+  /*background-color: yellow;*/
+  border: dashed 1px yellow;
 }
 
 #player-hand {
-  background-color: lightblue;
+  /*background-color: lightblue;*/
+  border: dashed 1px lightblue;
 }
 
 .card {
@@ -50,7 +69,10 @@ body {
   background-repeat: no-repeat;
 }
 
-.hidden {
-  /*visibility: hidden;*/
+.subdued {
   opacity: .2;
+}
+
+.hidden {
+  visibility: hidden;
 }

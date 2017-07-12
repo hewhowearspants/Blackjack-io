@@ -18,10 +18,10 @@ function createDeck() {
   let deck = [];
 
   suits.forEach((suit) => {
-    for (let i = 0; i < values.length; i++) {
-      let card = new Card(suit, values[i], realValues[i]);
+    values.forEach((value, index) => {
+      let card = new Card(suit, value, realValues[index]);
       deck.push(card);
-    };
+    });
   });
 
   // console.log(deck);
@@ -50,8 +50,8 @@ function calculateHand(dealTo) {
   // let hasAce;
 
   let handTotal = dealTo.hand.reduce((total, card) => {
-    // if (card.value === 'A') {
-    //   hasAce = true;
+    // if (card.value === 'A' && ((total + 11) <= 21)) {
+    //   card.realValue = 11;
     // };
     return total += card.realValue;
   }, 0);
@@ -74,12 +74,18 @@ function hitMe(deck, dealTo) {
 
   dealTo.total = calculateHand(dealTo);
 
-  console.log(deck.length);
-  console.log(dealTo.total);
+  if (testOver21(dealTo.total)) {
+    endGame();
+  };
+
+  //console.log(deck.length);
+  $('#message-box').text(`${dealTo.name}: ${dealTo.total}`);
+  console.log(dealTo.name + ' total: ' + dealTo.total);
 }
 
 function dealHand() {
   console.log('deal em out!');
+  let $messageBox = $('#message-box');
   let deck = shuffleDeck();
 
   hitMe(deck, dealer);
@@ -87,13 +93,39 @@ function dealHand() {
   hitMe(deck, player);
   hitMe(deck, player);
 
-  console.log(`${dealer.name} hand: ${JSON.stringify(dealer.hand)}`);
+  if (player.total === 21 && dealer.total === 21) {
+    $messageBox.text('PUSH!');
+    endGame();
+  } else if (player.total === 21) {
+    $messageBox.text('BLACKJACK! You win!');
+    endGame();
+  } else if (dealer.total === 21) {
+    $messageBox.text('Dealer has blackjack! Dealer wins.');
+    endGame();
+  }
+
+  //console.log(`${dealer.name} hand: ${JSON.stringify(dealer.hand)}`);
   console.log(`${dealer.name} total: ${dealer.total}`);
-  console.log(`${player.name} hand: ${JSON.stringify(player.hand)}`);
+  //console.log(`${player.name} hand: ${JSON.stringify(player.hand)}`);
   console.log(`${player.name} total: ${player.total}`);
 
   startGame(deck);
 
+};
+
+function dealerTurn(deck) {
+  $('#hit-button').off('click');
+  $('#hit-button').addClass('subdued');
+  $('#stand-button').off('click');
+  $('#stand-button').addClass('subdued');
+
+  if (player.total < 21) {
+    while (dealer.total < 16) {
+      hitMe(deck, dealer);
+    };
+  };
+
+  endGame();
 };
 
 function startGame(deck) {
@@ -102,34 +134,57 @@ function startGame(deck) {
   let $standButton = $('#stand-button');
   let $dealButton = $('#deal-button');
 
-  $dealButton.addClass('hidden');
+  $dealButton.addClass('subdued');
   $dealButton.off('click');
 
-  $hitButton.removeClass('hidden');
+  $hitButton.removeClass('subdued');
   $hitButton.on('click', function() {
     hitMe(deck, player);
   });
 
-  $standButton.removeClass('hidden');
+  $standButton.removeClass('subdued');
   $standButton.on('click', function() {
-    endGame(deck);
+    dealerTurn(deck);
   });
-
 
 };
 
-function endGame(deck) {
+function endGame() {
+  let $messageBox = $('#message-box');
+  let $dealButton = $('#deal-button');
   $('#hit-button').off('click');
-  $('#hit-button').addClass('hidden');
+  $('#hit-button').addClass('subdued');
   $('#stand-button').off('click');
-  $('#stand-button').off('click');
-  if (dealer.total > player.total) {
-    console.log('dealer wins!');
-  } else {
-    console.log('you win!');
-  }
+  $('#stand-button').addClass('subdued');
+
+  if (player.total > 21) {
+    $messageBox.text('BUST!');
+  } else if (dealer.total > 21) {
+    $messageBox.text('Dealer busts! YOU WIN!');
+  } else if (dealer.total === player.total) {
+    $messageBox.text('PUSH!');
+  } else if (dealer.total > player.total) {
+    $messageBox.text('Dealer wins.')
+  } else if (player.total > dealer.total) {
+    $messageBox.text('YOU WIN!!');
+  };
+
+  $dealButton.removeClass('subdued');
+  $dealButton.text('DEAL AGAIN');
+  $dealButton.one('click', resetGame);
   console.log('game finished!');
 }
+
+function resetGame() {
+  $('.hand').children().remove();
+  $('.button').toggleClass('subdued');
+  $('#deal-button').text('DEAL');
+  $('').text(' ');
+  player.hand = [];
+  dealer.hand = [];
+
+  dealHand();
+};
 
 function setUpTable () {
   console.log('setting up table!');
@@ -138,8 +193,8 @@ function setUpTable () {
   let $playerHand = ($('<div>', {'class': 'hand', 'id': 'player-hand'}));
   let $messageBox = ($('<div>', {'class': 'banner', 'id': 'message-box'})).html('<span id="message">This is a message box!</span>');
   let $dealButton = ($('<button>', {'class': 'button', 'id': 'deal-button'})).text('DEAL');
-  let $hitButton = ($('<button>', {'class': 'button hidden', 'id': 'hit-button'})).text('HIT');
-  let $standButton = ($('<button>', {'class': 'button hidden', 'id': 'stand-button'})).text('STAND');
+  let $hitButton = ($('<button>', {'class': 'button subdued', 'id': 'hit-button'})).text('HIT');
+  let $standButton = ($('<button>', {'class': 'button subdued', 'id': 'stand-button'})).text('STAND');
 
   $('body').append($cardTable);
   $('#card-table').append($dealerHand);
