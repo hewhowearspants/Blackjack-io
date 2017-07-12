@@ -72,19 +72,25 @@ function hitMe(deck, dealTo) {
   dealTo.hand.push(newCard);
   dealTo.$hand.append($newCard);
 
-  console.log(deck.length);
-  console.log(dealTo.name + ' hand: ' + dealTo.hand);
+  dealTo.total = calculateHand(dealTo);
 
-  console.log(dealTo.name + ' total: ' + calculateHand(dealTo));
+  console.log(deck.length);
+  console.log(dealTo.total);
 }
 
 function dealHand() {
   console.log('deal em out!');
   let deck = shuffleDeck();
+
   hitMe(deck, dealer);
   hitMe(deck, dealer);
   hitMe(deck, player);
   hitMe(deck, player);
+
+  console.log(`${dealer.name} hand: ${JSON.stringify(dealer.hand)}`);
+  console.log(`${dealer.name} total: ${dealer.total}`);
+  console.log(`${player.name} hand: ${JSON.stringify(player.hand)}`);
+  console.log(`${player.name} total: ${player.total}`);
 
   startGame(deck);
 
@@ -92,11 +98,20 @@ function dealHand() {
 
 function startGame(deck) {
   console.log('game begins!');
-  $('#deal-button').off('click');
-  $('#hit-button').on('click', function() {
+  let $hitButton = $('#hit-button');
+  let $standButton = $('#stand-button');
+  let $dealButton = $('#deal-button');
+
+  $dealButton.addClass('hidden');
+  $dealButton.off('click');
+
+  $hitButton.removeClass('hidden');
+  $hitButton.on('click', function() {
     hitMe(deck, player);
   });
-  $('#stand-button').on('click', function() {
+
+  $standButton.removeClass('hidden');
+  $standButton.on('click', function() {
     endGame(deck);
   });
 
@@ -105,7 +120,14 @@ function startGame(deck) {
 
 function endGame(deck) {
   $('#hit-button').off('click');
+  $('#hit-button').addClass('hidden');
   $('#stand-button').off('click');
+  $('#stand-button').off('click');
+  if (dealer.total > player.total) {
+    console.log('dealer wins!');
+  } else {
+    console.log('you win!');
+  }
   console.log('game finished!');
 }
 
@@ -113,11 +135,7 @@ function setUpTable () {
   console.log('setting up table!');
   let $cardTable = ($('<div>', {'class': 'container', 'id': 'card-table'}));
   let $dealerHand = ($('<div>', {'class': 'hand', 'id': 'dealer-hand'}));
-  //let $dealerCardOne = ($('<div>', {'class': 'card flipped'}));
-  //let $dealerCardTwo = ($('<div>', {'class': 'card unflipped'}));
   let $playerHand = ($('<div>', {'class': 'hand', 'id': 'player-hand'}));
-  //let $playerCardOne = ($('<div>', {'class': 'card unflipped'}));
-  //let $playerCardTwo = ($('<div>', {'class': 'card unflipped'}));
   let $messageBox = ($('<div>', {'class': 'banner', 'id': 'message-box'})).html('<span id="message">This is a message box!</span>');
   let $dealButton = ($('<button>', {'class': 'button', 'id': 'deal-button'})).text('DEAL');
   let $hitButton = ($('<button>', {'class': 'button hidden', 'id': 'hit-button'})).text('HIT');
@@ -130,10 +148,6 @@ function setUpTable () {
   $('#card-table').append($hitButton);
   $('#card-table').append($standButton);
   $('#card-table').append($playerHand);
-  //$('#dealer-hand').append($dealerCardOne);
-  //$('#dealer-hand').append($dealerCardTwo);
-  //$('#player-hand').append($playerCardOne);
-  //$('#player-hand').append($playerCardTwo);
 
   $('#deal-button').on('click', dealHand);
   player.$hand = $('#player-hand');

@@ -51,5 +51,6 @@ body {
 }
 
 .hidden {
-  visibility: none;
+  /*visibility: hidden;*/
+  opacity: .2;
 }
