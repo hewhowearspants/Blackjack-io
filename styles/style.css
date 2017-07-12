@@ -29,7 +29,6 @@ body {
 .banner {
   margin: 20px;
   /*background-color: grey;*/
-  opacity: .75;
   color: white;
 }
 
@@ -57,6 +56,29 @@ body {
   border: dashed 1px lightblue;
 }
 
+.text-box {
+  display: inline-block;
+  width: 30%;
+}
+
+#player-box{
+  text-align: left;
+  /*position: relative;*/
+  /*width: 25%;*/
+  left: 0%;
+  margin-right: 5px;
+  color: lightblue;
+}
+
+#dealer-box{
+  /*position: relative;*/
+  text-align: right;
+  /*width: 25%;*/
+  right: 0%;
+  margin-left: 5px;
+  color: yellow;
+}
+
 .card {
   height: 181px;
   width: 125px;
@@ -75,4 +97,8 @@ body {
 
 .hidden {
   visibility: hidden;
+}
+
+p {
+  margin: 0;
 }
