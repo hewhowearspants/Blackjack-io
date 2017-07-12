@@ -1,0 +1,55 @@
+body {
+  background-color: green;
+}
+
+.container {
+  width: 80vw;
+  max-width: 1000px;
+  margin: 20px auto;
+  box-sizing: border-box;
+  background-color: brown;
+  padding: 10px;
+  text-align: center;
+}
+
+.banner {
+  margin: 20px;
+  background-color: grey;
+}
+
+.button {
+  border: none;
+  border-radius: 5px;
+  margin: 5px;
+}
+
+.hand {
+  display: block;
+  text-align: center;
+  height: 200px;
+  margin: 10px;
+}
+
+#dealer-hand {
+  background-color: yellow;
+}
+
+#player-hand {
+  background-color: lightblue;
+}
+
+.card {
+  height: 181px;
+  width: 125px;
+  /*background-color: white;*/
+  /*border: solid 2px black;*/
+  border-radius: 6px;
+  display: inline-block;
+  margin: 10px;
+  background-size: contain;
+  background-repeat: no-repeat;
+}
+
+.hidden {
+  visibility: none;
+}
