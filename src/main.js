@@ -50,12 +50,16 @@ function dealHand() {
   let $messageBox = $('#message-box');
   let deck = shuffleDeck();
 
+  $messageBox.text('Dealing \'em out!');
+
   hitMe(deck, dealer);
-  $('#dealer-hand div:nth-child(1)').css('background-image', 'url("./assets/card-back.jpg")');
   hitMe(deck, dealer);
   hitMe(deck, player);
   hitMe(deck, player);
 
+  $('#dealer-hand div:nth-child(1)').css('background-image', 'url("./assets/card-back.jpg")');
+
+  $('.hand').children().removeClass('removed');
   $('.hand').children().addClass('hidden');
 
   var timeout = 0;
@@ -63,6 +67,7 @@ function dealHand() {
   for (let i = 1; i < 3; i++) {
     setTimeout(function () {
       $(`#dealer-hand div:nth-child(${i})`).removeClass('hidden');
+      $(`#dealer-hand div:nth-child(${i})`).addClass('flyin');
     }, timeout);
     timeout += 250;
   };
@@ -70,6 +75,7 @@ function dealHand() {
   for (let i = 1; i < 3; i++) {
     setTimeout(function () {
       $(`#player-hand div:nth-child(${i})`).removeClass('hidden');
+      $(`#player-hand div:nth-child(${i})`).addClass('flyin');
     }, timeout);
     timeout += 250;
   };
@@ -80,7 +86,7 @@ function dealHand() {
     } else {
       startGame(deck);
     };
-  }, 1000);
+  }, timeout);
 
 };
 
@@ -107,7 +113,7 @@ function testForBlackjack() {
 function hitMe(deck, turn) {
   console.log('hit me!');
 
-  let $newCard = ($('<div>', {'class': 'card'}));
+  let $newCard = ($('<div>', {'class': 'card removed'}));
   let newCard = deck.shift();
   $newCard.css('background-image', `url('${newCard.img}')`);
 
@@ -115,12 +121,12 @@ function hitMe(deck, turn) {
   turn.$hand.append($newCard);
 
   turn.total = calculateHand(turn);
+
   $(`#${turn.name}-total p`).text(turn.total);
 
   checkForAce(turn);
 
   //console.log(turn.name + ' total: ' + turn.total);
-
 };
 
 function calculateHand(turn) {
@@ -160,12 +166,16 @@ function startGame(deck) {
   let $standButton = $('#stand-button');
   let $dealButton = $('#deal-button');
 
+  $('#message-box').text(' ');
+
   $dealButton.addClass('subdued');
   $dealButton.off('click');
 
   $hitButton.removeClass('subdued');
   $hitButton.on('click', function() {
     hitMe(deck, player);
+    $('#player-hand div:last-child').removeClass('removed');
+    $('#player-hand div:last-child').addClass('flyin');
     if (testForBust(player)){
       checkWinConditions();
     };
@@ -184,21 +194,30 @@ function dealerTurn(deck) {
   $('#stand-button').off('click');
   $('#stand-button').addClass('subdued');
 
-  while (dealer.total < 16) {
-    setTimeout(function() {
-      hitMe(deck, dealer);
-    }, 250);
+  let timeout = 0;
+
+  while (dealer.total < 17) {
+    hitMe(deck, dealer);
   };
 
-  checkWinConditions();
+  for(let i = 2; i <= dealer.hand.length; i++) {
+    setTimeout(function() {
+      $(`#dealer-hand div:nth-child(${i})`).removeClass('removed');
+      $(`#dealer-hand div:nth-child(${i})`).addClass('flyin');
+    }, timeout);
+    timeout += 250;
+  }
+
+  setTimeout(function() {
+    checkWinConditions();
+  }, timeout + 250);
 
 };
 
 function checkWinConditions() {
   let $messageBox = $('#message-box');
 
-  $('#dealer-hand div:nth-child(1)').css('background-image', `url(${dealer.hand[0].img}`);
-
+  setTimeout(function () {
   if (testForBust(player)) {
     $messageBox.text('BUST!');
   } else if (testForBust(dealer)) {
@@ -210,6 +229,8 @@ function checkWinConditions() {
   } else if (dealer.total < player.total) {
     $messageBox.text('YOU WIN!!');
   };
+
+  }, 1000);
 
   endGame();
 };
@@ -223,8 +244,17 @@ function endGame() {
 
   let $messageBox = $('#message-box');
   let $dealButton = $('#deal-button');
-  let $hitButton = $('#hit-button')
-  let $standButton = $('#stand-button')
+  let $hitButton = $('#hit-button');
+  let $standButton = $('#stand-button');
+  let $dealerFirstCard = $('#dealer-hand div:nth-child(1)')
+
+  $dealerFirstCard.removeClass('flyin');
+  $dealerFirstCard.addClass('loop');
+  setTimeout(function() {
+    // $dealerFirstCard.removeClass('flipout');
+    // $dealerFirstCard.addClass('flipin');
+    $dealerFirstCard.css('background-image', `url(${dealer.hand[0].img}`);
+  }, 500);
 
   $hitButton.off('click');
   $hitButton.addClass('subdued');

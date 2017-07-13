@@ -14,6 +14,7 @@ body {
 .container {
   width: 80vw;
   max-width: 1000px;
+  min-width: 220px;
   margin: 20px auto;
   box-sizing: border-box;
   border-radius: 20px;
@@ -23,19 +24,7 @@ body {
   background-image: url('../assets/tableBackground.png');
   background-size: cover;
   background-position: bottom center;
-  background-repeat: no-repeat;*/
-}
-
-.banner {
-  margin: 20px;
-  /*background-color: grey;*/
-  color: white;
-}
-
-.button {
-  border: none;
-  border-radius: 5px;
-  margin: 5px;
+  background-repeat: no-repeat;
 }
 
 .hand {
@@ -44,6 +33,9 @@ body {
   height: 200px;
   margin: 10px;
   border-radius: 10px;
+  box-sizing: border-box;
+  /*min-width: 200px;*/
+  /*position: relative;*/
 }
 
 #dealer-hand {
@@ -54,6 +46,55 @@ body {
 #player-hand {
   /*background-color: lightblue;*/
   border: dashed 1px lightblue;
+}
+
+.card {
+  height: 181px;
+  width: 125px;
+  /*width: 100%;*/
+  /*min-width: 30%;*/
+  /*background-color: white;*/
+  /*border: solid 2px black;*/
+  border-radius: 6px;
+  display: inline-block;
+/*  margin-top: 10px;
+  margin-bottom: 10px;
+  margin-left: -40px;
+  margin-right: 10px; */
+  margin: 10px -40px;
+  background-size: cover;
+  background-repeat: no-repeat;
+  /*position: relative;*/
+  /*transform-origin: top center;*/
+
+}
+
+.banner {
+  margin: 20px;
+  /*background-color: grey;*/
+  color: white;
+}
+
+.button {
+  border: solid 3px rgba(255,255,255,0);
+  border-radius: 5px;
+  margin: 5px;
+}
+
+.button:hover {
+  animation: flashingborder 1s linear infinite;
+}
+
+@keyframes flashingborder {
+  0% {
+    border: solid 3px white;
+  }
+  50% {
+    border: solid 3px rgba(255,255,255,0);
+  }
+  100% {
+    border: solid 3px white;
+  }
 }
 
 .text-box {
@@ -79,21 +120,86 @@ body {
   color: yellow;
 }
 
-.card {
-  height: 181px;
-  width: 125px;
-  /*background-color: white;*/
-  /*border: solid 2px black;*/
-  border-radius: 6px;
-  display: inline-block;
-  margin: 10px;
-  background-size: cover;
-  background-repeat: no-repeat;
+.flipin {
+  transform-origin: left;
+  animation: flipin .25s ease-out forwards;
 }
 
-.unflipped {
-  /*background-image: url('../assets/card-back.jpg');*/
-  background-size: cover;
+.flipout {
+  transform-origin: left;
+  animation: flipout .25s ease-in;
+}
+
+.flyin {
+  animation: flyin .5s ease-in;
+}
+
+.loop {
+  animation: loopin 1s ease-in-out forwards;
+  /*transform-origin: left;*/
+  /*transform-style: preserve-3d;*/
+}
+
+@keyframes flyin {
+  0% {
+    transform: perspective(500px) translate3d(30px, -1000px, 50px) rotate(60deg);
+  }
+}
+
+@keyframes loopin {
+  0% {
+    transform: perspective(500px) translate3d(0px, 0px, 0px) rotateY(0deg);
+  }
+  25% {
+    transform: perspective(500px) translate3d(-75px, 0px, 30px) rotateY(30deg);
+  }
+  50% {
+    transform: perspective(500px) translate3d(-75px, 0px, 30px) rotateY(100deg);
+  }
+  75% {
+    transform: perspective(500px) translate3d(-75px, 0px, 30px) rotateY(30deg);
+  }
+  100% {
+    transform: perspective(500px) translate3d(-75px, 0px, 30px) rotateY(30deg);
+  }
+}
+
+@keyframes loop {
+  0% {
+    transform: perspective(500px) translate3d(0px, 0px, -1px) rotateX(0deg);
+  }
+  25% {
+    transform: perspective(500px) translate3d(0px, 250px, 50px) rotateX(90deg);
+  }
+  50% {
+    transform: perspective(500px) translate3d(0px, 0px, 100px) rotateX(180deg);
+  }
+  75% {
+    transform: perspective(500px) translate3d(0px, -250px, 50px) rotateX(270deg);
+  }
+  100% {
+    transform: perspective(500px) translate3d(0px, 0px, -1px) rotateX(360deg);
+  }
+}
+
+@keyframes flipin {
+  0% {
+    transform: rotateY(90deg);
+    backface-visibility: hidden;
+  }
+  100% {
+    transform: rotateY(0deg);
+  }
+}
+
+@keyframes flipout {
+  0% {
+    transform: rotateY(0deg);
+  }
+  100% {
+    transform: rotateY(90deg);
+    backface-visibility: hidden;
+  }
 }
 
 .subdued {
@@ -102,6 +208,10 @@ body {
 
 .hidden {
   visibility: hidden;
+}
+
+.removed {
+  display: none;
 }
 
 p {
