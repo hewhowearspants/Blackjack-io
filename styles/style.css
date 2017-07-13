@@ -87,8 +87,13 @@ body {
   border-radius: 6px;
   display: inline-block;
   margin: 10px;
-  background-size: contain;
+  background-size: cover;
   background-repeat: no-repeat;
+}
+
+.unflipped {
+  /*background-image: url('../assets/card-back.jpg');*/
+  background-size: cover;
 }
 
 .subdued {

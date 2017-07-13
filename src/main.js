@@ -51,15 +51,36 @@ function dealHand() {
   let deck = shuffleDeck();
 
   hitMe(deck, dealer);
+  $('#dealer-hand div:nth-child(1)').css('background-image', 'url("./assets/card-back.jpg")');
   hitMe(deck, dealer);
   hitMe(deck, player);
   hitMe(deck, player);
 
-  if(testForBlackjack()) {
-    endGame();
-  } else {
-    startGame(deck);
+  $('.hand').children().addClass('hidden');
+
+  var timeout = 0;
+
+  for (let i = 1; i < 3; i++) {
+    setTimeout(function () {
+      $(`#dealer-hand div:nth-child(${i})`).removeClass('hidden');
+    }, timeout);
+    timeout += 250;
   };
+
+  for (let i = 1; i < 3; i++) {
+    setTimeout(function () {
+      $(`#player-hand div:nth-child(${i})`).removeClass('hidden');
+    }, timeout);
+    timeout += 250;
+  };
+
+  setTimeout(function () {
+    if(testForBlackjack()) {
+      endGame();
+    } else {
+      startGame(deck);
+    };
+  }, 1000);
 
 };
 
@@ -86,16 +107,19 @@ function testForBlackjack() {
 function hitMe(deck, turn) {
   console.log('hit me!');
 
-  let $newCard = ($('<div>', {'class': 'card unflipped'}));
+  let $newCard = ($('<div>', {'class': 'card'}));
   let newCard = deck.shift();
   $newCard.css('background-image', `url('${newCard.img}')`);
 
   turn.hand.push(newCard);
   turn.$hand.append($newCard);
 
-  turn.total = accountForAce(turn, calculateHand(turn));
+  turn.total = calculateHand(turn);
+  $(`#${turn.name}-total p`).text(turn.total);
 
-  console.log(turn.name + ' total: ' + turn.total);
+  checkForAce(turn);
+
+  //console.log(turn.name + ' total: ' + turn.total);
 
 };
 
@@ -108,22 +132,17 @@ function calculateHand(turn) {
 
 };
 
-function accountForAce(turn, total) {
+function checkForAce(turn) {
   console.log('checking for ace...');
 
-  if (checkForAce(turn) && (total + 10 <= 21)) {
-    $(`#${turn.name}-total p`).text(`${total} (${total + 10})`)
-    total += 10;
-  } else {
-    $(`#${turn.name}-total p`).text(total);
+  if (hasAce(turn) && (turn.total + 10 <= 21)) {
+    $(`#${turn.name}-total p`).text(`${turn.total} (${turn.total + 10})`)
+    turn.total += 10;
   };
 
-  return total;
-}
+};
 
-
-
-function checkForAce(turn) {
+function hasAce(turn) {
   let hasAce = false;
 
   turn.hand.forEach ((card) => {
@@ -166,7 +185,9 @@ function dealerTurn(deck) {
   $('#stand-button').addClass('subdued');
 
   while (dealer.total < 16) {
-    hitMe(deck, dealer);
+    setTimeout(function() {
+      hitMe(deck, dealer);
+    }, 250);
   };
 
   checkWinConditions();
@@ -175,6 +196,8 @@ function dealerTurn(deck) {
 
 function checkWinConditions() {
   let $messageBox = $('#message-box');
+
+  $('#dealer-hand div:nth-child(1)').css('background-image', `url(${dealer.hand[0].img}`);
 
   if (testForBust(player)) {
     $messageBox.text('BUST!');
