@@ -14,7 +14,7 @@ var Card = function(suit,value,realValue) {
 function createDeck() {
   let suits = ['spades', 'clubs', 'hearts', 'diamonds'];
   let values = ['A','2','3','4','5','6','7','8','9','10','J','Q','K'];
-  let realValues = [11,2,3,4,5,6,7,8,9,10,10,10,10]
+  let realValues = [1,2,3,4,5,6,7,8,9,10,10,10,10]
   let deck = [];
 
   suits.forEach((suit) => {
@@ -55,7 +55,7 @@ function dealHand() {
   hitMe(deck, player);
   hitMe(deck, player);
 
-  if(checkForBlackjack()) {
+  if(testForBlackjack()) {
     endGame();
   } else {
     startGame(deck);
@@ -63,7 +63,7 @@ function dealHand() {
 
 };
 
-function checkForBlackjack() {
+function testForBlackjack() {
   console.log('checking for blackjack...');
 
   let $messageBox = $('#message-box');
@@ -83,50 +83,56 @@ function checkForBlackjack() {
   };
 };
 
-function hitMe(deck, dealTo) {
+function hitMe(deck, turn) {
   console.log('hit me!');
 
   let $newCard = ($('<div>', {'class': 'card unflipped'}));
   let newCard = deck.shift();
   $newCard.css('background-image', `url('${newCard.img}')`);
 
-  dealTo.hand.push(newCard);
-  dealTo.$hand.append($newCard);
+  turn.hand.push(newCard);
+  turn.$hand.append($newCard);
 
-  dealTo.total = calculateHand(dealTo);
+  turn.total = accountForAce(turn, calculateHand(turn));
 
-  console.log(dealTo.name + ' total: ' + dealTo.total);
+  console.log(turn.name + ' total: ' + turn.total);
 
-  //console.log(deck.length);
-  switch(dealTo.name) {
-    case 'player':
-      $('#player-total p').text(dealTo.total);
-      break;
-    case 'dealer':
-      $('#dealer-total p').text(dealTo.total);
-      break;
-  };
-
-
-  //checkForBust(dealTo);
 };
 
-function calculateHand(dealTo) {
-  console.log('calculating hand total...')
-  // let hasAce;
+function calculateHand(turn) {
+  console.log(`calculating ${turn.name} hand total...`);
 
-  let handTotal = dealTo.hand.reduce((total, card) => {
-    // if (card.value === 'A' && ((total + 11) <= 21)) {
-    //   card.realValue = 11;
-    // };
+  return turn.hand.reduce((total, card) => {
     return total += card.realValue;
   }, 0);
 
-  // if (hasAce) {
-  //   return [handTotal, handTotal + 10];
-  // } else {
-    return handTotal;
-  //};
+};
+
+function accountForAce(turn, total) {
+  console.log('checking for ace...');
+
+  if (checkForAce(turn) && (total + 10 <= 21)) {
+    $(`#${turn.name}-total p`).text(`${total} (${total + 10})`)
+    total += 10;
+  } else {
+    $(`#${turn.name}-total p`).text(total);
+  };
+
+  return total;
+}
+
+
+
+function checkForAce(turn) {
+  let hasAce = false;
+
+  turn.hand.forEach ((card) => {
+    if (card.value === 'A') {
+      hasAce = true;
+    };
+  });
+
+  return hasAce;
 };
 
 function startGame(deck) {
@@ -151,24 +157,6 @@ function startGame(deck) {
     dealerTurn(deck);
   });
 
-};
-
-function checkWinConditions() {
-  let $messageBox = $('#message-box');
-
-  if (player.total > 21) {
-    $messageBox.text('BUST!');
-  } else if (dealer.total > 21) {
-    $messageBox.text('Dealer busts! YOU WIN!');
-  } else if (dealer.total === player.total) {
-    $messageBox.text('PUSH!');
-  } else if (dealer.total > player.total) {
-    $messageBox.text('Dealer wins.');
-  } else if (dealer.total < player.total) {
-    $messageBox.text('YOU WIN!!');
-  };
-
-  endGame();
 };
 
 function dealerTurn(deck) {
@@ -203,39 +191,9 @@ function checkWinConditions() {
   endGame();
 };
 
-// function checkForWin() {
-//   console.log('checking who won...');
-//   let $messageBox = $('#message-box');
-
-//   if (dealer.total === player.total) {
-//     $messageBox.text('PUSH!');
-//     endGame();
-//   } else if (dealer.total > player.total) {
-//     $messageBox.text('Dealer wins.');
-//     endGame();
-//   } else if (dealer.total < player.total) {
-//     $messageBox.text('YOU WIN!!');
-//     endGame();
-//   };
-// };
-
 function testForBust(turn) {
   return turn.total > 21;
-}
-
-// function checkForBust(turn) {
-//   console.log('checking for bust...');
-//   let $messageBox = $('#message-box');
-
-//   if (turn.total > 21) {
-//     if (turn.name === 'player') {
-//       $messageBox.text('BUST!');
-//     } else if (turn.name === 'dealer');{
-//       $messageBox.text('Dealer busts! YOU WIN!');
-//     };
-//     endGame();
-//   };
-// };
+};
 
 function endGame() {
   console.log('game finished!');
