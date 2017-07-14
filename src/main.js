@@ -3,6 +3,7 @@ console.log('main.js loaded');
 
 let player = {name: 'player', hand: []};
 let dealer = {name: 'dealer', hand: []};
+let deck = [];
 
 var Card = function(suit,value,realValue) {
   this.suit = suit;
@@ -11,11 +12,12 @@ var Card = function(suit,value,realValue) {
   this.img = `./assets/Playing-Cards/${value}_of_${suit}.png`;
 };
 
+deck = shuffleDeck();
+
 function createDeck() {
   let suits = ['spades', 'clubs', 'hearts', 'diamonds'];
   let values = ['A','2','3','4','5','6','7','8','9','10','J','Q','K'];
   let realValues = [1,2,3,4,5,6,7,8,9,10,10,10,10]
-  let deck = [];
 
   suits.forEach((suit) => {
     values.forEach((value, index) => {
@@ -24,14 +26,13 @@ function createDeck() {
     });
   });
 
-  // console.log(deck);
-  return deck;
 };
 
 function shuffleDeck() {
   console.log('shuffling deck...')
 
-  let deck = createDeck();
+  createDeck();
+
   let deckSize = deck.length;
   let shuffleDeck = [];
   let randIndex;
@@ -47,15 +48,14 @@ function shuffleDeck() {
 function dealHand() {
   console.log('deal em out!');
 
-  let $messageBox = $('#message-box');
-  let deck = shuffleDeck();
+  let $messageBox = $('#message');
 
   $messageBox.text('Dealing \'em out!');
 
-  hitMe(deck, dealer);
-  hitMe(deck, dealer);
-  hitMe(deck, player);
-  hitMe(deck, player);
+  hitMe(dealer);
+  hitMe(dealer);
+  hitMe(player);
+  hitMe(player);
 
   $('#dealer-hand div:nth-child(1)').css('background-image', 'url("./assets/card-back.jpg")');
 
@@ -85,16 +85,16 @@ function dealHand() {
     if(testForBlackjack()) {
       endGame();
     } else {
-      startGame(deck);
+      startGame();
     };
   }, timeout);
 
 };
 
 function testForBlackjack() {
-  console.log('checking for blackjack...');
+  // console.log('checking for blackjack...');
 
-  let $messageBox = $('#message-box');
+  let $messageBox = $('#message');
 
   if (player.total === 21 && dealer.total === 21) {
     console.log('Both player and dealer have 21, PUSH');
@@ -111,8 +111,8 @@ function testForBlackjack() {
   };
 };
 
-function hitMe(deck, turn) {
-  console.log('hit me!');
+function hitMe(turn) {
+  console.log(`${turn.name} hits!`);
 
   let $newCard = ($('<div>', {'class': 'card removed'}));
   let newCard = deck.shift();
@@ -131,7 +131,7 @@ function hitMe(deck, turn) {
 };
 
 function calculateHand(turn) {
-  console.log(`calculating ${turn.name} hand total...`);
+  //console.log(`calculating ${turn.name} hand total...`);
 
   return turn.hand.reduce((total, card) => {
     return total += card.realValue;
@@ -140,7 +140,6 @@ function calculateHand(turn) {
 };
 
 function checkForAce(turn) {
-  console.log('checking for ace...');
 
   if (hasAce(turn) && (turn.total + 10 <= 21)) {
     $(`#${turn.name}-total p`).text(`${turn.total} (${turn.total + 10})`)
@@ -161,20 +160,20 @@ function hasAce(turn) {
   return hasAce;
 };
 
-function startGame(deck) {
+function startGame() {
   console.log('game begins!');
   let $hitButton = $('#hit-button');
   let $standButton = $('#stand-button');
   let $dealButton = $('#deal-button');
 
-  $('#message-box').text(' ');
+  $('#message').text(' ');
 
   $dealButton.addClass('subdued');
   $dealButton.off('click');
 
   $hitButton.removeClass('subdued');
   $hitButton.on('click', function() {
-    hitMe(deck, player);
+    hitMe(player);
     $('#player-hand div:last-child').removeClass('removed');
     $('#player-hand div:last-child').addClass('flyin');
     if (testForBust(player)){
@@ -184,12 +183,12 @@ function startGame(deck) {
 
   $standButton.removeClass('subdued');
   $standButton.on('click', function() {
-    dealerTurn(deck);
+    dealerTurn();
   });
 
 };
 
-function dealerTurn(deck) {
+function dealerTurn() {
   $('#hit-button').off('click');
   $('#hit-button').addClass('subdued');
   $('#stand-button').off('click');
@@ -198,7 +197,7 @@ function dealerTurn(deck) {
   let timeout = 0;
 
   while (dealer.total < 17) {
-    hitMe(deck, dealer);
+    hitMe(dealer);
   };
 
   for(let i = 2; i <= dealer.hand.length; i++) {
@@ -216,7 +215,7 @@ function dealerTurn(deck) {
 };
 
 function checkWinConditions() {
-  let $messageBox = $('#message-box');
+  let $messageBox = $('#message');
 
   setTimeout(function () {
   if (testForBust(player)) {
@@ -243,7 +242,7 @@ function testForBust(turn) {
 function endGame() {
   console.log('game finished!');
 
-  let $messageBox = $('#message-box');
+  let $messageBox = $('#message');
   let $dealButton = $('#deal-button');
   let $hitButton = $('#hit-button');
   let $standButton = $('#stand-button');
@@ -273,11 +272,15 @@ function resetGame() {
   $('.hand').children().remove();
   $('.button').toggleClass('subdued');
   $('#deal-button').text('DEAL');
-  $('#message-box').text(' ');
+  $('#message').text(' ');
   $('#player-box').addClass('hidden');
   $('#dealer-box').addClass('hidden');
   player.hand = [];
   dealer.hand = [];
+
+  if(deck.length < 10) {
+    deck = shuffleDeck();
+  }
 
   dealHand();
 };
@@ -288,9 +291,10 @@ function setUpTable () {
   let $dealerHand = ($('<div>', {'class': 'hand', 'id': 'dealer-hand'}));
   let $playerHand = ($('<div>', {'class': 'hand', 'id': 'player-hand'}));
   let $banner = ($('<div>', {'class': 'banner'}));
-  let $playerTotal = ($('<div>', {'class': 'text-box hidden', 'id': 'player-box'})).html('<span id="player-total">Player Total: <p>0</p> </span>');
+  let $buttons = ($('<div>', {'id': 'button-bar'}));
+  let $playerTotal = ($('<div>', {'class': 'text-box hidden', 'id': 'player-box'})).html('<span id="player-total">Player Total <p>0</p> </span>');
   let $messageBox = ($('<div>', {'class': 'text-box', 'id': 'message-box'})).html('<span id="message">Welcome to Blackjack!</span>');
-  let $dealerTotal = ($('<div>', {'class': 'text-box hidden', 'id': 'dealer-box'})).html('<span id="dealer-total">Dealer Total: <p>0</p> </span>');
+  let $dealerTotal = ($('<div>', {'class': 'text-box hidden', 'id': 'dealer-box'})).html('<span id="dealer-total">Dealer Total <p>0</p> </span>');
   let $dealButton = ($('<button>', {'class': 'button', 'id': 'deal-button'})).text('DEAL');
   let $hitButton = ($('<button>', {'class': 'button subdued', 'id': 'hit-button'})).text('HIT');
   let $standButton = ($('<button>', {'class': 'button subdued', 'id': 'stand-button'})).text('STAND');
@@ -301,9 +305,10 @@ function setUpTable () {
   $('.banner').append($playerTotal);
   $('.banner').append($messageBox);
   $('.banner').append($dealerTotal);
-  $('#card-table').append($dealButton);
-  $('#card-table').append($hitButton);
-  $('#card-table').append($standButton);
+  $('#card-table').append($buttons);
+  $('#button-bar').append($dealButton);
+  $('#button-bar').append($hitButton);
+  $('#button-bar').append($standButton);
   $('#card-table').append($playerHand);
 
   $('#deal-button').on('click', dealHand);

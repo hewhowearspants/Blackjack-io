@@ -1,5 +1,6 @@
 body {
   background-color: black;
+  font-family: 'Montserrat', sans-serif;
   background-image: url('../assets/tableBackground.png');
   /*min-height: 100vw;
   width: 100%;
@@ -12,10 +13,20 @@ body {
   color: white;
 }
 
+h1 {
+  font-weight: 700;
+  font-size: 3em;
+  margin: 0;
+  text-shadow: 3px 3px 3px #000
+}
+
 .container {
   width: 80vw;
   max-width: 1000px;
   min-width: 220px;
+  /*height: 80%;*/
+  max-height: 600px;
+  min-height: 100px;
   margin: 20px auto;
   box-sizing: border-box;
   border-radius: 20px;
@@ -32,75 +43,61 @@ body {
   display: block;
   text-align: center;
   height: 200px;
+  max-height: 40%;
   margin: 10px;
-  border-radius: 10px;
+  border-radius: 20px;
   box-sizing: border-box;
   /*min-width: 200px;*/
   /*position: relative;*/
 }
 
 #dealer-hand {
-  /*background-color: yellow;*/
+  /*background-color: rgba(255,0,0,.25);*/
   /*border: dashed 1px yellow;*/
 }
 
 #player-hand {
-  /*background-color: lightblue;*/
+  /*background-color: rgba(0,0,255,.25);*/
   /*border: dashed 1px lightblue;*/
 }
 
 .card {
   height: 181px;
   width: 125px;
-  /*width: 100%;*/
-  /*min-width: 30%;*/
-  /*background-color: white;*/
-  /*border: solid 2px black;*/
+  /*max-height: 8em;
+  max-width: 5.52em;*/
   border-radius: 6px;
   display: inline-block;
-/*  margin-top: 10px;
-  margin-bottom: 10px;
-  margin-left: -40px;
-  margin-right: 10px; */
   margin: 10px -40px;
   background-size: cover;
   background-repeat: no-repeat;
-  /*position: relative;*/
-  /*transform-origin: top center;*/
 
 }
 
 .banner {
-  margin: 20px;
-  /*background-color: grey;*/
+  margin: 10px;
+  height: 10%;
+  max-height: 50px;
+  /*background-color: rgba(0,255,255,.25);*/
   color: white;
-}
-
-.button {
-  border: solid 3px rgba(255,255,255,0);
-  border-radius: 5px;
-  margin: 5px;
-}
-
-.button:hover {
-  animation: flashingborder 1s linear infinite;
-}
-
-@keyframes flashingborder {
-  0% {
-    border: solid 3px white;
-  }
-  50% {
-    border: solid 3px rgba(255,255,255,0);
-  }
-  100% {
-    border: solid 3px white;
-  }
+  box-sizing: border-box;
 }
 
 .text-box {
+  font-family: 'Montserrat', sans-serif;
+  font-weight: 100;
   display: inline-block;
   width: 30%;
+}
+
+#message-box {
+  font-weight: 100;
+  font-style: italic;
+  border-left: solid 2px white;
+  border-right: solid 2px white;
+  width: 30%;
+  padding: 0px 10px;
+  text-shadow: 2px 2px 1px #000
 }
 
 #player-box{
@@ -109,6 +106,7 @@ body {
   /*width: 25%;*/
   left: 0%;
   margin-right: 5px;
+  padding: 0 5px;
   color: lightblue;
 }
 
@@ -118,7 +116,52 @@ body {
   /*width: 25%;*/
   right: 0%;
   margin-left: 5px;
+  padding: 0 5px;
   color: yellow;
+}
+
+#button-bar {
+  /*background-color: rgba(255,255,255,.5);*/
+  height: 10%;
+  box-sizing: border-box;
+}
+
+button {
+  border: solid 2px rgba(255,255,255,0);
+  border-radius: 5px;
+  margin: 5px;
+  box-shadow: 2px 2px 2px black;
+  transition: .25s all;
+  background-color: lightgrey;
+}
+
+button:hover {
+  background-color: #333;
+  color: #eee;
+  animation: flashingborder .75s linear infinite alternate;
+  cursor: pointer;
+}
+
+@keyframes flashingborder {
+  50% {
+    border: solid 2px rgba(255,255,255,.75);
+    background-color: lightgrey;
+    color: black;
+  }
+}
+
+.subdued {
+  /*background-color: rgba(255,255,255,.2);*/
+  opacity: .2;
+  box-shadow: none;
+  border: none;
+}
+
+.subdued:hover {
+  animation: none;
+  background-color: lightgrey;
+  color: black;
+  cursor: default;
 }
 
 .flipin {
@@ -203,9 +246,11 @@ body {
   }
 }
 
-.subdued {
+/*.subdued {
   opacity: .2;
-}
+  box-shadow: none;
+  animation: none;
+}*/
 
 .hidden {
   visibility: hidden;
