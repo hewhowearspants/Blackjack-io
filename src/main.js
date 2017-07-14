@@ -1,9 +1,10 @@
 $(document).ready(function() {
 console.log('main.js loaded');
 
-let player = {name: 'player', hand: []};
+let player = {name: 'player', hand: [], money: 250};
 let dealer = {name: 'dealer', hand: []};
 let deck = [];
+let bet = 0;
 
 var Card = function(suit,value,realValue) {
   this.suit = suit;
