@@ -81,6 +81,7 @@ function dealHand() {
   };
 
   setTimeout(function () {
+    $('#player-box').removeClass('hidden');
     if(testForBlackjack()) {
       endGame();
     } else {
@@ -253,6 +254,7 @@ function endGame() {
   setTimeout(function() {
     // $dealerFirstCard.removeClass('flipout');
     // $dealerFirstCard.addClass('flipin');
+    $('#dealer-box').removeClass('hidden');
     $dealerFirstCard.css('background-image', `url(${dealer.hand[0].img}`);
   }, 500);
 
@@ -272,6 +274,8 @@ function resetGame() {
   $('.button').toggleClass('subdued');
   $('#deal-button').text('DEAL');
   $('#message-box').text(' ');
+  $('#player-box').addClass('hidden');
+  $('#dealer-box').addClass('hidden');
   player.hand = [];
   dealer.hand = [];
 
@@ -284,9 +288,9 @@ function setUpTable () {
   let $dealerHand = ($('<div>', {'class': 'hand', 'id': 'dealer-hand'}));
   let $playerHand = ($('<div>', {'class': 'hand', 'id': 'player-hand'}));
   let $banner = ($('<div>', {'class': 'banner'}));
-  let $playerTotal = ($('<div>', {'class': 'text-box', 'id': 'player-box'})).html('<span id="player-total">Player Total: <p>0</p> </span>');
+  let $playerTotal = ($('<div>', {'class': 'text-box hidden', 'id': 'player-box'})).html('<span id="player-total">Player Total: <p>0</p> </span>');
   let $messageBox = ($('<div>', {'class': 'text-box', 'id': 'message-box'})).html('<span id="message">Welcome to Blackjack!</span>');
-  let $dealerTotal = ($('<div>', {'class': 'text-box', 'id': 'dealer-box'})).html('<span id="dealer-total">Dealer Total: <p>0</p> </span>');
+  let $dealerTotal = ($('<div>', {'class': 'text-box hidden', 'id': 'dealer-box'})).html('<span id="dealer-total">Dealer Total: <p>0</p> </span>');
   let $dealButton = ($('<button>', {'class': 'button', 'id': 'deal-button'})).text('DEAL');
   let $hitButton = ($('<button>', {'class': 'button subdued', 'id': 'hit-button'})).text('HIT');
   let $standButton = ($('<button>', {'class': 'button subdued', 'id': 'stand-button'})).text('STAND');

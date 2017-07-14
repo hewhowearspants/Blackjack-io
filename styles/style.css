@@ -1,12 +1,13 @@
 body {
   background-color: black;
-  background-image: url('../assets/bodyBackground.png');
+  background-image: url('../assets/tableBackground.png');
   /*min-height: 100vw;
   width: 100%;
   min-width: 100%;*/
-  background-size: auto auto;
-  background-position: top center;
+  background-size: cover;
+  background-position: bottom center;
   background-repeat: no-repeat;
+  background-attachment: fixed;
   text-align: center;
   color: white;
 }
@@ -21,7 +22,7 @@ body {
   /*background-color: brown;*/
   padding: 10px;
   text-align: center;
-  background-image: url('../assets/tableBackground.png');
+  /*background-image: url('../assets/tableBackground.png');*/
   background-size: cover;
   background-position: bottom center;
   background-repeat: no-repeat;
@@ -40,12 +41,12 @@ body {
 
 #dealer-hand {
   /*background-color: yellow;*/
-  border: dashed 1px yellow;
+  /*border: dashed 1px yellow;*/
 }
 
 #player-hand {
   /*background-color: lightblue;*/
-  border: dashed 1px lightblue;
+  /*border: dashed 1px lightblue;*/
 }
 
 .card {
@@ -103,7 +104,7 @@ body {
 }
 
 #player-box{
-  text-align: left;
+  text-align: right;
   /*position: relative;*/
   /*width: 25%;*/
   left: 0%;
@@ -113,7 +114,7 @@ body {
 
 #dealer-box{
   /*position: relative;*/
-  text-align: right;
+  text-align: left;
   /*width: 25%;*/
   right: 0%;
   margin-left: 5px;
