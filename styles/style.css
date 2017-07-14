@@ -133,20 +133,25 @@ button {
   box-shadow: 2px 2px 2px black;
   transition: .25s all;
   background-color: lightgrey;
+  outline: transparent;
 }
 
 button:hover {
   background-color: #333;
   color: #eee;
+  border: solid 2px rgba(255,255,255,.75);
   animation: flashingborder .75s linear infinite alternate;
   cursor: pointer;
 }
 
+button: focus {
+  background-color: darkblue;
+  color: white;
+}
+
 @keyframes flashingborder {
   50% {
-    border: solid 2px rgba(255,255,255,.75);
-    background-color: lightgrey;
-    color: black;
+    border: solid 2px rgba(255,255,255,0);
   }
 }
 
@@ -162,6 +167,7 @@ button:hover {
   background-color: lightgrey;
   color: black;
   cursor: default;
+  border: none;
 }
 
 .flipin {
