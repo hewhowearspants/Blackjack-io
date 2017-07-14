@@ -1,7 +1,13 @@
 $(document).ready(function() {
 console.log('main.js loaded');
 
-let player = {name: 'player', hand: [], bet: 0, money: 250};
+let player = {name: 'player', hand: [], bet: 0};
+if (localStorage.getItem('playerMoney')) {
+  player.money = localStorage.getItem('playerMoney');
+} else {
+  player.money = 250;
+};
+console.log(localStorage.getItem('playerMoney'));
 let dealer = {name: 'dealer', hand: []};
 let deck = [];
 
@@ -56,12 +62,14 @@ function placeBet(turn) {
 function winMoney(turn) {
   turn.money += turn.bet;
   $('#player-money p').text(turn.money);
+  localStorage.setItem('playerMoney', turn.money);
   console.log(`${turn.name} won ${turn.bet}, now has ${turn.money}`);
 };
 
 function loseMoney(turn) {
   turn.money -= turn.bet;
   $('#player-money p').text(turn.money);
+  localStorage.setItem('playerMoney', turn.money);
   console.log(`${turn.name} lost ${turn.bet}, now has ${turn.money}`);
 }
 
@@ -290,6 +298,7 @@ function endGame() {
   $standButton.addClass('subdued');
 
   $('#player-bet p').text('0');
+  localStorage.setItem('playerMoney', player.money);
 
   if (player.money > 0) {
     $dealButton.removeClass('subdued');
