@@ -1,10 +1,9 @@
 $(document).ready(function() {
 console.log('main.js loaded');
 
-let player = {name: 'player', hand: [], money: 250};
+let player = {name: 'player', hand: [], bet: 0, money: 250};
 let dealer = {name: 'dealer', hand: []};
 let deck = [];
-let bet = 0;
 
 var Card = function(suit,value,realValue) {
   this.suit = suit;
@@ -45,6 +44,23 @@ function shuffleDeck() {
 
   return shuffleDeck;
 };
+
+function placeBet(turn) {
+  turn.bet = 5;
+  console.log(`${turn.name} bet: ${turn.bet}`)
+  // eventually accept player input for bet
+  dealHand();
+};
+
+function winMoney(turn) {
+  turn.money += turn.bet;
+  console.log(`${turn.name} won ${turn.bet}, now has ${turn.money}`);
+};
+
+function loseMoney(turn) {
+  turn.money -= turn.bet;
+  console.log(`${turn.name} lost ${turn.bet}, now has ${turn.money}`);
+}
 
 function dealHand() {
   console.log('deal em out!');
@@ -103,10 +119,12 @@ function testForBlackjack() {
     return true;
   } else if (player.total === 21) {
     console.log('Player has blackjack. Player wins.');
+    winMoney(player);
     $messageBox.text('BLACKJACK! You win!');
     return true;
   } else if (dealer.total === 21) {
     console.log('Dealer has blackjack. Dealer wins.');
+    loseMoney(player);
     $messageBox.text('Dealer has blackjack! Dealer wins.');
     return true;
   };
@@ -221,14 +239,18 @@ function checkWinConditions() {
   setTimeout(function () {
   if (testForBust(player)) {
     $messageBox.text('BUST!');
+    loseMoney(player);
   } else if (testForBust(dealer)) {
     $messageBox.text('Dealer busts! YOU WIN!');
+    winMoney(player);
   } else if (dealer.total === player.total) {
     $messageBox.text('PUSH!');
   } else if (dealer.total > player.total) {
     $messageBox.text('Dealer wins.');
+    loseMoney(player);
   } else if (dealer.total < player.total) {
     $messageBox.text('YOU WIN!!');
+    winMoney(player);
   };
 
   }, 1000);
@@ -264,9 +286,13 @@ function endGame() {
   $standButton.off('click');
   $standButton.addClass('subdued');
 
-  $dealButton.removeClass('subdued');
-  $dealButton.text('DEAL AGAIN');
-  $dealButton.one('click', resetGame);
+  if (player.money > 0) {
+    $dealButton.removeClass('subdued');
+    $dealButton.text('DEAL AGAIN');
+    $dealButton.one('click', resetGame);
+  } else {
+    $messageBox.text('You\'re outta cash! Get outta here, ya bum!');
+  };
 };
 
 function resetGame() {
@@ -277,13 +303,14 @@ function resetGame() {
   $('#player-box').addClass('hidden');
   $('#dealer-box').addClass('hidden');
   player.hand = [];
+  player.bet = 0;
   dealer.hand = [];
 
   if(deck.length < 10) {
     deck = shuffleDeck();
   }
 
-  dealHand();
+  placeBet(player);
 };
 
 function setUpTable () {
@@ -312,7 +339,9 @@ function setUpTable () {
   $('#button-bar').append($standButton);
   $('#card-table').append($playerHand);
 
-  $('#deal-button').on('click', dealHand);
+  $('#deal-button').on('click', function() {
+    placeBet(player);
+  });
   player.$hand = $('#player-hand');
   dealer.$hand = $('#dealer-hand');
 };
