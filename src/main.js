@@ -48,17 +48,20 @@ function shuffleDeck() {
 function placeBet(turn) {
   turn.bet = 5;
   console.log(`${turn.name} bet: ${turn.bet}`)
+  $('#player-bet p').text(turn.bet);
   // eventually accept player input for bet
   dealHand();
 };
 
 function winMoney(turn) {
   turn.money += turn.bet;
+  $('#player-money p').text(turn.money);
   console.log(`${turn.name} won ${turn.bet}, now has ${turn.money}`);
 };
 
 function loseMoney(turn) {
   turn.money -= turn.bet;
+  $('#player-money p').text(turn.money);
   console.log(`${turn.name} lost ${turn.bet}, now has ${turn.money}`);
 }
 
@@ -286,6 +289,8 @@ function endGame() {
   $standButton.off('click');
   $standButton.addClass('subdued');
 
+  $('#player-bet p').text('0');
+
   if (player.money > 0) {
     $dealButton.removeClass('subdued');
     $dealButton.text('DEAL AGAIN');
@@ -318,25 +323,44 @@ function setUpTable () {
   let $cardTable = ($('<div>', {'class': 'container', 'id': 'card-table'}));
   let $dealerHand = ($('<div>', {'class': 'hand', 'id': 'dealer-hand'}));
   let $playerHand = ($('<div>', {'class': 'hand', 'id': 'player-hand'}));
+
   let $banner = ($('<div>', {'class': 'banner'}));
-  let $buttons = ($('<div>', {'id': 'button-bar'}));
+  let $moneyBox = ($('<div>', {'class': 'text-container', 'id': 'money-box'}));
+  let $playerMoney = ($('<div>', {'class': 'text-box', 'id': 'player-money'})).html(`<span>Money: <p>${player.money}</p> </span>`);
+  let $playerBet = ($('<div>', {'class': 'text-box', 'id': 'player-bet'})).html(`<span>Bet <p>${player.bet}</p> </span>`);
+  let $messageBox = ($('<div>', {'class': 'text-container', 'id': 'message-box'}));
+  let $message = ($('<div>', {'class': 'text-box', 'id': 'message'})).html('<span id="message-text">Welcome to Blackjack!</span>');
+  let $totalBox = ($('<div>', {'class': 'text-container', 'id': 'total-box'}));
   let $playerTotal = ($('<div>', {'class': 'text-box hidden', 'id': 'player-box'})).html('<span id="player-total">Player Total <p>0</p> </span>');
-  let $messageBox = ($('<div>', {'class': 'text-box', 'id': 'message-box'})).html('<span id="message">Welcome to Blackjack!</span>');
   let $dealerTotal = ($('<div>', {'class': 'text-box hidden', 'id': 'dealer-box'})).html('<span id="dealer-total">Dealer Total <p>0</p> </span>');
+
+  let $buttons = ($('<div>', {'id': 'button-bar'}));
   let $dealButton = ($('<button>', {'class': 'button', 'id': 'deal-button'})).text('DEAL');
   let $hitButton = ($('<button>', {'class': 'button subdued', 'id': 'hit-button'})).text('HIT');
   let $standButton = ($('<button>', {'class': 'button subdued', 'id': 'stand-button'})).text('STAND');
 
   $('body').append($cardTable);
+
   $('#card-table').append($dealerHand);
+
   $('#card-table').append($banner);
-  $('.banner').append($playerTotal);
+
+  $('.banner').append($moneyBox);
+  $('#money-box').append($playerMoney);
+  $('#money-box').append($playerBet);
+
   $('.banner').append($messageBox);
-  $('.banner').append($dealerTotal);
+  $('#message-box').append($message);
+
+  $('.banner').append($totalBox);
+  $('#total-box').append($playerTotal);
+  $('#total-box').append($dealerTotal);
+
   $('#card-table').append($buttons);
   $('#button-bar').append($dealButton);
   $('#button-bar').append($hitButton);
   $('#button-bar').append($standButton);
+
   $('#card-table').append($playerHand);
 
   $('#deal-button').on('click', function() {

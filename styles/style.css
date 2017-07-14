@@ -76,48 +76,115 @@ h1 {
 
 .banner {
   margin: 10px;
-  height: 10%;
-  max-height: 50px;
+  /*height: 10%;*/
+  height: 55px;
   /*background-color: rgba(0,255,255,.25);*/
   color: white;
   box-sizing: border-box;
+  display: block;
+  width: 100%;
 }
 
 .text-box {
   font-family: 'Montserrat', sans-serif;
   font-weight: 100;
+  font-size: 14px;
   display: inline-block;
-  width: 30%;
+  margin: 0 7%;
+  height: 55px;
+  /*width: 30%;*/
+  box-sizing: border-box;
+  /*min-width: 75px;*/
+  background-color: rgba(255,255,255,.3);
+}
+
+.text-container {
+  height: 55px;
+  box-sizing: border-box;
+  /*padding: 0 5px;*/
+  /*min-width: 150px;*/
+}
+
+#total-box {
+  display: inline-block;
+  position: relative;
+  width: 35%;
+  border-left: solid 2px white;
+  /*right: 0px;*/
+}
+
+#player-box{
+  text-align: left;
+  left: 0px;
+  top: 0px;
+  width: 43%;
+  /*padding: 0 5px;*/
+  color: lightblue;
+  position: absolute;
+  display: inline-block;
+  box-sizing: border-box;
+}
+
+#dealer-box{
+  text-align: right;
+  right: 0px;
+  bottom: 0px;
+  width: 43%;
+  color: yellow;
+  position: absolute;
+  display: inline-block;
+  box-sizing: border-box;
 }
 
 #message-box {
   font-weight: 100;
   font-style: italic;
-  border-left: solid 2px white;
-  border-right: solid 2px white;
   width: 30%;
-  padding: 0px 10px;
-  text-shadow: 2px 2px 1px #000
+  /*padding: 0px 5px;*/
+  display: inline-block;
+  position: relative;
+  text-align: center;
+  box-sizing: border-box;
 }
 
-#player-box{
-  text-align: right;
-  /*position: relative;*/
-  /*width: 25%;*/
-  left: 0%;
-  margin-right: 5px;
-  padding: 0 5px;
-  color: lightblue;
+#message {
+  display: inline-block;
+  text-align: center;
+  font-size: 1em;
+  /*padding: 0 5px;*/
+  position: absolute;
+  width: 86%;
+  /*height: 55px;*/
+  text-shadow: 2px 2px 1px #000;
+  left: 0px;
 }
 
-#dealer-box{
-  /*position: relative;*/
+#money-box {
+  display: inline-block;
+  border-right: solid 2px white;
+  position: relative;
+  /*left: 0%;*/
+  width: 35%;
+}
+
+#player-money {
+  display: inline-block;
   text-align: left;
-  /*width: 25%;*/
-  right: 0%;
-  margin-left: 5px;
-  padding: 0 5px;
-  color: yellow;
+  /*padding: 0 5px;*/
+  position: absolute;
+  /*float: left;*/
+  left: 0px;
+  width: 43%;
+}
+
+#player-bet {
+  display: inline-block;
+  text-align: right;
+  /*padding: 0 5px;*/
+  position: absolute;
+  /*float: right;*/
+  right: 0px;
+  width: 43%;
 }
 
 #button-bar {
@@ -268,4 +335,11 @@ button: focus {
 
 p {
   margin: 0;
+  /*display: inline;*/
+}
+
+.clearfix {
+  content: '';
+  display: table;
+  clear: both;
 }
