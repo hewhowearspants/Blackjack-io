@@ -2,14 +2,15 @@ $(document).ready(function() {
 console.log('main.js loaded');
 
 let player = {name: 'player', hand: [], bet: 0};
+let dealer = {name: 'dealer', hand: []};
+let deck = [];
+
 if (localStorage.getItem('playerMoney')) {
-  player.money = localStorage.getItem('playerMoney');
+  player.money = parseInt(localStorage.getItem('playerMoney'));
+  console.log(player.money, typeof player.money);
 } else {
   player.money = 250;
 };
-console.log(localStorage.getItem('playerMoney'));
-let dealer = {name: 'dealer', hand: []};
-let deck = [];
 
 var Card = function(suit,value,realValue) {
   this.suit = suit;
@@ -52,31 +53,77 @@ function shuffleDeck() {
 };
 
 function placeBet(turn) {
-  turn.bet = 5;
-  console.log(`${turn.name} bet: ${turn.bet}`)
-  $('#player-bet p').text(turn.bet);
-  // eventually accept player input for bet
-  dealHand();
+  let $inputBet = $('<input>', {'type': 'number', 'id': 'input-bet', 'min': 1, 'max': `${turn.money}`, 'value': `${turn.bet || 5}`, 'formmethod': 'post'});
+  let $submitBet = $('<input>', {'type': 'submit', 'id': 'submit-bet', 'value': 'BET'});
+  let $messageBox = $('#message');
+  let $dealButton = $('#deal-button');
+
+  $dealButton.addClass('subdued');
+  $dealButton.off('click');
+
+  $messageBox.html('<p>Place your bet: </p>');
+  $messageBox.append($inputBet);
+  $messageBox.append($submitBet);
+
+  $inputBet.keypress(function(event) {
+    let betAmount = parseInt($inputBet.val());
+    if (event.keyCode == 13 || event.which == 13) {
+      setBet(turn, betAmount);
+    };
+  });
+
+  $submitBet.on('click', function() {
+    let betAmount = parseInt($inputBet.val());
+    setBet(turn, betAmount);
+  });
+};
+
+function setBet(turn, betAmount) {
+  let $messageText = $('#message p')
+  if (betAmount > 0 && betAmount <= turn.money) {
+    turn.bet = betAmount;
+    turn.money -= turn.bet;
+    $('#player-money p').text(`$${turn.money}`);
+    $('#player-bet p').text(`$${turn.bet}`);
+
+    dealHand();
+
+  } else {
+    $messageText.text('Not a valid bet!');
+    $messageText.css('color', 'orange');
+    setTimeout(function() {
+      $messageText.css('color', '');
+      $messageText.text('Place your bet: ');
+    }, 2000);
+  };
 };
 
 function winMoney(turn) {
-  turn.money += turn.bet;
-  $('#player-money p').text(turn.money);
+  turn.money += turn.bet * 2;
+  $('#player-money p').text(`$${turn.money}`);
   localStorage.setItem('playerMoney', turn.money);
   console.log(`${turn.name} won ${turn.bet}, now has ${turn.money}`);
 };
 
 function loseMoney(turn) {
   turn.money -= turn.bet;
-  $('#player-money p').text(turn.money);
+  $('#player-money p').text(`$${turn.money}`);
   localStorage.setItem('playerMoney', turn.money);
   console.log(`${turn.name} lost ${turn.bet}, now has ${turn.money}`);
+}
+
+function pushMoney(turn) {
+  turn.money += turn.bet;
+  $('#player-money p').text(`$${turn.money}`);
+  localStorage.setItem('playerMoney', turn.money);
+  console.log(`${turn.name} gets their money back`);
 }
 
 function dealHand() {
   console.log('deal em out!');
 
   let $messageBox = $('#message');
+  let $dealButton = $('#deal-button');
 
   $messageBox.text('Dealing \'em out!');
 
@@ -125,18 +172,18 @@ function testForBlackjack() {
   let $messageBox = $('#message');
 
   if (player.total === 21 && dealer.total === 21) {
-    console.log('Both player and dealer have 21, PUSH');
-    $messageBox.text('PUSH!');
+    console.log('Both player and dealer have 21<br>PUSH!');
+    pushMoney(player);
+    $messageBox.html('PUSH!');
     return true;
   } else if (player.total === 21) {
     console.log('Player has blackjack. Player wins.');
     winMoney(player);
-    $messageBox.text('BLACKJACK! You win!');
+    $messageBox.html(`BLACKJACK!<br/>You win $${player.bet}!`);
     return true;
   } else if (dealer.total === 21) {
     console.log('Dealer has blackjack. Dealer wins.');
-    loseMoney(player);
-    $messageBox.text('Dealer has blackjack! Dealer wins.');
+    $messageBox.html('Dealer has blackjack!<br/>Dealer wins.');
     return true;
   };
 };
@@ -149,6 +196,7 @@ function hitMe(turn) {
   $newCard.css('background-image', `url('${newCard.img}')`);
 
   turn.hand.push(newCard);
+  $newCard.attr('id', `${turn.name}-card-${turn.hand.length}`);
   turn.$hand.append($newCard);
 
   turn.total = calculateHand(turn);
@@ -249,19 +297,18 @@ function checkWinConditions() {
 
   setTimeout(function () {
   if (testForBust(player)) {
-    $messageBox.text('BUST!');
-    loseMoney(player);
+    $messageBox.html('BUST!');
   } else if (testForBust(dealer)) {
-    $messageBox.text('Dealer busts! YOU WIN!');
     winMoney(player);
+    $messageBox.html(`Dealer busts!<br/>YOU WIN $${player.bet}!`);
   } else if (dealer.total === player.total) {
-    $messageBox.text('PUSH!');
+    pushMoney(player);
+    $messageBox.html('PUSH!');
   } else if (dealer.total > player.total) {
-    $messageBox.text('Dealer wins.');
-    loseMoney(player);
+    $messageBox.html('Dealer wins.');
   } else if (dealer.total < player.total) {
-    $messageBox.text('YOU WIN!!');
     winMoney(player);
+    $messageBox.html(`YOU WIN $${player.bet}!`);
   };
 
   }, 1000);
@@ -297,12 +344,12 @@ function endGame() {
   $standButton.off('click');
   $standButton.addClass('subdued');
 
-  $('#player-bet p').text('0');
+  $('#player-bet p').html('$0');
   localStorage.setItem('playerMoney', player.money);
 
   if (player.money > 0) {
     $dealButton.removeClass('subdued');
-    $dealButton.text('DEAL AGAIN');
+    $dealButton.text('DEAL');
     $dealButton.one('click', resetGame);
   } else {
     $messageBox.text('You\'re outta cash! Get outta here, ya bum!');
@@ -311,18 +358,16 @@ function endGame() {
 
 function resetGame() {
   $('.hand').children().remove();
-  $('.button').toggleClass('subdued');
   $('#deal-button').text('DEAL');
   $('#message').text(' ');
   $('#player-box').addClass('hidden');
   $('#dealer-box').addClass('hidden');
   player.hand = [];
-  player.bet = 0;
   dealer.hand = [];
 
   if(deck.length < 10) {
     deck = shuffleDeck();
-  }
+  };
 
   placeBet(player);
 };
@@ -335,8 +380,8 @@ function setUpTable () {
 
   let $banner = ($('<div>', {'class': 'banner'}));
   let $moneyBox = ($('<div>', {'class': 'text-container', 'id': 'money-box'}));
-  let $playerMoney = ($('<div>', {'class': 'text-box', 'id': 'player-money'})).html(`<span>Money: <p>${player.money}</p> </span>`);
-  let $playerBet = ($('<div>', {'class': 'text-box', 'id': 'player-bet'})).html(`<span>Bet <p>${player.bet}</p> </span>`);
+  let $playerMoney = ($('<div>', {'class': 'text-box', 'id': 'player-money'})).html(`<span>Money: <p>$${player.money}</p> </span>`);
+  let $playerBet = ($('<div>', {'class': 'text-box', 'id': 'player-bet'})).html(`<span>Bet <p>$${player.bet}</p> </span>`);
   let $messageBox = ($('<div>', {'class': 'text-container', 'id': 'message-box'}));
   let $message = ($('<div>', {'class': 'text-box', 'id': 'message'})).html('<span id="message-text">Welcome to Blackjack!</span>');
   let $totalBox = ($('<div>', {'class': 'text-container', 'id': 'total-box'}));

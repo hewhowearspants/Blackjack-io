@@ -2,9 +2,6 @@ body {
   background-color: black;
   font-family: 'Montserrat', sans-serif;
   background-image: url('../assets/tableBackground.png');
-  /*min-height: 100vw;
-  width: 100%;
-  min-width: 100%;*/
   background-size: cover;
   background-position: bottom center;
   background-repeat: no-repeat;
@@ -23,14 +20,12 @@ h1 {
 .container {
   width: 80vw;
   max-width: 1000px;
-  min-width: 220px;
-  /*height: 80%;*/
   max-height: 600px;
+  min-width: 220px;
   min-height: 100px;
   margin: 20px auto;
   box-sizing: border-box;
   border-radius: 20px;
-  /*background-color: brown;*/
   padding: 10px;
   text-align: center;
   /*background-image: url('../assets/tableBackground.png');*/
@@ -47,18 +42,14 @@ h1 {
   margin: 10px;
   border-radius: 20px;
   box-sizing: border-box;
-  /*min-width: 200px;*/
-  /*position: relative;*/
-}
-
-#dealer-hand {
-  /*background-color: rgba(255,0,0,.25);*/
-  /*border: dashed 1px yellow;*/
 }
 
 #player-hand {
-  /*background-color: rgba(0,0,255,.25);*/
-  /*border: dashed 1px lightblue;*/
+
+}
+
+#dealer-hand {
+
 }
 
 .card {
@@ -71,14 +62,19 @@ h1 {
   margin: 10px -40px;
   background-size: cover;
   background-repeat: no-repeat;
+}
 
+#dealer-hand .card {
+  transform: perspective(500px) rotateY(0deg);
+}
+
+#dealer-card-1 {
+  transform: perspective(500px) rotateY(180deg);
 }
 
 .banner {
   margin: 10px;
-  /*height: 10%;*/
   height: 55px;
-  /*background-color: rgba(0,255,255,.25);*/
   color: white;
   box-sizing: border-box;
   display: block;
@@ -86,23 +82,26 @@ h1 {
 }
 
 .text-box {
-  font-family: 'Montserrat', sans-serif;
-  font-weight: 100;
-  font-size: 14px;
+  font-family: 'Dosis', sans-serif;
+  font-weight: 200;
+  font-size: 1em;
+  letter-spacing: 2px;
   display: inline-block;
   margin: 0 7%;
   height: 55px;
-  /*width: 30%;*/
   box-sizing: border-box;
-  /*min-width: 75px;*/
-  background-color: rgba(255,255,255,.3);
+  /*background-color: rgba(255,255,255,.25);*/
+}
+
+.text-box p {
+  font-weight: 600;
+  font-size: 1.1em;
+  letter-spacing: 3px;
 }
 
 .text-container {
   height: 55px;
   box-sizing: border-box;
-  /*padding: 0 5px;*/
-  /*min-width: 150px;*/
 }
 
 #total-box {
@@ -110,10 +109,9 @@ h1 {
   position: relative;
   width: 35%;
   border-left: solid 2px white;
-  /*right: 0px;*/
 }
 
-#player-box{
+#player-box {
   text-align: left;
   left: 0px;
   top: 0px;
@@ -137,8 +135,7 @@ h1 {
 }
 
 #message-box {
-  font-weight: 100;
-  font-style: italic;
+  /*font-style: italic;*/
   width: 30%;
   /*padding: 0px 5px;*/
   display: inline-block;
@@ -150,13 +147,63 @@ h1 {
 #message {
   display: inline-block;
   text-align: center;
-  font-size: 1em;
+  font-size: 1.1em;
+  font-weight: 300;
+  /*font-style: italic;*/
   /*padding: 0 5px;*/
   position: absolute;
   width: 86%;
   /*height: 55px;*/
   text-shadow: 2px 2px 1px #000;
   left: 0px;
+  transition: .4s all;
+}
+
+#message p {
+  font-size: 1em;
+  font-weight: 300;
+}
+
+input {
+  font-family: 'Dosis', sans-serif;
+  margin: 5px;
+  font-size: 16px;
+  size: 7;
+}
+
+#input-bet {
+  padding: 3px;
+  font-weight: 100;
+  outline: transparent;
+  border: solid 2px white;
+  border-radius: 5px;
+  background-color: transparent;
+  color: gold;
+}
+
+#submit-bet {
+  border: solid 2px rgba(255,255,255,0);
+  border-radius: 5px;
+  box-shadow: 2px 2px 2px black;
+  background-color: lightgrey;
+  outline: transparent;
+  transition: .25s all;
+  box-sizing: border-box;
+}
+
+#submit-bet:hover {
+  background-color: #333;
+  color: #eee;
+  border: solid 2px rgba(255,255,255,.75);
+  animation: flashingborder .75s linear infinite alternate;
+  cursor: pointer;
+}
+
+#submit-bet:active {
+  box-shadow: none;
+  transform: perspective(500) translateZ(-10px);
+  color: white;
+  background-color: lightgray;
 }
 
 #money-box {
@@ -165,14 +212,13 @@ h1 {
   position: relative;
   /*left: 0%;*/
   width: 35%;
+  opacity: .75;
 }
 
 #player-money {
   display: inline-block;
   text-align: left;
-  /*padding: 0 5px;*/
   position: absolute;
-  /*float: left;*/
   left: 0px;
   width: 43%;
 }
@@ -180,9 +226,7 @@ h1 {
 #player-bet {
   display: inline-block;
   text-align: right;
-  /*padding: 0 5px;*/
   position: absolute;
-  /*float: right;*/
   right: 0px;
   width: 43%;
 }
@@ -194,8 +238,12 @@ h1 {
 }
 
 button {
+  font-family: 'Dosis', sans-serif;
+  font-weight: 800;
+  font-size: 1em;
+  letter-spacing: 1px;
   border: solid 2px rgba(255,255,255,0);
-  border-radius: 5px;
+  border-radius: 10px;
   margin: 5px;
   box-shadow: 2px 2px 2px black;
   transition: .25s all;
@@ -209,11 +257,13 @@ button:hover {
   border: solid 2px rgba(255,255,255,.75);
   animation: flashingborder .75s linear infinite alternate;
   cursor: pointer;
+  border-radius: 0px;
 }
 
-button: focus {
-  background-color: darkblue;
+button:active {
+  box-shadow: none;
   color: white;
+  background-color: lightgray;
 }
 
 @keyframes flashingborder {
@@ -222,39 +272,14 @@ button: focus {
   }
 }
 
-.subdued {
-  /*background-color: rgba(255,255,255,.2);*/
-  opacity: .2;
-  box-shadow: none;
-  border: none;
-}
-
-.subdued:hover {
-  animation: none;
-  background-color: lightgrey;
-  color: black;
-  cursor: default;
-  border: none;
-}
-
-.flipin {
-  transform-origin: left;
-  animation: flipin .25s ease-out forwards;
-}
-
-.flipout {
-  transform-origin: left;
-  animation: flipout .25s ease-in;
-}
-
 .flyin {
   animation: flyin .5s ease-in;
 }
 
 .loop {
-  animation: loopin 1s ease-in-out forwards;
+  animation: flipover 1s ease-out forwards;
   /*transform-origin: left;*/
-  /*transform-style: preserve-3d;*/
+  transform-style: preserve-3d;
 }
 
 @keyframes flyin {
@@ -263,67 +288,41 @@ button: focus {
   }
 }
 
-@keyframes loopin {
+@keyframes flipover {
   0% {
-    transform: perspective(500px) translate3d(0px, 0px, 0px) rotateY(0deg);
+    transform: perspective(500px) translate3d(0px, 0px, 0px) rotateY(-180deg);
   }
-  25% {
-    transform: perspective(500px) translate3d(-75px, 0px, 30px) rotateY(30deg);
+  35% {
+    transform: perspective(500px) translate3d(-85px, 0px, 0px) rotateY(-180deg);
   }
   50% {
-    transform: perspective(500px) translate3d(-75px, 0px, 30px) rotateY(100deg);
+    transform: perspective(500px) translate3d(-85px, 0px, 30px) rotateY(-81deg); /* 99 deg centerline */
   }
   75% {
-    transform: perspective(500px) translate3d(-75px, 0px, 30px) rotateY(30deg);
+    transform: perspective(500px) translate3d(-80px, 0px, 30px) rotateY(30deg);
+    z-index: 5;
   }
   100% {
-    transform: perspective(500px) translate3d(-75px, 0px, 30px) rotateY(30deg);
+    transform: perspective(500px) translate3d(-80px, 0px, 30px) rotateY(30deg);
   }
 }
 
-@keyframes loop {
-  0% {
-    transform: perspective(500px) translate3d(0px, 0px, -1px) rotateX(0deg);
-  }
-  25% {
-    transform: perspective(500px) translate3d(0px, 250px, 50px) rotateX(90deg);
-  }
-  50% {
-    transform: perspective(500px) translate3d(0px, 0px, 100px) rotateX(180deg);
-  }
-  75% {
-    transform: perspective(500px) translate3d(0px, -250px, 50px) rotateX(270deg);
-  }
-  100% {
-    transform: perspective(500px) translate3d(0px, 0px, -1px) rotateX(360deg);
-  }
-}
-
-@keyframes flipin {
-  0% {
-    transform: rotateY(90deg);
-    backface-visibility: hidden;
-  }
-  100% {
-    transform: rotateY(0deg);
-  }
-}
-
-@keyframes flipout {
-  0% {
-    transform: rotateY(0deg);
-  }
-  100% {
-    transform: rotateY(90deg);
-    backface-visibility: hidden;
-  }
-}
-
-/*.subdued {
+.subdued {
+  /*background-color: rgba(255,255,255,.2);*/
   opacity: .2;
   box-shadow: none;
+  border: none;
   animation: none;
-}*/
+}
+
+.subdued:hover {
+  animation: none;
+  background-color: lightgrey;
+  color: black;
+  cursor: default;
+  border: none;
+  border-radius: 10px;
+}
 
 .hidden {
   visibility: hidden;
