@@ -372,6 +372,32 @@ function resetGame() {
   placeBet(player);
 };
 
+function showInfo() {
+  let $infoPanel = $('<div>', {'class': 'removed', 'id': 'info-panel'});
+  let $infoContent = $('<p>', {'id': 'info-content'});
+  let $okButton = $('<button>', {'id': 'ok-button'}).text('OK');
+
+  $infoContent.html("<p>Blackjack is also known as 21, is a card game where a player faces off against a dealer. The dealer and each player initially gets two cards. The player can only see one of the dealer's cards. Their values are face value, except Aces and face cards (J, Q, K), which are 1 or 11 and 10, respectively.</p><br/>"
+    +"<p>The player's goal is to get the sum of their cards higher than the sum of the dealer's cards, without that sum going over 21. The player can request additional cards (or 'HIT') if they want to increase their chances of beating the dealer. When the player is satisfied, and have not gone over 21, they can end their turn (or 'STAND').</p><br/>"
+    +"<p>When the player(s) has ended their turn, if sum of the dealer's hand is less than 16, the dealer will 'HIT' until their hand is worth more than 16, at which point, the dealer stands. If the dealer goes over 21, the player(s) automatically wins.</p><br/>"
+    +"<p>After the dealer stands, the dealer's hidden card is revealed to the player(s), and if the sum of the players hand is higher than the dealer, the player wins. If they are equal, then it is a tie game, or 'PUSH'.</p><br/>"
+    +"<p>Blackjack is frequently played in casinos, and players usually bet on winning. If the player wins, they get double their money back. If the player and dealer 'PUSH', the player gets only their initial bet back.</p>"
+    );
+
+  $('body').children().fadeOut();
+  $('body').append($infoPanel);
+  $infoPanel.append($infoContent);
+  $infoPanel.append($okButton);
+  $infoPanel.fadeIn();
+
+  $okButton.on('click', function(){
+    $($infoPanel).fadeOut();
+    $($infoPanel).remove();
+    $('body').children().fadeIn();
+  });
+
+}
+
 function setUpTable () {
   console.log('setting up table!');
   let $cardTable = ($('<div>', {'class': 'container', 'id': 'card-table'}));
@@ -393,7 +419,10 @@ function setUpTable () {
   let $hitButton = ($('<button>', {'class': 'button subdued', 'id': 'hit-button'})).text('HIT');
   let $standButton = ($('<button>', {'class': 'button subdued', 'id': 'stand-button'})).text('STAND');
 
+  let $infoButton = $('<div>', {'class': 'info', 'id': 'info-button'}).text('?');
+
   $('body').append($cardTable);
+  $('body').append($infoButton);
 
   $('#card-table').append($dealerHand);
 
@@ -420,6 +449,8 @@ function setUpTable () {
   $('#deal-button').on('click', function() {
     placeBet(player);
   });
+  $('#info-button').on('click', showInfo);
+
   player.$hand = $('#player-hand');
   dealer.$hand = $('#dealer-hand');
 };

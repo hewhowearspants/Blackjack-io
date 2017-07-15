@@ -10,6 +10,94 @@ body {
   color: white;
 }
 
+#info-button {
+  font-family: 'Montserrat', sans-serif;
+  font-weight: 700;
+  font-size: 25px;
+  position: absolute;
+  top: 0%;
+  left: 0%;
+  height: 40px;
+  width: 40px;
+  border: dashed 5px rgba(255,255,255,0);
+  border-radius: 100%;
+  opacity: .5;
+  box-sizing: border-box;
+  vertical-align: center;
+  animation: rotate 5s linear infinite;
+  animation-play-state: paused;
+}
+
+#info-button:hover {
+  cursor: pointer;
+}
+
+#info-button:before {
+  position: absolute;
+  border: dashed 5px white;
+  content: '';
+  border-radius: 50%;
+  animation: rotate 5s linear infinite;
+  animation-play-state: paused;
+  top: -5px;
+  bottom: -5px;
+  left: -5px;
+  right: -5px;
+}
+
+#info-button:hover::before {
+  animation: rotate 5s linear infinite;
+  animation-play-state: running;
+}
+
+#info-panel {
+  font-size: 13px;
+  font-weight: 200;
+  text-align: center;
+  letter-spacing: 1px;
+  position: absolute;
+  top: 200px;
+  left: 50%;
+  /*background-color: lightblue;*/
+  height: 400px;
+  width: 60%;
+  margin-top: -100px;
+  margin-left: -30%;
+}
+
+#info-content{
+  height: 100%;
+  overflow: auto;
+  background: rgba(0,0,0,.2);
+  padding: 10px;
+  border-radius: 10px;
+}
+
+#info-content::-webkit-scrollbar {
+  border-radius: 10px;
+/*  width: 15px;*/
+  background-color: rgba(0,0,0,.15);
+}
+
+#info-content::-webkit-scrollbar-thumb {
+  background-color: rgba(0,0,0,.3);
+  border-radius: 5px;
+}
+
+#info-panel p {
+  text-align: justify;
+  text-shadow: 2px 2px 2px #000;
+}
+
+#ok-button {
+  position: relative;
+}
+
+@keyframes rotate {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
 h1 {
   font-weight: 700;
   font-size: 3em;
