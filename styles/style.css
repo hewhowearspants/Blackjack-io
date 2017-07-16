@@ -34,7 +34,7 @@ body {
 
 #info-button:before {
   position: absolute;
-  border: dashed 5px white;
+  border: dotted 4px white;
   content: '';
   border-radius: 50%;
   animation: rotate 5s linear infinite;
