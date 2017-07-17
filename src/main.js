@@ -7,7 +7,7 @@ let deck = [];
 let playerWallet = parseInt(localStorage.getItem('playerMoney'));
 
 if (playerWallet) {
-  player.money = playerWallet;;
+  player.money = playerWallet;
 } else {
   player.money = 1000;
 };
@@ -35,6 +35,15 @@ function createDeck() {
     });
   });
 
+  prefetchDeckImages();
+};
+
+// PRELOADS CARD DECK IMAGES
+function prefetchDeckImages() {
+  deck.forEach((card) => {
+    let $imageLink = $('<link>', {'rel': 'prefetch', 'href': `${card.img}`});
+    $('head').append($imageLink);
+  });
 };
 
 // SHUFFLES CARD DECK AFTER CREATING THEM
@@ -65,7 +74,8 @@ function placeBet(turn) {
   $dealButton.addClass('subdued');
   $dealButton.off('click');
 
-  $messageBox.html('<p>Place your bet: </p>');
+  // $messageBox.html('<p>Place your bet: </p>');
+  $messageBox.html('');
   $messageBox.append($inputBet);
   $messageBox.append($submitBet);
 
@@ -88,40 +98,49 @@ function setBet(turn, betAmount) {
   if (betAmount > 0 && betAmount <= turn.money) {
     turn.bet = betAmount;
     turn.money -= turn.bet;
-    $('#player-money p').text(`$${turn.money}`);
+    $('#player-money p').text(`$${centify(turn.money)}`);
     $('#player-bet p').text(`$${turn.bet}`);
 
     dealHand();
 
   } else {
     $messageText.text('Not a valid bet!');
-    $messageText.css('color', 'orange');
+    $messageText.css({'color': 'orange', 'font-size':'14px'});
     setTimeout(function() {
       $messageText.css('color', '');
-      $messageText.text('Place your bet: ');
     }, 2000);
   };
 };
 
-// GIVES PLAYER DOUBLE THEIR MONEY IF THEY WIN
-function winMoney(turn) {
-  turn.money += turn.bet * 2;
-  $('#player-money p').text(`$${turn.money}`);
+// GIVES PLAYER MONEY IF THEY WIN
+// WINS PAY 2 TO 1
+// BLACKJACK PAYS 3 TO 2
+function winMoney(turn, multiplier) {
+  turn.money += turn.bet * multiplier;
+  $('#player-money p').text(`$${centify(turn.money)}`);
   localStorage.setItem('playerMoney', turn.money);
-  console.log(`${turn.name} won ${turn.bet}, now has ${turn.money}`);
+  // console.log(`${turn.name} won ${turn.bet}, now has ${turn.money}`);
 };
 
 // RETURNS THE PLAYER'S BET IF THEY PUSH WITH THE DEALER
 function pushMoney(turn) {
   turn.money += turn.bet;
-  $('#player-money p').text(`$${turn.money}`);
+  $('#player-money p').text(`$${centify(turn.money)}`);
   localStorage.setItem('playerMoney', turn.money);
-  console.log(`${turn.name} gets their money back`);
+  // console.log(`${turn.name} gets their money back`);
 }
+
+function centify(amount) {
+  if (amount % 1) {
+    return amount.toFixed(2);
+  } else {
+    return amount;
+  }
+};
 
 // DEALS THE INITIAL TWO CARDS AND TESTS FOR BLACKJACK
 function dealHand() {
-  console.log('deal em out!');
+  // console.log('deal em out!');
 
   let $messageBox = $('#message');
   let $dealButton = $('#deal-button');
@@ -179,17 +198,14 @@ function testForBlackjack() {
   let $messageBox = $('#message');
 
   if (player.total === 21 && dealer.total === 21) {
-    console.log('Both player and dealer have 21<br>PUSH!');
     pushMoney(player);
     $messageBox.html('PUSH!');
     return true;
   } else if (player.total === 21) {
-    console.log('Player has blackjack. Player wins.');
-    winMoney(player);
-    $messageBox.html(`BLACKJACK!<br/>You win $${player.bet}!`);
+    winMoney(player, (3/2));
+    $messageBox.html(`Blackjack pays 3:2!</p>You win $${centify(player.bet * (3/2))}!`);
     return true;
   } else if (dealer.total === 21) {
-    console.log('Dealer has blackjack. Dealer wins.');
     $messageBox.html('Dealer has blackjack!<br/>Dealer wins.');
     return true;
   };
@@ -198,10 +214,10 @@ function testForBlackjack() {
 // ADDS A CARD TO THE INDICATED PLAYER'S HAND, UPDATES PLAYER TOTAL
 // ADJUSTS CALCULATION IF ACE IS PRESENT
 function hitMe(turn) {
-  console.log(`${turn.name} hits!`);
-
+  // console.log(`${turn.name} hits!`);
   let $newCard = ($('<div>', {'class': 'card removed'}));
   let newCard = deck.shift();
+
   $newCard.css('background-image', `url('${newCard.img}')`);
 
   turn.hand.push(newCard);
@@ -214,13 +230,11 @@ function hitMe(turn) {
 
   checkForAce(turn);
 
-  //console.log(turn.name + ' total: ' + turn.total);
 };
 
 // RETURNS INDICATED PLAYER'S TOTAL VALUE OF THEIR HAND
 function calculateHand(turn) {
   //console.log(`calculating ${turn.name} hand total...`);
-
   return turn.hand.reduce((total, card) => {
     return total += card.realValue;
   }, 0);
@@ -228,8 +242,8 @@ function calculateHand(turn) {
 };
 
 // ADDS 10 TO PLAYER'S TOTAL IF THEY HAVE AN ACE AND IT WON'T PUT THEM OVER 21
+// DISPLAYS BOTH POSSIBLE TOTALS
 function checkForAce(turn) {
-
   if (hasAce(turn) && (turn.total + 10 <= 21)) {
     $(`#${turn.name}-total p`).text(`${turn.total} (${turn.total + 10})`)
     turn.total += 10;
@@ -252,7 +266,7 @@ function hasAce(turn) {
 
 // INITIALIZES HIT AND STAND BUTTONS
 function startGame() {
-  console.log('game begins!');
+  // console.log('game begins!');
   let $hitButton = $('#hit-button');
   let $standButton = $('#stand-button');
   let $dealButton = $('#deal-button');
@@ -285,6 +299,7 @@ function startGame() {
 
 // RUNS THE DEALER'S TURN, HITTING UNTIL THEY ARE OVER 16
 function dealerTurn() {
+  // darken hit and stand buttons
   $('#hit-button').off('click');
   $('#hit-button').addClass('subdued');
   $('#stand-button').off('click');
@@ -320,7 +335,7 @@ function checkWinConditions() {
   if (testForBust(player)) {
     $messageBox.html('BUST!');
   } else if (testForBust(dealer)) {
-    winMoney(player);
+    winMoney(player, 2);
     $messageBox.html(`Dealer busts!<br/>YOU WIN $${player.bet}!`);
   } else if (dealer.total === player.total) {
     pushMoney(player);
@@ -328,7 +343,7 @@ function checkWinConditions() {
   } else if (dealer.total > player.total) {
     $messageBox.html('Dealer wins.');
   } else if (dealer.total < player.total) {
-    winMoney(player);
+    winMoney(player, 2);
     $messageBox.html(`YOU WIN $${player.bet}!`);
   };
 
@@ -337,16 +352,15 @@ function checkWinConditions() {
   endGame();
 };
 
-// RETURNS WHETHER OR NOT INDICATED PLACE HAS GONE OVER 21
+// RETURNS WHETHER OR NOT INDICATED PLAYER HAS GONE OVER 21
 function testForBust(turn) {
   return turn.total > 21;
 };
 
 // SHOWS DEALER'S HIDDEN CARD, DEACTIVATES HIT/STAND BUTTON,
-// REACTIVATES DEAL BUTTON TO RESET GAME IF PLAYER STILL HAS MONEY
+// REACTIVATES DEAL BUTTON TO RESET GAME
 function endGame() {
-  console.log('game finished!');
-
+  // console.log('game finished!');
   let $messageBox = $('#message');
   let $dealButton = $('#deal-button');
   let $hitButton = $('#hit-button');
@@ -369,30 +383,31 @@ function endGame() {
   $('#player-bet p').html('$0');
   localStorage.setItem('playerMoney', player.money);
 
-  if (player.money > 0) {
-    $dealButton.removeClass('subdued');
-    $dealButton.text('DEAL');
-    $dealButton.one('click', resetGame);
-  } else {
-    $messageBox.text('You\'re outta cash! Get outta here, ya bum!');
-  };
+  $dealButton.removeClass('subdued');
+  $dealButton.text('DEAL');
+  $dealButton.one('click', resetGame);
 };
 
-// RESETS & RESTARTS GAME, SHUFFLES DECK IF DECK ONLY HAS 10 CARDS LEFT IN IT
+// RESETS GAME & RESTARTS IF PLAYER STILL HAS MONEY
+// SHUFFLES DECK IF DECK ONLY HAS 10 CARDS LEFT IN IT
 function resetGame() {
   $('.hand').children().remove();
-  $('#deal-button').text('DEAL');
   $('#message').text(' ');
   $('#player-box').addClass('hidden');
   $('#dealer-box').addClass('hidden');
   player.hand = [];
   dealer.hand = [];
 
-  if(deck.length < 10) {
-    deck = shuffleDeck();
+  if(player.money > 0) {
+    if(deck.length < 10) {
+      deck = shuffleDeck();
+    };
+    placeBet(player);
+  } else {
+    $('#deal-button').addClass('subdued');
+    $('#message').text('You\'re outta cash! Get outta here, ya bum!');
   };
 
-  placeBet(player);
 };
 
 // SHOWS GAME INFORMATION PANEL, HIDES EVERYTHING ELSE
@@ -401,11 +416,11 @@ function showInfo() {
   let $infoContent = $('<p>', {'id': 'info-content'});
   let $okButton = $('<button>', {'id': 'ok-button'}).text('OK');
 
-  $infoContent.html("<p>Blackjack, also known as 21, is a card game where a player faces off against a dealer. The dealer and the player each initially get two cards. The player can only see one of the dealer's cards. Their values are face value, except Aces and face cards (J, Q, K), which are 1 or 11 and 10, respectively.</p><br/>"
-    +"<p>The player's goal is to get the sum of their cards higher than the sum of the dealer's cards, without that sum going over 21. The player can request additional cards (or 'HIT') if they want to increase their chances of beating the dealer. When the player is satisfied, and have not gone over 21, they can end their turn (or 'STAND').</p><br/>"
-    +"<p>When the player(s) has ended their turn, if sum of the dealer's hand is less than 16, the dealer will 'HIT' until their hand is worth more than 16, at which point, the dealer stands. If the dealer goes over 21, the player(s) automatically wins.</p><br/>"
-    +"<p>After the dealer stands, the dealer's hidden card is revealed to the player(s), and if the sum of the players hand is higher than the dealer, the player wins. If they are equal, then it is a tie game, or 'PUSH'.</p><br/>"
-    +"<p>Blackjack is frequently played in casinos, and players usually bet on winning. If the player wins, they get double their money back. If the player and dealer 'PUSH', the player gets only their initial bet back.</p>"
+  $infoContent.html("<p>Blackjack, also known as 21, is a card game where a player faces off against a dealer. The dealer and the player each initially get two cards. The player can only see one of the dealer's cards. The cards's are worth face value, except Aces and face cards (J, Q, K), which are 1 or 11 and 10, respectively.</p><br/>"
+    +"<p>The player's goal is to get the sum of their cards higher than the sum of the dealer's cards, without that sum going over 21 ('BUST'). The player can request additional cards (or 'HIT') if they want to increase their chances of beating the dealer. When the player is satisfied, and has not gone over 21, they can end their turn (or 'STAND').</p><br/>"
+    +"<p>When the player has ended their turn, if sum of the dealer's hand is less than 16, the dealer will 'HIT' until their hand is worth more than 16, at which point, the dealer stands. If the dealer 'BUSTS', the player automatically wins.</p><br/>"
+    +"<p>After the dealer stands, the dealer's hidden card is revealed to the player, and if the sum of the player's hand is higher than the dealer, the player wins. If they are equal, then it is a tie game, or 'PUSH'.</p><br/>"
+    +"<p>Blackjack is frequently played in casinos, and players bet a certain amount on winning. If the player wins, they get double their money back. If the player and dealer 'PUSH', the player gets only their initial bet back.</p>"
     );
 
   $('body').children().fadeOut();
