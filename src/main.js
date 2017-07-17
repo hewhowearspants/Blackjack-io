@@ -94,7 +94,7 @@ function placeBet(turn) {
 
 // ACCEPTS THE BET INPUT AND STARTS THE GAME ONLY IF PLAYER BETS BETWEEN 1 AND ALL OF THEIR MONEY
 function setBet(turn, betAmount) {
-  let $messageText = $('#message p')
+  let $messageBox = $('#message')
   if (betAmount > 0 && betAmount <= turn.money) {
     turn.bet = betAmount;
     turn.money -= turn.bet;
@@ -104,10 +104,13 @@ function setBet(turn, betAmount) {
     dealHand();
 
   } else {
+    let $messageText = $('<p>');
     $messageText.text('Not a valid bet!');
     $messageText.css({'color': 'orange', 'font-size':'14px'});
+    $messageBox.append($messageText);
+    $messageText.delay(1000).fadeOut('fast');
     setTimeout(function() {
-      $messageText.css('color', '');
+      $messageText.remove();
     }, 2000);
   };
 };
@@ -130,6 +133,7 @@ function pushMoney(turn) {
   // console.log(`${turn.name} gets their money back`);
 }
 
+// DISPLAYS 2 DIGITS IF PLAYER HAS DOLLARS AND CENTS
 function centify(amount) {
   if (amount % 1) {
     return amount.toFixed(2);
