@@ -1,3 +1,5 @@
+// var socket = io();
+
 $(document).ready(function() {
 console.log('main.js loaded');
 
@@ -5,6 +7,11 @@ let player = {name: 'player', hand: [], bet: 0};
 let dealer = {name: 'dealer', hand: []};
 let deck = [];
 let playerWallet = parseInt(localStorage.getItem('playerMoney'));
+var socket = io({query: {
+  name: player.name,
+  hand: player.hand,
+  bet: player.bet,
+}});
 
 if (playerWallet) {
   player.money = playerWallet;
@@ -17,7 +24,7 @@ var Card = function(suit,value,realValue) {
   this.suit = suit;
   this.value = value;
   this.realValue = realValue;
-  this.img = `./assets/Playing-Cards/${value}_of_${suit}.png`;
+  this.img = `../images/Playing-Cards/${value}_of_${suit}.png`;
 };
 
 deck = shuffleDeck();
@@ -94,7 +101,7 @@ function placeBet(turn) {
 
 // ACCEPTS THE BET INPUT AND STARTS THE GAME ONLY IF PLAYER BETS BETWEEN 1 AND ALL OF THEIR MONEY
 function setBet(turn, betAmount) {
-  let $messageBox = $('#message')
+  let $messageBox = $('#message');
   if (betAmount > 0 && betAmount <= turn.money) {
     turn.bet = betAmount;
     turn.money -= turn.bet;
@@ -156,8 +163,10 @@ function dealHand() {
   hitMe(player);
   hitMe(player);
 
+  socket.emit('deal', player);
+
   // dealer's first card is hidden
-  $('#dealer-hand div:nth-child(1)').css('background-image', 'url("./assets/card-back.jpg")');
+  $('#dealer-hand div:nth-child(1)').css('background-image', 'url("../images/card-back.jpg")');
 
   // below is the animation timing allowing the cards to fly in in order, as if dealt by a dealer
   // see style.css for animation details
@@ -231,6 +240,8 @@ function hitMe(turn) {
   turn.total = calculateHand(turn);
 
   $(`#${turn.name}-total p`).text(turn.total);
+
+  socket.emit('deal', turn);
 
   checkForAce(turn);
 
@@ -317,10 +328,10 @@ function dealerTurn() {
 
   // sets timing for new dealer card animations
   for(let i = 2; i <= dealer.hand.length; i++) {
-    setTimeout(function() {
-      $(`#dealer-hand div:nth-child(${i})`).removeClass('removed');
-      $(`#dealer-hand div:nth-child(${i})`).addClass('flyin');
-    }, timeout);
+    setTimeout(function(x) {
+      $(`#dealer-hand div:nth-child(${x})`).removeClass('removed');
+      $(`#dealer-hand div:nth-child(${x})`).addClass('flyin');
+    }, timeout, i);
     timeout += 250;
   }
 
@@ -414,9 +425,32 @@ function resetGame() {
 
 };
 
-// SHOWS GAME INFORMATION PANEL, HIDES EVERYTHING ELSE
-function showInfo() {
-  let $infoPanel = $('<div>', {'class': 'removed', 'id': 'info-panel'});
+// CREATES AND PLACES ALL DOM ELEMENTS
+function setUpTable () {
+  console.log('setting up table!');
+  let $cardTable = ($('<div>', {'class': 'container', 'id': 'card-table'}));
+  let $dealerHand = ($('<div>', {'class': 'hand', 'id': 'dealer-hand'}));
+  let $playerHand = ($('<div>', {'class': 'hand', 'id': 'player-hand'}));
+
+  let $banner = ($('<div>', {'class': 'banner'}));
+  let $moneyBox = ($('<div>', {'class': 'text-container', 'id': 'money-box'}));
+  let $playerMoney = ($('<div>', {'class': 'text-box', 'id': 'player-money'})).html(`<span>Money <p>$${player.money}</p> </span>`);
+  let $playerBet = ($('<div>', {'class': 'text-box', 'id': 'player-bet'})).html(`<span>Bet <p>$${player.bet}</p> </span>`);
+  let $messageBox = ($('<div>', {'class': 'text-container', 'id': 'message-box'}));
+  let $message = ($('<div>', {'class': 'text-box', 'id': 'message'})).html('<span id="message-text">Welcome to Blackjack!</span>');
+  let $totalBox = ($('<div>', {'class': 'text-container', 'id': 'total-box'}));
+  let $playerTotal = ($('<div>', {'class': 'text-box hidden', 'id': 'player-box'})).html('<span id="player-total">Player <p>0</p> </span>');
+  let $dealerTotal = ($('<div>', {'class': 'text-box hidden', 'id': 'dealer-box'})).html('<span id="dealer-total">Dealer <p>0</p> </span>');
+
+  let $buttons = ($('<div>', {'id': 'button-bar'}));
+  let $dealButton = ($('<button>', {'class': 'button', 'id': 'deal-button'})).text('DEAL');
+  let $hitButton = ($('<button>', {'class': 'button subdued', 'id': 'hit-button'})).text('HIT');
+  let $standButton = ($('<button>', {'class': 'button subdued', 'id': 'stand-button'})).text('STAND');
+
+  let $infoButton = $('<div>', {'class': 'info', 'id': 'info-button'}).text('?');
+
+  let $infoPanelOverlay = $('<div>', {'class': 'removed', 'id': 'info-panel-overlay'});
+  let $infoPanel = $('<div>', {'id': 'info-panel'});
   let $infoContent = $('<p>', {'id': 'info-content'});
   let $okButton = $('<button>', {'id': 'ok-button'}).text('OK');
 
@@ -427,46 +461,15 @@ function showInfo() {
     +"<p>Blackjack is frequently played in casinos, and players bet a certain amount on winning. If the player wins, they get double their money back. If the player and dealer 'PUSH', the player gets only their initial bet back.</p>"
     );
 
-  $('body').children().fadeOut();
-  $('body').append($infoPanel);
-  $infoPanel.append($infoContent);
-  $infoPanel.append($okButton);
-  $infoPanel.fadeIn();
-
-  $okButton.on('click', function(){
-    $($infoPanel).fadeOut();
-    $($infoPanel).remove();
-    $('body').children().fadeIn();
-  });
-
-}
-
-// CREATES AND PLACES ALL DOM ELEMENTS
-function setUpTable () {
-  console.log('setting up table!');
-  let $cardTable = ($('<div>', {'class': 'container', 'id': 'card-table'}));
-  let $dealerHand = ($('<div>', {'class': 'hand', 'id': 'dealer-hand'}));
-  let $playerHand = ($('<div>', {'class': 'hand', 'id': 'player-hand'}));
-
-  let $banner = ($('<div>', {'class': 'banner'}));
-  let $moneyBox = ($('<div>', {'class': 'text-container', 'id': 'money-box'}));
-  let $playerMoney = ($('<div>', {'class': 'text-box', 'id': 'player-money'})).html(`<span>Money: <p>$${player.money}</p> </span>`);
-  let $playerBet = ($('<div>', {'class': 'text-box', 'id': 'player-bet'})).html(`<span>Bet <p>$${player.bet}</p> </span>`);
-  let $messageBox = ($('<div>', {'class': 'text-container', 'id': 'message-box'}));
-  let $message = ($('<div>', {'class': 'text-box', 'id': 'message'})).html('<span id="message-text">Welcome to Blackjack!</span>');
-  let $totalBox = ($('<div>', {'class': 'text-container', 'id': 'total-box'}));
-  let $playerTotal = ($('<div>', {'class': 'text-box hidden', 'id': 'player-box'})).html('<span id="player-total">Player Total <p>0</p> </span>');
-  let $dealerTotal = ($('<div>', {'class': 'text-box hidden', 'id': 'dealer-box'})).html('<span id="dealer-total">Dealer Total <p>0</p> </span>');
-
-  let $buttons = ($('<div>', {'id': 'button-bar'}));
-  let $dealButton = ($('<button>', {'class': 'button', 'id': 'deal-button'})).text('DEAL');
-  let $hitButton = ($('<button>', {'class': 'button subdued', 'id': 'hit-button'})).text('HIT');
-  let $standButton = ($('<button>', {'class': 'button subdued', 'id': 'stand-button'})).text('STAND');
-
-  let $infoButton = $('<div>', {'class': 'info', 'id': 'info-button'}).text('?');
 
   $('body').append($cardTable);
   $('body').append($infoButton);
+  $('body').append($infoPanelOverlay);
+
+  $infoPanelOverlay.append($infoPanel);
+  $infoPanel.append($infoContent);
+  $infoPanel.append($okButton);
+  $infoPanel.fadeIn();
 
   $('#card-table').append($dealerHand);
 
@@ -493,13 +496,19 @@ function setUpTable () {
   $('#deal-button').on('click', function() {
     placeBet(player);
   });
-  $('#info-button').on('click', showInfo);
+
+  $('#info-button').on('click', function() {
+    $infoPanelOverlay.removeClass('removed');
+  });
+
+  $('#ok-button').on('click', function(){
+    $infoPanelOverlay.addClass('removed');
+  });
 
   player.$hand = $('#player-hand');
   dealer.$hand = $('#dealer-hand');
 };
 
 setUpTable();
-
 
 });

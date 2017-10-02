@@ -1,0 +1,26 @@
+{
+  "name": "project_01_blackjack",
+  "version": "1.0.0",
+  "description": "Blackjack Online",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js",
+    "dev": "nodemon server.js",
+    "debugger": "DEBUG=*:* npm run dev"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/hewhowearspants/Project-01-Blackjack.git"
+  },
+  "author": "Ryan Edwards",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/hewhowearspants/Project-01-Blackjack/issues"
+  },
+  "homepage": "https://github.com/hewhowearspants/Project-01-Blackjack#readme",
+  "dependencies": {
+    "express": "^4.15.4",
+    "socket.io": "^2.0.3"
+  }
+}
