@@ -3,10 +3,13 @@
 $(document).ready(function() {
 console.log('main.js loaded');
 
-let player = {name: 'player', hand: [], bet: 0};
-let dealer = {name: 'dealer', hand: []};
 let deck = [];
-let playerWallet = parseInt(localStorage.getItem('playerMoney'));
+let playerWallet = parseInt(localStorage.getItem('playerMoney')) || 1000;
+let playerName = localStorage.getItem('playerName') || 'player';
+let player = {name: playerName, hand: [], money: playerWallet, bet: 0};
+let dealer = {name: 'dealer', hand: []};
+let users = [];
+let players = [];
 var socket = io({query: {
   name: player.name,
   hand: player.hand,
@@ -27,7 +30,7 @@ var Card = function(suit,value,realValue) {
   this.img = `../images/Playing-Cards/${value}_of_${suit}.png`;
 };
 
-deck = shuffleDeck();
+deck = createDeck();
 
 // CREATES 52 CARD OBJECTS USING OBJECT CONSTRUCTOR
 function createDeck() {
@@ -55,25 +58,25 @@ function prefetchDeckImages() {
 
 // SHUFFLES CARD DECK AFTER CREATING THEM
 function shuffleDeck() {
-  console.log('shuffling deck...')
+  // console.log('shuffling deck...')
 
-  createDeck();
+  // createDeck();
 
-  let deckSize = deck.length;
-  let shuffleDeck = [];
-  let randIndex;
+  // let deckSize = deck.length;
+  // let shuffleDeck = [];
+  // let randIndex;
 
-  for(let i = 0; i < deckSize; i++) {
-    randIndex = Math.floor(Math.random() * deck.length);
-    shuffleDeck.push(deck.splice(randIndex, 1)[0]);
-  };
+  // for(let i = 0; i < deckSize; i++) {
+  //   randIndex = Math.floor(Math.random() * deck.length);
+  //   shuffleDeck.push(deck.splice(randIndex, 1)[0]);
+  // };
 
-  return shuffleDeck;
+  // return shuffleDeck;
 };
 
 // PROVIDES INPUT FIELD FOR PLAYER TO INPUT BET AMOUNT
 function placeBet(turn) {
-  let $inputBet = $('<input>', {'type': 'number', 'id': 'input-bet', 'min': 1, 'max': `${turn.money}`, 'value': `${turn.bet || 5}`, 'formmethod': 'post'});
+  let $inputBet = $('<input>', {'type': 'number', 'id': 'input-bet', 'min': 1, 'max': `${player.money}`, 'value': `${player.bet || 5}`, 'formmethod': 'post'});
   let $submitBet = $('<input>', {'type': 'submit', 'id': 'submit-bet', 'value': 'BET'});
   let $messageBox = $('#message');
   let $dealButton = $('#deal-button');
@@ -89,26 +92,27 @@ function placeBet(turn) {
   $inputBet.keypress(function(event) {
     let betAmount = parseInt($inputBet.val());
     if (event.keyCode == 13 || event.which == 13) {
-      setBet(turn, betAmount);
+      setBet(betAmount);
     };
   });
 
   $submitBet.on('click', function() {
     let betAmount = parseInt($inputBet.val());
-    setBet(turn, betAmount);
+    setBet(betAmount);
   });
 };
 
 // ACCEPTS THE BET INPUT AND STARTS THE GAME ONLY IF PLAYER BETS BETWEEN 1 AND ALL OF THEIR MONEY
-function setBet(turn, betAmount) {
+function setBet(betAmount) {
   let $messageBox = $('#message');
-  if (betAmount > 0 && betAmount <= turn.money) {
-    turn.bet = betAmount;
-    turn.money -= turn.bet;
-    $('#player-money p').text(`$${centify(turn.money)}`);
-    $('#player-bet p').text(`$${turn.bet}`);
+  if (betAmount > 0 && betAmount <= player.money) {
+    player.bet = betAmount;
+    player.money -= player.bet;
+    $('#player-money p').text(`$${centify(player.money)}`);
+    $('#player-bet p').text(`$${player.bet}`);
 
-    dealHand();
+    socket.emit('place bet', {name: player.name, bet: player.bet});
+    //dealHand();
 
   } else {
     let $messageText = $('<p>');
@@ -150,7 +154,7 @@ function centify(amount) {
 };
 
 // DEALS THE INITIAL TWO CARDS AND TESTS FOR BLACKJACK
-function dealHand() {
+function dealCards(players, dealer) {
   // console.log('deal em out!');
 
   let $messageBox = $('#message');
@@ -158,15 +162,30 @@ function dealHand() {
 
   $messageBox.text('Dealing \'em out!');
 
-  hitMe(dealer);
-  hitMe(dealer);
-  hitMe(player);
-  hitMe(player);
+  // hitMe(dealer);
+  // hitMe(dealer);
+  // hitMe(player);
+  // hitMe(player);
 
-  socket.emit('deal', player);
+  players.forEach((serverPlayer) => {
+    if (serverPlayer.id === socket.id) {
+      player.hand.forEach((card) => {
+        let $newCard = ($('<div>', {'class': 'card removed'}));
+        $newCard.css('background-image', `url('${card.img}')`);
+        $('#player-hand').append($newCard);
+      });
+      $('#player-total p').text(player.total);
+    }
+  })
+
+  dealer.forEach((dealerCard) => {
+    let $newCard = ($('<div>', {'class': 'card removed'}));
+    $newCard.css('background-image', `url('${dealerCard.img}')`);
+    $('#dealer-hand').append($newCard);
+  })
 
   // dealer's first card is hidden
-  $('#dealer-hand div:nth-child(1)').css('background-image', 'url("../images/card-back.jpg")');
+  // $('#dealer-hand div:nth-child(1)').css('background-image', 'url("../images/card-back.jpg")');
 
   // below is the animation timing allowing the cards to fly in in order, as if dealt by a dealer
   // see style.css for animation details
@@ -195,11 +214,13 @@ function dealHand() {
   // ends the game if so, resumes game if not
   setTimeout(function () {
     $('#player-box').removeClass('hidden');
-    if(testForBlackjack()) {
-      endGame();
-    } else {
-      startGame();
-    };
+    $('#button-bar').children().removeClass('removed');
+    socket.emit('player ready');
+    // if(testForBlackjack()) {
+    //   endGame();
+    // } else {
+    //   startGame();
+    // };
   }, timeout);
 
 };
@@ -226,24 +247,22 @@ function testForBlackjack() {
 
 // ADDS A CARD TO THE INDICATED PLAYER'S HAND, UPDATES PLAYER TOTAL
 // ADJUSTS CALCULATION IF ACE IS PRESENT
-function hitMe(turn) {
+function hitMe(card, total) {
   // console.log(`${turn.name} hits!`);
   let $newCard = ($('<div>', {'class': 'card removed'}));
-  let newCard = deck.shift();
+  //let newCard = deck.shift();
 
-  $newCard.css('background-image', `url('${newCard.img}')`);
+  $newCard.css('background-image', `url('${card.img}')`);
 
-  turn.hand.push(newCard);
-  $newCard.attr('id', `${turn.name}-card-${turn.hand.length}`);
-  turn.$hand.append($newCard);
+  player.hand.push(card);
+  $newCard.attr('id', `player-card-${player.hand.length}`);
+  $(`#player-hand`).append($newCard);
+  $newCard.removeClass('removed');
+  $newCard.addClass('flyin');
 
-  turn.total = calculateHand(turn);
+  player.total = total;
 
-  $(`#${turn.name}-total p`).text(turn.total);
-
-  socket.emit('deal', turn);
-
-  checkForAce(turn);
+  $(`#player-total p`).text(total);
 
 };
 
@@ -313,59 +332,59 @@ function startGame() {
 };
 
 // RUNS THE DEALER'S TURN, HITTING UNTIL THEY ARE OVER 16
-function dealerTurn() {
-  // darken hit and stand buttons
-  $('#hit-button').off('click');
-  $('#hit-button').addClass('subdued');
-  $('#stand-button').off('click');
-  $('#stand-button').addClass('subdued');
+// function dealerTurn() {
+//   // darken hit and stand buttons
+//   $('#hit-button').off('click');
+//   $('#hit-button').addClass('subdued');
+//   $('#stand-button').off('click');
+//   $('#stand-button').addClass('subdued');
 
-  let timeout = 0;
+//   let timeout = 0;
 
-  while (dealer.total < 17) {
-    hitMe(dealer);
-  };
+//   while (dealer.total < 17) {
+//     hitMe(dealer);
+//   };
 
-  // sets timing for new dealer card animations
-  for(let i = 2; i <= dealer.hand.length; i++) {
-    setTimeout(function(x) {
-      $(`#dealer-hand div:nth-child(${x})`).removeClass('removed');
-      $(`#dealer-hand div:nth-child(${x})`).addClass('flyin');
-    }, timeout, i);
-    timeout += 250;
-  }
+//   // sets timing for new dealer card animations
+//   for(let i = 2; i <= dealer.hand.length; i++) {
+//     setTimeout(function(x) {
+//       $(`#dealer-hand div:nth-child(${x})`).removeClass('removed');
+//       $(`#dealer-hand div:nth-child(${x})`).addClass('flyin');
+//     }, timeout, i);
+//     timeout += 250;
+//   }
 
-  // checks win conditions after animations are done playing
-  setTimeout(function() {
-    checkWinConditions();
-  }, timeout + 250);
+//   // checks win conditions after animations are done playing
+//   setTimeout(function() {
+//     checkWinConditions();
+//   }, timeout + 250);
 
-};
+// };
 
 // GIVES MONEY TO PLAYER IF THEY WIN OR PUSH, THEN GOES TO END GAME
-function checkWinConditions() {
-  let $messageBox = $('#message');
+// function checkWinConditions() {
+//   let $messageBox = $('#message');
 
-  setTimeout(function () {
-  if (testForBust(player)) {
-    $messageBox.html('BUST!');
-  } else if (testForBust(dealer)) {
-    winMoney(player, 2);
-    $messageBox.html(`Dealer busts!<br/>YOU WIN $${player.bet}!`);
-  } else if (dealer.total === player.total) {
-    pushMoney(player);
-    $messageBox.html('PUSH!');
-  } else if (dealer.total > player.total) {
-    $messageBox.html('Dealer wins.');
-  } else if (dealer.total < player.total) {
-    winMoney(player, 2);
-    $messageBox.html(`YOU WIN $${player.bet}!`);
-  };
+//   setTimeout(function () {
+//   if (testForBust(player)) {
+//     $messageBox.html('BUST!');
+//   } else if (testForBust(dealer)) {
+//     winMoney(player, 2);
+//     $messageBox.html(`Dealer busts!<br/>YOU WIN $${player.bet}!`);
+//   } else if (dealer.total === player.total) {
+//     pushMoney(player);
+//     $messageBox.html('PUSH!');
+//   } else if (dealer.total > player.total) {
+//     $messageBox.html('Dealer wins.');
+//   } else if (dealer.total < player.total) {
+//     winMoney(player, 2);
+//     $messageBox.html(`YOU WIN $${player.bet}!`);
+//   };
 
-  }, 1000);
+//   }, 1000);
 
-  endGame();
-};
+//   endGame();
+// };
 
 // RETURNS WHETHER OR NOT INDICATED PLAYER HAS GONE OVER 21
 function testForBust(turn) {
@@ -374,7 +393,7 @@ function testForBust(turn) {
 
 // SHOWS DEALER'S HIDDEN CARD, DEACTIVATES HIT/STAND BUTTON,
 // REACTIVATES DEAL BUTTON TO RESET GAME
-function endGame() {
+function endGame(dealerHiddenCard, dealerTotal, winStatus, message) {
   // console.log('game finished!');
   let $messageBox = $('#message');
   let $dealButton = $('#deal-button');
@@ -386,20 +405,39 @@ function endGame() {
   $dealerFirstCard.addClass('loop');
   setTimeout(function() {
     $('#dealer-box').removeClass('hidden');
-    $dealerFirstCard.css('background-image', `url(${dealer.hand[0].img}`);
+    $dealerFirstCard.css('background-image', `url(${dealerHiddenCard}`);
   }, 500);
 
-  $hitButton.off('click');
-  $hitButton.addClass('subdued');
+  // $hitButton.off('click');
+  // $hitButton.addClass('subdued');
 
-  $standButton.off('click');
-  $standButton.addClass('subdued');
+  // $standButton.off('click');
+  // $standButton.addClass('subdued');
 
-  $('#player-bet p').html('$0');
-  localStorage.setItem('playerMoney', player.money);
+  if (winStatus === 'win') {
+    player.money += player.bet * 2;
+    player.bet = 0;
+    $('#player-bet p').html('$0');
+    $('#player-money p').text(`${centify(player.money)}`);
+    localStorage.setItem('playerMoney', player.money);
+  } else if (winStatus === 'push') {
+    player.money += player.bet;
+    player.bet = 0;
+    $('#player-bet p').html('$0');
+    $('#player-money p').text(`${centify(player.money)}`);
+    localStorage.setItem('playerMoney', player.money);
+  } else if (winStatus === 'lose') {
+    $('#player-bet p').html('$0');
+    $('#player-money p').text(`${centify(player.money)}`);
+    localStorage.setItem('playerMoney', player.money);
+  }
+
+  $messageBox.html(`<p>${message}</p>`)
+  $('#dealer-total p').text(dealerTotal);
+  $('#dealer-box').removeClass('hidden');
 
   $dealButton.removeClass('subdued');
-  $dealButton.text('DEAL');
+  $dealButton.text('AGAIN?');
   $dealButton.one('click', resetGame);
 };
 
@@ -437,15 +475,15 @@ function setUpTable () {
   let $playerMoney = ($('<div>', {'class': 'text-box', 'id': 'player-money'})).html(`<span>Money <p>$${player.money}</p> </span>`);
   let $playerBet = ($('<div>', {'class': 'text-box', 'id': 'player-bet'})).html(`<span>Bet <p>$${player.bet}</p> </span>`);
   let $messageBox = ($('<div>', {'class': 'text-container', 'id': 'message-box'}));
-  let $message = ($('<div>', {'class': 'text-box', 'id': 'message'})).html('<span id="message-text">Welcome to Blackjack!</span>');
+  let $message = ($('<div>', {'class': 'text-box', 'id': 'message'}));
   let $totalBox = ($('<div>', {'class': 'text-container', 'id': 'total-box'}));
   let $playerTotal = ($('<div>', {'class': 'text-box hidden', 'id': 'player-box'})).html('<span id="player-total">Player <p>0</p> </span>');
   let $dealerTotal = ($('<div>', {'class': 'text-box hidden', 'id': 'dealer-box'})).html('<span id="dealer-total">Dealer <p>0</p> </span>');
 
   let $buttons = ($('<div>', {'id': 'button-bar'}));
-  let $dealButton = ($('<button>', {'class': 'button', 'id': 'deal-button'})).text('DEAL');
-  let $hitButton = ($('<button>', {'class': 'button subdued', 'id': 'hit-button'})).text('HIT');
-  let $standButton = ($('<button>', {'class': 'button subdued', 'id': 'stand-button'})).text('STAND');
+  let $dealButton = ($('<button>', {'class': 'button removed subdued', 'id': 'deal-button'})).text('DEAL');
+  let $hitButton = ($('<button>', {'class': 'button removed subdued', 'id': 'hit-button'})).text('HIT');
+  let $standButton = ($('<button>', {'class': 'button removed subdued', 'id': 'stand-button'})).text('STAND');
 
   let $infoButton = $('<div>', {'class': 'info', 'id': 'info-button'}).text('?');
 
@@ -510,5 +548,92 @@ function setUpTable () {
 };
 
 setUpTable();
+
+socket.on('welcome', function(data) {
+  users = data.users;
+  players = data.players;
+  console.log(users);
+  console.log(players);
+  $('#message').html(`<p>${data.greeting}!</p>`);
+});
+
+socket.on('sit invite', function() {
+  let $sitButton = $('<button>', {id: 'sit-button'}).text('SIT');
+  console.log($('#player-hand').children());
+  if($('#player-hand').children().length === 0) {
+    $('#player-hand').append($sitButton);
+  }
+  $('#sit-button').on('click', function() {
+    socket.emit('deal me in', {name: player.name});
+    $sitButton.remove();
+    placeBet();
+  })
+});
+
+socket.on('deal cards', function(data) {
+  data.players.forEach((serverPlayer) => {
+    if (serverPlayer.id === socket.id) {
+      player.hand = serverPlayer.hand;
+      player.total = serverPlayer.total;
+    }
+  })
+  dealCards(data.players, data.dealer)
+  console.log(data.players);
+  console.log(data.dealer);
+});
+
+socket.on('your turn', function() {
+  let $hitButton = $('#hit-button');
+  let $standButton = $('#stand-button');
+  $hitButton.removeClass('subdued');
+  $standButton.removeClass('subdued');
+  $hitButton.on('click', function() {
+    socket.emit('hit me');
+  });
+  $standButton.on('click', function() {
+    socket.emit('stand');
+
+    let $hitButton = $('#hit-button');
+    let $standButton = $('#stand-button');
+    $hitButton.addClass('subdued');
+    $standButton.addClass('subdued');
+    $hitButton.off('click');
+    $standButton.off('click');
+  });
+});
+
+socket.on('new card', function(data) {
+  hitMe(data.card, data.total);
+})
+
+socket.on('turn over', function() {
+  let $hitButton = $('#hit-button');
+  let $standButton = $('#stand-button');
+  $hitButton.addClass('subdued');
+  $standButton.addClass('subdued');
+  $hitButton.off('click');
+  $standButton.off('click');
+  if (player.total > 21) {
+    $('#message').html('<p>BUSTED</p>');
+    player.bet = 0;
+    $('#player-bet p').html('$0');
+    localStorage.setItem('playerMoney', player.money);
+  }
+});
+
+socket.on('new dealer card', function(data) {
+  let timeout = 0;
+  let $newCard = ($('<div>', {'class': 'card removed'}));
+  $newCard.css('background-image', `url('${data.card.img}')`);
+  $(`#dealer-hand`).append($newCard);
+  setTimeout(function() {
+    $newCard.removeClass('removed');
+    $newCard.addClass('flyin');
+  }, 250);
+});
+
+socket.on('game over', function(data) {
+  endGame(data.dealerHiddenCard, data.dealerTotal, data.status, data.message);
+})
 
 });
