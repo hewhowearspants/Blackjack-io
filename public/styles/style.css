@@ -1,6 +1,7 @@
 body {
   display: flex;
   margin: 0;
+  overflow: hidden;
   flex-direction: column;
   align-items: center;
   background-color: black;
@@ -155,8 +156,9 @@ h1 #jack {
 .container {
   display: flex;
   flex-direction: column;
-  justify-content: space-around;
-  width: 80vw;
+  justify-content: space-between;
+  align-items: center;
+  width: calc(100vw - 20px);
   height: calc(100% - 58px);
   box-sizing: border-box;
   border-radius: 20px;
@@ -165,14 +167,35 @@ h1 #jack {
 
 /* CONTAINS THE CARD ELEMENTS */
 
+.player-container {
+  display: flex;
+  width: 100%;
+  justify-content: space-around;
+}
+
 .hand {
-  /* display: block; */
+  display: flex;
+  justify-content: center;
+  align-items: center;
   text-align: center;
   height: 150px;
-  width: 100%;
-  margin: 10px 0;
+  width: 150px;
+  margin: 10px 0 -50px;
   border-radius: 20px;
   box-sizing: border-box;
+  transition: .25s all;
+}
+
+.player-container .hand {
+  background-color: rgba(0,0,0,.3);
+}
+
+.hand.occupied {
+  background-color: rgba(0,0,255,.6);
+}
+
+#player-hand {
+  transform: translateY(-100px);
 }
 
 /* THE CARD ELEMENTS */
@@ -416,6 +439,75 @@ button:active {
   100% {
     transform: perspective(500px) translate3d(-80px, 0px, 30px) rotateY(30deg);
   }
+}
+
+#chat-container {
+  width: 30vw;
+  height: 30vh;
+  position: fixed;
+  display: flex;
+  flex-direction: column;
+  top: 0;
+  right: 0;
+  background-color: rgba(0,0,0,.5);
+}
+
+#chat-content {
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+  width: 100%;
+  height: 100%;
+  overflow-y: auto;
+}
+
+#chat-messages {
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column-reverse;
+  align-items: flex-start;
+  overflow: auto;
+  padding: 0px 5px;
+  font-weight: 100;
+  font-size: 14px;
+}
+
+#chat-messages p {
+  text-align: left;
+}
+
+#chat-messages p span {
+}
+
+#chat-form {
+  height: 50px;
+  width: 100%;
+  display: flex;
+  align-items: center;
+}
+
+#chat-input {
+  flex-grow: 1;
+  background: transparent;
+  outline: transparent;
+  color: white;
+  border: none;
+  border-bottom: 1px solid white;
+}
+
+#chat-submit {
+  width: 50px;
+  color: white;
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  font-weight: 100;
+}
+
+#chat-submit:hover {
+  color: yellow;
+  border: none;
+  animation: none;
 }
 
 .subdued {

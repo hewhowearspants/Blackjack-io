@@ -110,14 +110,19 @@ function dealerTurn() {
   }
 
   setTimeout(function() {
-    checkWinConditions();
+    endGame();
+    setTimeout(function() {
+      resetGame();
+    }, 1000);
   }, timeout);
 
-  console.log(dealer);
 }
 
-function checkWinConditions() {
+function endGame() {
+  let playerList = {};
+  let gameInProgress = false;
   players.forEach((player) => {
+    playerList[player.id] = true;
     if (player.total > 21) {
       io.to(player.id).emit('game over', {
         dealerHiddenCard: dealer.hand[0].img,
@@ -125,7 +130,7 @@ function checkWinConditions() {
         status: 'lose',
         message: 'BUSTED!',
       });
-    } else if (dealer.total > 21 && player.total < 21) {
+    } else if (dealer.total > 21 && player.total <= 21) {
       io.to(player.id).emit('game over', {
         dealerHiddenCard: dealer.hand[0].img, 
         dealerTotal: dealer.total,
@@ -155,58 +160,114 @@ function checkWinConditions() {
       });
     }
   })
+
+  users.forEach((user) => {
+    if(!playerList[user.id]) {
+      io.to(user.id).emit('game over', {
+        dealerHiddenCard: dealer.hand[0].img,
+        dealerTotal: dealer.total,
+        status: '',
+        message: 'Game over!',
+      });
+    };
+  });
+}
+
+function resetGame() {
+  players.forEach((player) => {
+    player.bet = 0;
+    player.hand = [];
+    player.total = 0;
+  })
+  dealer.hand = [];
+  dealer.total = 0;
+  betCount = 0;
+  playersReadyCount = 0;
+  gameInProgress = false;
+
+  io.sockets.emit('sit invite');
 }
 
 ////SOCKET.IO FUNCTIONALITY
 let players = [];
+let playersLeftToPlay = [];
 let users = [];
+let messages = [];
 let dealer = {hand: [], total: 0};
-let playerTurn = 0;
+let betCount = 0;
+let playersReadyCount = 0;
+let gameInProgress = false;
 
 io.on('connection', function(socket) {
   console.log('new connection from ' + socket.id);
-  let user = socket.handshake.query;
-  console.log(`welcome ${user.name}!`);
   
-  // THIS WILL EVENTUALLY BE PUT IN A SOCKET.ON WHEN USER SETS THEIR NAME
-  users.push({
-    id: socket.id,
-    name: user.name,
+  socket.on('new user', function(data) {
+    // let user = socket.handshake.query;
+    console.log(`welcome ${data.name}!`);
+
+    users.push({
+      id: socket.id,
+      name: data.name,
+    });
+
+    console.log(`welcoming ${socket.id} (${data.name})`);
+    socket.emit('welcome', {
+      users: users, 
+      currentPlayers: players,
+      chatMessages: messages,
+      greeting: `Welcome, ${data.name}`, 
+      gameInProgress: gameInProgress
+    });
+    console.log(players);
+    if (gameInProgress) {
+      socket.emit('fill me in', {
+        currentPlayers: players,
+        dealerHand: [
+          { img: '../images/card-back.jpg' },
+          { img: dealer.hand[1].img }
+        ],
+      })
+    }
+
+    messages.push({name: '::', text: `${data.name} has joined`});
+    socket.broadcast.emit('new user', `${data.name} has joined`);
+
+    console.log(users);
+    if (players.length < 5 && !gameInProgress) {
+      socket.emit('sit invite');
+    }
   });
 
-  socket.emit('welcome', {users: users, players: players, greeting: `Welcome, ${user.name}`});
-  socket.broadcast.emit('new user', `${user.name} has joined`);
-
-  console.log(users);
-  if (players.length < 5) {
-    socket.emit('sit invite');
-  }
-
   socket.on('deal me in', function(data) {
-    players.push({
+    let newPlayer = {
       id: socket.id,
       name: data.name,
       hand: [],
-      bet: 0,
-    });
-    console.log(players);
-    io.sockets.emit('new player', {players: players});
-    socket.emit('request bet', {players: players});
+      bet: 5,
+      total: 0,
+    }
+    players.push(newPlayer);
+    console.log(`new player! ${newPlayer.id}`)
+    io.sockets.emit('new player', {newPlayer: newPlayer});
+    if (players.length === 5) {
+      io.sockets.emit('sit uninvite');
+    }
   })
 
   socket.on('place bet', function(data) {
-    let betCount = 0;
     players.forEach((player) => {
       if (player.id === socket.id) {
         player.bet = data.bet;
         console.log(`${player.name} bet ${data.bet}`);
         betCount++;
-      } else if (player.bet) {
-        betCount++;
+        console.log(`${betCount} out of ${players.length} have bet so far`);
       }
     });
+
     if (betCount === players.length) {
       setTimeout(function() {
+        gameInProgress = true;
+        betCount = 0;
         dealCards();
         io.sockets.emit('deal cards', {
           players: players, 
@@ -215,31 +276,49 @@ io.on('connection', function(socket) {
             { img: dealer.hand[1].img }
           ]
         });
-      }, 1000)
+        io.sockets.emit('sit uninvite');
+      }, 1000);
     }
   })
 
   socket.on('player ready', function() {
-    io.to(players[playerTurn].id).emit('your turn');
+    playersReadyCount++;
+    console.log(`${socket.id} is ready`)
+    if (playersReadyCount === players.length) {
+      playersLeftToPlay = [...players]
+      io.to(playersLeftToPlay[0].id).emit('your turn');
+    };
   });
 
   socket.on('hit me', function() {
+    console.log(`${socket.id} hits!`);
     let newCard = deck.shift();
     players.forEach((player) => {
       if (player.id === socket.id) {
+        
         player.hand.push(newCard);
         player.total = calculateHand(player.hand);
         player = checkForAce(player);
-        socket.emit('new card', {card: newCard, total: player.total});
+        
+        io.sockets.emit('new card', {player: player, card: newCard, total: player.total});
+        
         if (player.total > 21) {
           console.log(`${player.name} busted!`);
-          if (playerTurn + 1 < players.length) {
-            io.to(players[playerTurn].id).emit('turn over');
-            playerTurn++;
-            console.log(`player turn: ${playerTurn}`);
-            io.to(players[playerTurn].id).emit('your turn');
+          let bustedPlayer;
+          
+          playersLeftToPlay.forEach((player, index) => {
+            if (player.id === socket.id) {
+              bustedPlayer = player;
+              playersLeftToPlay.splice(index, 1);
+            }
+          });
+          
+          if (playersLeftToPlay.length) {
+            io.to(bustedPlayer.id).emit('turn over');
+            console.log(`player turn: ${playersLeftToPlay[0].id}`);
+            io.to(playersLeftToPlay[0].id).emit('your turn');
           } else {
-            io.to(players[playerTurn].id).emit('turn over');
+            io.to(bustedPlayer.id).emit('turn over');
             dealerTurn();
           }
         }
@@ -248,35 +327,121 @@ io.on('connection', function(socket) {
   });
 
   socket.on('stand', function() {
-    if (playerTurn + 1 < players.length) {
-      playerTurn++;
-      io.to(players[playerTurn].id).emit('your turn');
+    let finishedPlayer;
+    playersLeftToPlay.forEach((player, index) => {
+      if (player.id === socket.id) {
+        finishedPlayer = player;
+        playersLeftToPlay.splice(index, 1);
+      }
+    });
+
+    if (playersLeftToPlay.length) {
+      io.to(playersLeftToPlay[0].id).emit('your turn');
     } else {
       dealerTurn();
     }
   })
-  
-  // socket.on('deal', function(player) {
-  //   console.log(player.id, player.hand, player.total);
-  // });
+
+  socket.on('leave game', function() {
+    players.forEach((player, index) => {
+      if (player.id === socket.id) {
+        players.splice(index, 1);
+        io.sockets.emit('player left', {leftPlayer: player});
+        console.log(`${player.name} (${socket.id}) is out`);
+        io.sockets.emit('sit invite');
+      }
+    });
+
+    playersLeftToPlay.forEach((player, index) => {
+      if (player.id === socket.id) {
+        playersLeftToPlay.splice(index, 1);
+        if (index === 0) {
+          io.to(playersLeftToPlay[0].id).emit('your turn');
+        }
+      }
+    });
+
+    if (betCount === players.length && players.length !== 0 && !gameInProgress) {
+      setTimeout(function() {
+        gameInProgress = true;
+        betCount = 0;
+        dealCards();
+        io.sockets.emit('deal cards', {
+          players: players, 
+          dealer: [
+            { img: '../images/card-back.jpg' },
+            { img: dealer.hand[1].img }
+          ]
+        });
+        io.sockets.emit('sit uninvite');
+      }, 1000);
+    }
+
+    if (players.length === 0) {
+      io.sockets.emit('reset board');
+      resetGame();
+    }
+  })
 
   socket.on('disconnect', function() {
     users.forEach((user, index) => {
       console.log(`${user.name} disconnected!`);
       if (socket.id === user.id) {
         users.splice(index, 1);
+        messages.push({name: '::', text: `${user.name} left`});
+        io.sockets.emit('user left', {user: user});
       }
     });
+
     players.forEach((player, index) => {
       console.log(`${player.name} no longer playing!`);
       if (socket.id === player.id) {
         players.splice(index, 1);
-        socket.emit('player left', {player: player});
+        io.sockets.emit('player left', {leftPlayer: player});
       }
     });
 
+    playersLeftToPlay.forEach((player, index) => {
+      if (player.id === socket.id) {
+        playersLeftToPlay.splice(index, 1);
+        if (index === 0) {
+          io.to(playersLeftToPlay[0].id).emit('your turn');
+        }
+      }
+    });
+
+    if (betCount === players.length && players.length !== 0 && !gameInProgress) {
+      setTimeout(function() {
+        gameInProgress = true;
+        betCount = 0;
+        dealCards();
+        io.sockets.emit('deal cards', {
+          players: players, 
+          dealer: [
+            { img: '../images/card-back.jpg' },
+            { img: dealer.hand[1].img }
+          ]
+        });
+        io.sockets.emit('sit uninvite');
+      }, 1000);
+    }
+
     if (players.length === 0) {
       dealer = {hand: [], total: 0};
+      resetGame();
+      io.sockets.emit('reset board');
+    }
+  });
+
+  socket.on('chat message', function(data) {
+    if (messages.length > 100) {
+      messages.pop();
+    }
+    if (data.text === '>userlist') {
+      socket.emit('list users', users);
+    } else {
+      messages.push({name: data.name, text: data.text});
+      io.sockets.emit('new message', {name: data.name, id: socket.id, text: data.text});
     }
   });
 });
