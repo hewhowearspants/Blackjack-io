@@ -20,6 +20,9 @@ var Card = function(suit,value,realValue) {
   this.img = `../images/Playing-Cards/${value}_of_${suit}.png`;
 };
 let deck = [];
+// the number of 52-card decks in the dealer's shoe
+// casino's typically have 6
+let shoeSize = 6;
 deck = shuffleDeck();
 
 // CREATES 52 CARD OBJECTS USING OBJECT CONSTRUCTOR
@@ -41,7 +44,9 @@ function createDeck() {
 function shuffleDeck() {
   console.log('shuffling deck...')
 
-  createDeck();
+  for (let i = 0; i < shoeSize; i++) {
+    createDeck();
+  }
 
   let deckSize = deck.length;
   let shuffleDeck = [];
@@ -56,18 +61,29 @@ function shuffleDeck() {
 };
 
 function dealCards() {
+  console.log('initial deal');
+  // deal two for each player
   players.forEach((player) => {
-    player.hand.push(deck.shift());
-    player.hand.push(deck.shift());
+    let firstCard = deck.shift();
+    let secondCard = deck.shift();
+    player.hand.push(firstCard);
+    console.log(`${player.name} receives ${firstCard.value} of ${firstCard.suit}`);
+    player.hand.push(secondCard);
+    console.log(`${player.name} receives ${secondCard.value} of ${secondCard.suit}`);
     player.total = calculateHand(player.hand);
     player = checkForAce(player);
-    console.log(player);
   });
-  dealer.hand.push(deck.shift());
-  dealer.hand.push(deck.shift());
+  // deal two for the dealer
+  let firstCard = deck.shift();
+  let secondCard = deck.shift();
+  dealer.hand.push(firstCard);
+  console.log(`Dealer receives ${firstCard.value} of ${firstCard.suit}`)
+  dealer.hand.push(secondCard);
+  console.log(`Dealer receives ${secondCard.value} of ${secondCard.suit}`)
   dealer.total = calculateHand(dealer.hand);
   dealer = checkForAce(dealer);
-  console.log(dealer);
+  
+  console.log(`${deck.length} cards left in shoe`);
 }
 
 function calculateHand(hand) {
@@ -100,10 +116,14 @@ function dealerTurn() {
   let timeout = 0;
   while (dealer.total < 17) {
     let newCard = deck.shift();
+    
     dealer.hand.push(newCard);
+    console.log(`Dealer receives ${newCard.value} of ${newCard.suit}`);
+
     setTimeout(function() {
       io.sockets.emit('new dealer card', {card: newCard});
     }, timeout);
+
     dealer.total = calculateHand(dealer.hand);
     dealer = checkForAce(dealer);
     timeout += 250;
@@ -121,8 +141,10 @@ function dealerTurn() {
 function endGame() {
   let playerList = {};
   let gameInProgress = false;
+
   players.forEach((player) => {
     playerList[player.id] = true;
+
     if (player.total > 21) {
       io.to(player.id).emit('game over', {
         dealerHiddenCard: dealer.hand[0].img,
@@ -161,6 +183,7 @@ function endGame() {
     }
   })
 
+  // for the spectator audience...
   users.forEach((user) => {
     if(!playerList[user.id]) {
       io.to(user.id).emit('game over', {
@@ -184,6 +207,10 @@ function resetGame() {
   betCount = 0;
   playersReadyCount = 0;
   gameInProgress = false;
+
+  if (deck.length < 52) {
+    deck = shuffleDeck();
+  }
 
   io.sockets.emit('sit invite');
 }
@@ -291,17 +318,20 @@ io.on('connection', function(socket) {
   });
 
   socket.on('hit me', function() {
-    console.log(`${socket.id} hits!`);
     let newCard = deck.shift();
+
     players.forEach((player) => {
       if (player.id === socket.id) {
         
+        console.log(`${player.name} hits, dealing ${newCard.value} of ${newCard.suit}`);
+        console.log(`${deck.length} cards left`);
         player.hand.push(newCard);
         player.total = calculateHand(player.hand);
         player = checkForAce(player);
         
         io.sockets.emit('new card', {player: player, card: newCard, total: player.total});
         
+        // if player busts...
         if (player.total > 21) {
           console.log(`${player.name} busted!`);
           let bustedPlayer;
@@ -313,6 +343,7 @@ io.on('connection', function(socket) {
             }
           });
           
+          // if there are still players left
           if (playersLeftToPlay.length) {
             io.to(bustedPlayer.id).emit('turn over');
             console.log(`player turn: ${playersLeftToPlay[0].id}`);
