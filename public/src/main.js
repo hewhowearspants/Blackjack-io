@@ -59,7 +59,7 @@ function inputName() {
   let $inputName = $('<input>', {'type': 'text', 'id': 'input-name', 'formmethod': 'post', 'placeholder': 'enter your name'});
   let $submitName = $('<input>', {'type': 'submit', 'id': 'submit-name', 'value': 'GO'});
   $('body').append($inputName);
-  $('body').append($submitName);
+  //$('body').append($submitName);
 
   $inputName.keypress(function(event) {
     let name = $inputName.val();
