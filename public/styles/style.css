@@ -99,12 +99,14 @@ p {
   border-radius: 10px;
 }
 
-#info-content::-webkit-scrollbar {
+#info-content::-webkit-scrollbar,
+#chat-content::-webkit-scrollbar {
   border-radius: 10px;
   background-color: rgba(0,0,0,.15);
 }
 
-#info-content::-webkit-scrollbar-thumb {
+#info-content::-webkit-scrollbar-thumb,
+#chat-content::-webkit-scrollbar-thumb {
   background-color: rgba(0,0,0,.3);
   border-radius: 5px;
 }
@@ -195,7 +197,8 @@ h1 #jack {
 }
 
 #player-hand {
-  transform: translateY(-100px);
+  transform: translateY(-100px) scale(1.2);
+  z-index: 20;
 }
 
 /* THE CARD ELEMENTS */
@@ -370,6 +373,7 @@ input {
   justify-content: center;
   height: 40px;
   box-sizing: border-box;
+  z-index: 5;
 }
 
 button {
@@ -441,15 +445,32 @@ button:active {
   }
 }
 
+#chat-button {
+  height: 40px;
+  width: 40px;
+  font-size: 20px;
+  position: absolute;
+  z-index: 501;
+  top: 0;
+  right: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  color: rgba(255,255,255,0.5);
+}
+
 #chat-container {
   width: 30vw;
   height: 30vh;
   position: fixed;
+  z-index: 500;
   display: flex;
   flex-direction: column;
   top: 0;
   right: 0;
-  background-color: rgba(0,0,0,.5);
+  background-color: rgba(0,0,0,.65);
+  transition: .25s all;
 }
 
 #chat-content {
@@ -543,6 +564,11 @@ button:active {
     margin: 0;
   }
 
+  #chat-container {
+    height: 50vw;
+    width: 50vh;
+  }
+
   h1 {
     font-size: 2em;
   }
@@ -583,9 +609,41 @@ button:active {
   #total-box {
     width:48%;
   }
+
+  .player-container .hand-container:nth-child(1) {
+    position: fixed;
+    top: 30vh;
+    left: 0;
+    transform: rotate(45deg) translateY(125px) translateX(50px) scale(.8);
+  }
+
+  .player-container .hand-container:nth-child(2) {
+    position: fixed;
+    top: 50vh;
+    left: 0;
+    transform: rotate(45deg) translateY(125px) translateX(80px) scale(.8);
+  }
+
+  .player-container .hand-container:nth-child(3) {
+    transform: scale(.8);
+  }
+
+  .player-container .hand-container:nth-child(4) {
+    position: fixed;
+    top: 50vh;
+    right: 0;
+    transform: rotate(-45deg) translateY(125px) translateX(-80px) scale(.8);
+  }
+
+  .player-container .hand-container:nth-child(5) {
+    position: fixed;
+    top: 30vh;
+    right: 0;
+    transform: rotate(-45deg) translateY(125px) translateX(-50px) scale(.8);
+  }
 }
 
-@media screen and (min-width: 1000px) {
+/* @media screen and (min-width: 1000px) {
   .hand {
     height: 200px;
   }
@@ -599,4 +657,4 @@ button:active {
   .text-box p {
     font-size: 1.3em;
   }
-}
+} */
