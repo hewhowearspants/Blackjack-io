@@ -114,6 +114,7 @@ function setUpTable () {
   let $infoContent = $('<p>', {'id': 'info-content'});
   let $okButton = $('<button>', {'id': 'ok-button'}).text('OK');
 
+  let $chatButton = $('<div>', {'id': 'chat-button'}).html('<i class="fa fa-comments" aria-hidden="true"></i>')
   let $chatContainer = $('<div>', {'id': 'chat-container'});
   let $chatContent = $('<div>', {'id': 'chat-content'});
   let $chatMessages = $('<div>', {'id': 'chat-messages'});
@@ -132,6 +133,7 @@ function setUpTable () {
   $('body').append($cardTable);
   $('body').append($infoButton);
   $('body').append($chatContainer);
+  $('body').append($chatButton);
   $('body').append($infoPanelOverlay);
 
   $infoPanelOverlay.append($infoPanel);
@@ -184,6 +186,21 @@ function setUpTable () {
   $('#ok-button').on('click', function(){
     $infoPanelOverlay.addClass('removed');
   });
+
+  $('#chat-button').on('click', function() {
+    if ($chatContainer.height() === 40) {
+      $chatContainer.css({'height': ''});
+      $chatContainer.css({'width': ''});
+      $chatContainer.children().delay(250).fadeToggle();
+      $chatButton.css({'color': 'rgba(255,255,255,.5)'});
+    } else {
+      $chatContainer.children().fadeToggle(250, 'swing', function() {
+        $chatContainer.height(40);
+        $chatContainer.width(40);
+        $chatButton.css({'color': 'rgba(255,255,255,1)'});
+      });
+    }
+  })
 
   $('#chat-form').on('submit', function() {
     let text = $('#chat-input').val();
@@ -797,6 +814,10 @@ socket.on('new message', function(data) {
   let $name = $('<span>', {'class': 'chat-username'}).text(`${data.name}: `);
   let $text = $('<span>', {'class': 'chat-text'}).text(data.text);
   let $message = $('<p>', {'class': 'chat-message'}).append($name).append($text);
+
+  if ($('#chat-container').height() === 40) {
+    $('#chat-button').css({'color': 'yellow'});
+  }
 
   $('#chat-messages').prepend($message);
 });
