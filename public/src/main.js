@@ -1,5 +1,3 @@
-// var socket = io();
-
 $(document).ready(function() {
 console.log('main.js loaded');
 
