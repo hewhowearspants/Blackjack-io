@@ -565,8 +565,8 @@ button:active {
   }
 
   #chat-container {
-    height: 50vw;
-    width: 50vh;
+    height: 50vh;
+    width: 100vw;
   }
 
   h1 {
