@@ -493,9 +493,7 @@ function dealCards(players, dealer) {
     }
   });
 
-  //** MAYBE MAKE THIS SERVER-SIDE */
-  // tests if either player or dealer gets Blackjack (21 with two cards)
-  // ends the game if so, resumes game if not
+  
   if ($('.primary').attr('id') === 'player-hand') {
     setTimeout(function () {
       $('#player-box').removeClass('hidden');
@@ -504,6 +502,10 @@ function dealCards(players, dealer) {
       $('#stand-button').text('STAND');
       $('#stand-button').removeClass('removed');
       socket.emit('player ready');
+
+      //** MAYBE MAKE THIS SERVER-SIDE */
+      // tests if either player or dealer gets Blackjack (21 with two cards)
+      // ends the game if so, resumes game if not
       // if(testForBlackjack()) {
       //   endGame();
       // } else {
