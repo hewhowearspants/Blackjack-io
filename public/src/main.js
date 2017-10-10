@@ -226,6 +226,7 @@ socket.on('welcome', function(data) {
     assignNewPlayer(currentPlayer);
   });
   $('#message').html(`<p>${data.greeting}!</p>`);
+  $('#message p').delay(1000).fadeOut();
   data.chatMessages.forEach((chatMessage) => {
     let $name = $('<span>', {'class': 'chat-username'}).text(`${chatMessage.name}: `);
     let $text = $('<span>', {'class': 'chat-text'}).text(chatMessage.text);
@@ -423,7 +424,8 @@ function dealCards(players, dealer) {
   let $dealButton = $('#deal-button');
 
   $('.hand').children().remove();
-  $messageBox.text('Dealing \'em out!');
+  $messageBox.html('<p>Dealing \'em out!</p>');
+  $('#message p').delay(1000).fadeOut();
 
   players.forEach((serverPlayer) => {
     if (serverPlayer.id === socket.id) {
@@ -539,6 +541,9 @@ socket.on('your turn', function() {
   let $hitButton = $('#hit-button');
   let $standButton = $('#stand-button');
 
+  $('#message').html('<p>Your turn!</p>');
+  $('#message p').delay(1000).fadeOut();
+
   $hitButton.removeClass('subdued');
   $standButton.removeClass('subdued');
 
@@ -600,7 +605,7 @@ socket.on('turn over', function() {
 
   if (player.total > 21) {
     $('#message').html('<p>BUSTED</p>');
-    //player.bet = 0;
+    $('#message p').delay(1000).fadeOut();
     $('#player-bet p').html('$0');
     localStorage.setItem('playerMoney', player.money);
   }
@@ -687,18 +692,15 @@ function endGame(dealerHiddenCard, dealerTotal, winStatus, message) {
     // and gives them the option to either play another game or bow out
     if (winStatus === 'win') {
       player.money += player.bet * 2;
-      //player.bet = 0;
       $('#player-bet p').html('$0');
       $('#player-money p').text(`$${centify(player.money)}`);
       localStorage.setItem('playerMoney', player.money);
     } else if (winStatus === 'push') {
       player.money += player.bet;
-      //player.bet = 0;
       $('#player-bet p').html('$0');
       $('#player-money p').text(`$${centify(player.money)}`);
       localStorage.setItem('playerMoney', player.money);
     } else if (winStatus === 'lose') {
-      //player.bet = 0;
       $('#player-bet p').html('$0');
       $('#player-money p').text(`$${centify(player.money)}`);
       localStorage.setItem('playerMoney', player.money);
@@ -736,7 +738,8 @@ function endGame(dealerHiddenCard, dealerTotal, winStatus, message) {
     })
   }
 
-  $messageBox.html(`<p>${message}</p>`)
+  $messageBox.html(`<p>${message}</p>`);
+  $('#message p').delay(1000).fadeOut();
   $('#dealer-total p').text(dealerTotal);
   $('#dealer-box').removeClass('hidden');
 
