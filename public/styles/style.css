@@ -26,6 +26,8 @@ p {
   background: transparent;
   border: none;
   border-bottom: 2px solid white;
+  color: white;
+  text-align: center;
   outline: transparent;
 }
 
@@ -198,11 +200,11 @@ h1 #jack {
 }
 
 .player-container .hand {
-  background-color: rgba(0,0,0,.3);
+  background-color: rgba(0,0,0,0);
 }
 
 .hand.occupied {
-  background-color: rgba(0,0,255,.6);
+  background-color: rgba(0,0,0,.3);
 }
 
 #player-hand {
