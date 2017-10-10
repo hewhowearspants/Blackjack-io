@@ -21,6 +21,14 @@ p {
   margin: 0;
 }
 
+#input-name {
+  margin-top: 40vh;
+  background: transparent;
+  border: none;
+  border-bottom: 2px solid white;
+  outline: transparent;
+}
+
 /* THE ( ? ) GAME INFO BUTTON IN THE TOP RIGHT & ANIMATION*/
 
 #info-button {
@@ -88,6 +96,7 @@ p {
   right: 0;
   bottom: 0;
   left: 0;
+  z-index: 499;
   background-color: rgba(0,0,0,.6);
 }
 
@@ -374,6 +383,7 @@ input {
   height: 40px;
   box-sizing: border-box;
   z-index: 5;
+  transform: translateY(-65px);
 }
 
 button {
@@ -462,7 +472,7 @@ button:active {
 
 #chat-container {
   width: 30vw;
-  height: 30vh;
+  height: 35vh;
   position: fixed;
   z-index: 500;
   display: flex;
@@ -565,7 +575,7 @@ button:active {
   }
 
   #chat-container {
-    height: 50vh;
+    height: 35vh;
     width: 100vw;
   }
 
@@ -590,7 +600,7 @@ button:active {
     display: flex;
     justify-content: center;
     align-items: center;
-    top: 35vh;
+    top: 38vh;
     left: 20vw;
     width: 60%;
   }
@@ -601,8 +611,12 @@ button:active {
     justify-content: center;
   }
 
-  #message-text {
-    background-color: rgba(0,0,0,.3);
+  #message p {
+    background-color: rgba(0,0,0,1);
+  }
+
+  #input-bet {
+    background-color: black;
   }
 
   #money-box, 
