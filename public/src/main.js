@@ -387,6 +387,7 @@ function setBet(betAmount) {
     player.money -= player.bet;
     $('#player-money p').text(`$${centify(player.money)}`);
     $('#player-bet p').text(`$${player.bet}`);
+    $messageBox.children().remove();
 
     socket.emit('place bet', {name: player.name, bet: player.bet});
 
