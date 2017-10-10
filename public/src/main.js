@@ -292,7 +292,6 @@ function assignNewPlayer(newPlayer) {
 }
 
 
-
 socket.on('player left', function(data) {
   // 'data' is leftPlayer
   if (data.leftPlayer.id !== socket.id) {
@@ -584,7 +583,7 @@ socket.on('turn over', function() {
 
   if (player.total > 21) {
     $('#message').html('<p>BUSTED</p>');
-    player.bet = 0;
+    //player.bet = 0;
     $('#player-bet p').html('$0');
     localStorage.setItem('playerMoney', player.money);
   }
@@ -671,18 +670,18 @@ function endGame(dealerHiddenCard, dealerTotal, winStatus, message) {
     // and gives them the option to either play another game or bow out
     if (winStatus === 'win') {
       player.money += player.bet * 2;
-      player.bet = 0;
+      //player.bet = 0;
       $('#player-bet p').html('$0');
       $('#player-money p').text(`$${centify(player.money)}`);
       localStorage.setItem('playerMoney', player.money);
     } else if (winStatus === 'push') {
       player.money += player.bet;
-      player.bet = 0;
+      //player.bet = 0;
       $('#player-bet p').html('$0');
       $('#player-money p').text(`$${centify(player.money)}`);
       localStorage.setItem('playerMoney', player.money);
     } else if (winStatus === 'lose') {
-      player.bet = 0;
+      //player.bet = 0;
       $('#player-bet p').html('$0');
       $('#player-money p').text(`$${centify(player.money)}`);
       localStorage.setItem('playerMoney', player.money);

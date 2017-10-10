@@ -82,7 +82,7 @@ function dealCards() {
   console.log(`Dealer receives ${secondCard.value} of ${secondCard.suit}`)
   dealer.total = calculateHand(dealer.hand);
   dealer = checkForAce(dealer);
-  
+
   console.log(`${deck.length} cards left in shoe`);
 }
 
