@@ -271,12 +271,30 @@ io.on('connection', function(socket) {
     }
 
     messages.push({name: '::', text: `${data.name} has joined`});
-    socket.broadcast.emit('new user', `${data.name} has joined`);
+    io.sockets.emit('new user', `${data.name} has joined`);
 
     console.log(users);
     if (players.length < 5 && !gameInProgress) {
       socket.emit('sit invite');
     }
+  });
+
+  socket.on('name change', function(data) {
+    users.forEach((user) => {
+      if (user.id === socket.id) {
+        let oldName = user.name;
+        user.name = data.name;
+        console.log(`${oldName} is now ${user.name}`);
+        messages.push({name: '::', text: `${oldName} renamed to ${user.name}`});
+        io.sockets.emit('name change', {name: user.name, id: socket.id, text: `${oldName} renamed to ${user.name}`});
+      }
+    });
+
+    players.forEach((player) => {
+      if (player.id === socket.id) {
+        player.name = data.name;
+      }
+    });
   });
 
   socket.on('deal me in', function(data) {
