@@ -117,6 +117,9 @@ function hasAce(hand) {
 
 function dealerTurn() {
   let timeout = 0;
+
+  io.sockets.emit('whose turn', {id: null});
+
   while (dealer.total < 17) {
     let newCard = deck.shift();
     
@@ -259,6 +262,7 @@ io.on('connection', function(socket) {
           { img: dealer.hand[1].img }
         ],
       })
+      socket.emit('whose turn', {id: playersLeftToPlay[0].id});
     }
 
     messages.push({name: '::', text: `${data.name} has joined`});
@@ -317,8 +321,9 @@ io.on('connection', function(socket) {
     playersReadyCount++;
     console.log(`${socket.id} is ready`)
     if (playersReadyCount === players.length) {
-      playersLeftToPlay = [...players]
+      playersLeftToPlay = [...players];
       io.to(playersLeftToPlay[0].id).emit('your turn');
+      io.sockets.emit('whose turn', {id: playersLeftToPlay[0].id});
     };
   });
 
@@ -353,6 +358,7 @@ io.on('connection', function(socket) {
             io.to(bustedPlayer.id).emit('turn over');
             console.log(`player turn: ${playersLeftToPlay[0].id}`);
             io.to(playersLeftToPlay[0].id).emit('your turn');
+            io.sockets.emit('whose turn', {id: playersLeftToPlay[0].id});
           } else {
             io.to(bustedPlayer.id).emit('turn over');
             dealerTurn();
@@ -373,6 +379,7 @@ io.on('connection', function(socket) {
 
     if (playersLeftToPlay.length) {
       io.to(playersLeftToPlay[0].id).emit('your turn');
+      io.sockets.emit('whose turn', {id: playersLeftToPlay[0].id});
     } else {
       dealerTurn();
     }
@@ -391,8 +398,9 @@ io.on('connection', function(socket) {
     playersLeftToPlay.forEach((player, index) => {
       if (player.id === socket.id) {
         playersLeftToPlay.splice(index, 1);
-        if (index === 0) {
+        if (index === 0 && playersLeftToPlay[0]) {
           io.to(playersLeftToPlay[0].id).emit('your turn');
+          io.sockets.emit('whose turn', {id: playersLeftToPlay[0].id});
         }
       }
     });
@@ -441,8 +449,9 @@ io.on('connection', function(socket) {
     playersLeftToPlay.forEach((player, index) => {
       if (player.id === socket.id) {
         playersLeftToPlay.splice(index, 1);
-        if (index === 0) {
+        if (index === 0 && playersLeftToPlay[0]) {
           io.to(playersLeftToPlay[0].id).emit('your turn');
+          io.sockets.emit('whose turn', {id: playersLeftToPlay[0].id});
         }
       }
     });
