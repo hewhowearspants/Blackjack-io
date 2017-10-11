@@ -66,13 +66,16 @@ function dealCards() {
   players.forEach((player) => {
     let firstCard = deck.shift();
     let secondCard = deck.shift();
+
     player.hand.push(firstCard);
     console.log(`${player.name} receives ${firstCard.value} of ${firstCard.suit}`);
     player.hand.push(secondCard);
     console.log(`${player.name} receives ${secondCard.value} of ${secondCard.suit}`);
+
     player.total = calculateHand(player.hand);
     player = checkForAce(player);
   });
+
   // deal two for the dealer
   let firstCard = deck.shift();
   let secondCard = deck.shift();
@@ -119,6 +122,7 @@ function dealerTurn() {
     
     dealer.hand.push(newCard);
     console.log(`Dealer receives ${newCard.value} of ${newCard.suit}`);
+    console.log(`${deck.length} cards left in shoe`);
 
     setTimeout(function() {
       io.sockets.emit('new dealer card', {card: newCard});
@@ -131,6 +135,7 @@ function dealerTurn() {
 
   setTimeout(function() {
     endGame();
+    
     setTimeout(function() {
       resetGame();
     }, 1000);
