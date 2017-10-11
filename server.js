@@ -135,7 +135,7 @@ function dealerTurn() {
 
   setTimeout(function() {
     endGame();
-    
+
     setTimeout(function() {
       resetGame();
     }, 1000);
@@ -186,7 +186,7 @@ function endGame() {
         message: `Dealer wins.`,
       });
     }
-  })
+  });
 
   // for the spectator audience...
   users.forEach((user) => {
@@ -250,7 +250,7 @@ io.on('connection', function(socket) {
       greeting: `Welcome, ${data.name}`, 
       gameInProgress: gameInProgress
     });
-    console.log(players);
+
     if (gameInProgress) {
       socket.emit('fill me in', {
         currentPlayers: players,
@@ -414,6 +414,7 @@ io.on('connection', function(socket) {
     }
 
     if (players.length === 0) {
+      console.log('no more players! resetting...');
       io.sockets.emit('reset board');
       resetGame();
     }
@@ -464,8 +465,9 @@ io.on('connection', function(socket) {
 
     if (players.length === 0) {
       dealer = {hand: [], total: 0};
-      resetGame();
+      console.log('no more players! resetting...');
       io.sockets.emit('reset board');
+      resetGame();
     }
   });
 

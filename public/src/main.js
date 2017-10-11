@@ -216,17 +216,20 @@ function setUpTable () {
   //socket.emit('new user', { name: player.name });
 };
 
-// 'welcome' IS SERVER'S RESPONSE TO 'new user'
+// 'welcome' IS SERVER'S RESPONSE TO 'new user', initial info dumped on new user when they join
 socket.on('welcome', function(data) {
   // 'data' is users, currentPlayers, dealerHand, greeting, gameInProgress
   users = data.users;
   players = data.currentPlayers;
   dealer.hand = data.dealerHand;
+
   data.currentPlayers.forEach((currentPlayer) => {
     assignNewPlayer(currentPlayer);
   });
+
   $('#message').html(`<p>${data.greeting}!</p>`);
   $('#message p').delay(1000).fadeOut();
+
   data.chatMessages.forEach((chatMessage) => {
     let $name = $('<span>', {'class': 'chat-username'}).text(`${chatMessage.name}: `);
     let $text = $('<span>', {'class': 'chat-text'}).text(chatMessage.text);
@@ -239,7 +242,6 @@ socket.on('welcome', function(data) {
 // 'fill me in' IS THE SERVER UPDATING YOU ABOUT THE CARDS CURRENTLY IN PLAY
 // (for some reason, player socket IDs weren't being sent through the server's 'welcome' emit)
 socket.on('fill me in', function (data) {
-  console.log(data);
   players = data.currentPlayers;
   dealer.hand = data.dealerHand;
   dealCards(data.currentPlayers, data.dealerHand);
@@ -412,9 +414,9 @@ socket.on('deal cards', function(data) {
       player.total = serverPlayer.total;
     }
   })
+
   dealCards(data.players, data.dealer);
-  console.log(data.players);
-  console.log(data.dealer);
+
 });
 
 // RENDERS THE INITIAL TWO CARDS FOR ALL PLAYERS (and maybe TESTS FOR BLACKJACK)
@@ -444,10 +446,8 @@ function dealCards(players, dealer) {
 
         $newCard.attr('id', `${serverPlayer.id}-card-${serverPlayer.hand.length}`);
         $(`#${serverPlayer.id}`).append($newCard);
-        $newCard.removeClass('removed');
-        $newCard.removeClass('hidden');
-        $newCard.addClass('flyin');
-      })
+      });
+
     }
   })
 
@@ -455,10 +455,7 @@ function dealCards(players, dealer) {
     let $newCard = ($('<div>', {'class': 'card removed'}));
     $newCard.css('background-image', `url('${dealerCard.img}')`);
     $('#dealer-hand').append($newCard);
-  })
-
-  // dealer's first card is hidden
-  // $('#dealer-hand div:nth-child(1)').css('background-image', 'url("../images/card-back.jpg")');
+  });
 
   // below is the animation timing allowing the cards to fly in in order, as if dealt by a dealer
   // see style.css for animation details
