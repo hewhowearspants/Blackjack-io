@@ -271,6 +271,14 @@ function setUpTable () {
     $infoPanelOverlay.addClass('removed');
   });
 
+  setTimeout(function() {
+    $chatContainer.children().fadeToggle(250, 'swing', function() {
+        $chatContainer.height(40);
+        $chatContainer.width(40);
+        $chatButton.css({'color': 'rgba(255,255,255,1)'});
+      });
+  }, 1000);
+
   $('#chat-button').on('click', function() {
     if ($chatContainer.height() === 40) {
       $chatContainer.css({'height': ''});
