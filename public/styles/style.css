@@ -21,61 +21,57 @@ p {
   margin: 0;
 }
 
-#input-name {
-  margin-top: 40vh;
+#input-name,
+#input-name-change {
   background: transparent;
   border: none;
   border-bottom: 2px solid white;
   color: white;
   text-align: center;
   outline: transparent;
+  font-size: 18px;
+}
+
+#input-name {
+  margin-top: 40vh;
 }
 
 /* THE ( ? ) GAME INFO BUTTON IN THE TOP RIGHT & ANIMATION*/
 
-#info-button {
-  font-family: 'Montserrat', sans-serif;
-  font-weight: 700;
-  font-size: 25px;
-  position: absolute;
-  top: 0%;
-  left: 0%;
+#menu-button,
+#info-button,
+#profile-button {
   height: 40px;
   width: 40px;
-  border: dashed 5px rgba(255,255,255,0);
-  border-radius: 100%;
-  opacity: .5;
-  box-sizing: border-box;
-  vertical-align: center;
-  animation: rotate 5s linear infinite;
-  animation-play-state: paused;
-}
-
-#info-button:hover {
+  font-size: 25px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   cursor: pointer;
 }
 
-#info-button:before {
+#menu-button {
   position: absolute;
-  border: dotted 4px white;
-  content: '';
-  border-radius: 50%;
-  animation: rotate 5s linear infinite;
-  animation-play-state: paused;
-  top: -5px;
-  bottom: -5px;
-  left: -5px;
-  right: -5px;
+  top: 0;
+  left: 0;
+  z-index: 500;
 }
 
-#info-button:hover::before {
-  animation: rotate 5s linear infinite;
-  animation-play-state: running;
+#menu-buttons {
+  display: flex;
+  flex-direction: column;
+  width: 40px;
+  position: absolute;
+  left: 0;
+  top: 40px;
 }
 
-@keyframes rotate {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+.menu-button {
+  border-right: 2px solid transparent;
+}
+
+.menu-button.selected {
+  border-right: 2px solid white;
 }
 
 /* RELATED TO THE INFORMATION PANEL THAT POPS UP WHEN YOU CLICK THE INFO BUTTON */
@@ -85,8 +81,6 @@ p {
   font-weight: 200;
   text-align: center;
   letter-spacing: 1px;
-  /* top: 200px; */
-  /* left: 50%; */
   height: 400px;
   width: 80%;
   margin: 15vh auto;
@@ -102,7 +96,8 @@ p {
   background-color: rgba(0,0,0,.6);
 }
 
-#info-content{
+#info-content,
+#profile-content {
   height: 100%;
   overflow: auto;
   background: rgba(0,0,0,.8);
@@ -110,14 +105,45 @@ p {
   border-radius: 10px;
 }
 
-#info-content::-webkit-scrollbar,
-#chat-content::-webkit-scrollbar {
+#profile-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+#profile-content p {
+  font-size: 18px;
+  margin: 10px;
+}
+
+#submit-name-change {
+  background: transparent;
+  border: none;
+  border-bottom: 2px solid goldenrod;
+  color: lightgoldenrodyellow;
+  font-size: 18px;
+  outline: transparent;
+}
+
+#submit-name-change:hover {
+  border-bottom: 2px solid lightgoldenrodyellow;
+  background-color: goldenrod;
+  color: black;
+  cursor: pointer;
+}
+
+#submit-name-change:active {
+  background-color: lightgoldenrodyellow;
+  border-bottom: 2px solid goldenrod;
+}
+
+#info-content::-webkit-scrollbar {
   border-radius: 10px;
   background-color: rgba(0,0,0,.15);
 }
 
-#info-content::-webkit-scrollbar-thumb,
-#chat-content::-webkit-scrollbar-thumb {
+#info-content::-webkit-scrollbar-thumb {
   background-color: rgba(0,0,0,.3);
   border-radius: 5px;
 }
@@ -186,6 +212,44 @@ h1 #jack {
   justify-content: space-around;
 }
 
+.hand-user-info {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  border-radius: 5px;
+}
+
+.hand-player-name {
+  width: 90%;
+}
+
+.hand-player-name.selected {
+  background: linear-gradient(rgba(255,215,0,0.0), rgba(255,215,0,0.5));
+}
+
+.hand-player-stats {
+  display: flex;
+  width: 90%;
+}
+
+.hand-player-stats p {
+  flex: 1;
+  min-width: 33%;
+  font-size: .8em;
+}
+
+.hand-player-money {
+  background-color: rgba(255,0,0,.5);
+}
+
+.hand-player-bet {
+  background-color: rgba(0,255,0,.5);
+}
+
+.hand-player-total {
+  background-color: rgba(0,0,255,.5);
+}
+
 .hand {
   display: flex;
   justify-content: center;
@@ -195,7 +259,7 @@ h1 #jack {
   width: 150px;
   margin: 10px 0 -50px;
   border-radius: 20px;
-  box-sizing: border-box;
+  box-sizing: border-box; 
   transition: .25s all;
 }
 
@@ -204,7 +268,9 @@ h1 #jack {
 }
 
 .hand.occupied {
-  background-color: rgba(0,0,0,.3);
+  border: 7px solid rgba(255,255,255,0.5);
+  border-radius: 50%;
+  /* background-color: rgba(0,0,0,.3); */
 }
 
 #player-hand {
@@ -306,7 +372,7 @@ h1 #jack {
 }
 
 #dealer-box{
-  color: yellow;
+  color: gold;
 }
 
 #message {
@@ -339,34 +405,38 @@ input {
 #input-bet {
   padding: 3px;
   font-weight: 100;
-  font-size: 14px;
+  font-size: 16px;
+  text-align: center;
   outline: transparent;
-  border: solid 2px white;
-  border-radius: 5px;
-  background-color: transparent;
+  /* border: solid 2px goldenrod; */
+  border: none;
+  border-radius: 1px; 
+  background-color: rgba(0,0,0,.75);
   color: gold;
   width: 30%;
   letter-spacing: 1px;
 }
 
 #submit-bet {
-  border: solid 2px rgba(255,255,255,0);
-  border-radius: 5px;
+  border: none;
+  border-bottom: solid 2px goldenrod;
+  border-radius: 1px; 
+  font-size: 18px;
   font-weight: 800;
   box-shadow: 2px 2px 2px black;
-  background-color: gold;
+  background-color: black;
   outline: transparent;
   transition: .25s all;
   box-sizing: border-box;
   padding: 0 2px;
-  color: #333;
+  color: lightgoldenrodyellow;
   letter-spacing: 1px;
 }
 
 #submit-bet:hover {
-  background-color: #333;
-  color: gold;
-  border: solid 2px rgba(255,255,255,.75);
+  background-color: goldenrod;
+  color: black;
+  border-bottom: solid 2px rgba(0,0,0,.75);
   animation: flashingborder .75s linear infinite alternate;
   cursor: pointer;
 }
@@ -492,6 +562,11 @@ button:active {
   transition: .25s all;
 }
 
+#chat-container.reduced {
+  height: 40px;
+  width: 40px;
+}
+
 #chat-content {
   display: flex;
   flex-direction: column;
@@ -500,6 +575,7 @@ button:active {
   height: 100%;
   overflow-y: auto;
 }
+
 
 #chat-messages {
   flex: 1 1 auto;
@@ -510,6 +586,16 @@ button:active {
   padding: 0px 5px;
   font-weight: 100;
   font-size: 14px;
+}
+
+#chat-messages::-webkit-scrollbar {
+  border-radius: 10px;
+  background-color: rgba(0,0,0,.15);
+}
+
+#chat-messages::-webkit-scrollbar-thumb {
+  background-color: rgba(50,50,50,.5);
+  border-radius: 5px;
 }
 
 #chat-messages p {
@@ -609,7 +695,7 @@ button:active {
     display: flex;
     justify-content: center;
     align-items: center;
-    top: 38vh;
+    top: calc(38vh + 2px);
     left: 20vw;
     width: 60%;
   }
