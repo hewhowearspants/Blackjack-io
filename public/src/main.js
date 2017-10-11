@@ -107,11 +107,19 @@ function setUpTable () {
   let $hitButton = ($('<button>', {'class': 'button removed subdued', 'id': 'hit-button'})).text('HIT');
   let $standButton = ($('<button>', {'class': 'button removed subdued', 'id': 'stand-button'})).text('STAND');
 
-  let $infoButton = $('<div>', {'class': 'info', 'id': 'info-button'}).text('?');
+  let $menuButton = $('<div>', {'id': 'menu-button'}).html('<i class="fa fa-bars" aria-hidden="true"></i>');
+  let $menuButtons = $('<div>', {'id': 'menu-buttons'}).slideUp();
+  let $infoButton = $('<div>', {'id': 'info-button', 'class': 'menu-button selected'}).html('<i class="fa fa-question" aria-hidden="true"></i>');
+  let $profileButton = $('<div>', {'id': 'profile-button', 'class': 'menu-button'}).html('<i class="fa fa-user" aria-hidden="true"></i>');
 
-  let $infoPanelOverlay = $('<div>', {'class': 'removed', 'id': 'info-panel-overlay'});
+  let $profileGreeting = $('<p>', {'id': 'profile-greeting'}).html(`Hi, ${player.name}!<br/>Don't like being called ${player.name}?`);
+  let $inputNameChange = $('<input>', {'type': 'text', 'id': 'input-name-change', 'formmethod': 'post', 'placeholder': 'change your name'});
+  let $submitNameChange = $('<input>', {'type': 'submit', 'id': 'submit-name-change', 'value': 'CHANGE'});
+
+  let $infoPanelOverlay = $('<div>', {'id': 'info-panel-overlay'});
   let $infoPanel = $('<div>', {'id': 'info-panel'});
   let $infoContent = $('<p>', {'id': 'info-content'});
+  let $profileContent = $('<div>', {'id': 'profile-content'});
   let $okButton = $('<button>', {'id': 'ok-button'}).text('OK');
 
   let $chatButton = $('<div>', {'id': 'chat-button'}).html('<i class="fa fa-comments" aria-hidden="true"></i>')
@@ -129,17 +137,22 @@ function setUpTable () {
     +"<p>Blackjack is frequently played in casinos, and players bet a certain amount on winning. If the player wins, they get double their money back. If the player and dealer 'PUSH', the player gets only their initial bet back.</p>"
     );
 
+  $profileContent.append($profileGreeting).append($inputNameChange).append($submitNameChange);
+
 
   $('body').append($cardTable);
-  $('body').append($infoButton);
+  $('body').append($menuButton);
   $('body').append($chatContainer);
   $('body').append($chatButton);
-  $('body').append($infoPanelOverlay);
+  //$('body').append($infoPanelOverlay);
 
+  $menuButtons.append($infoButton).append($profileButton);
   $infoPanelOverlay.append($infoPanel);
   $infoPanel.append($infoContent);
-  $infoPanel.append($okButton);
+  $infoPanel.append($profileContent);
   $infoPanel.fadeIn();
+  $profileContent.fadeOut();
+
 
   $chatContainer.append($chatContent);
   $chatContent.append($chatMessages);
