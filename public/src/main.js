@@ -181,9 +181,23 @@ function setUpTable () {
   $('#button-bar').append($standButton);
 
   $('#card-table').append($playersContainer);
+
+  // sets up each hand container. comprised of two main parts, the user info and the hand itself
   for (let i = 1; i <= 5; i++) {
     let $handContainer = $('<div>', {'class': 'hand-container'});
-    $handContainer.append($('<div>', {'class': 'hand-user-info'}));
+    let $handUserInfo = $('<div>', {'class': 'hand-user-info'});
+    let $handPlayerStats = $('<div>', {'class': 'hand-player-stats'});
+    let $handPlayerMoney = $('<p>', {'class': 'hand-player-money'});
+    let $handPlayerBet = $('<p>', {'class': 'hand-player-bet'});
+    let $handPlayerTotal = $('<p>', {'class': 'hand-player-total'});
+
+    $handPlayerStats.append($handPlayerMoney).append($handPlayerBet).append($handPlayerTotal);
+
+    $handUserInfo.append($('<p>', {'class': 'hand-player-name'}));
+    $handUserInfo.append($handPlayerStats);
+
+    $handContainer.append($handUserInfo);
+    
     if (i === 3) {
       $handContainer.append($('<div>', {'class': 'hand primary'}));
     } else {
