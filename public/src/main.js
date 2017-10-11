@@ -373,7 +373,8 @@ socket.on('sit invite', function() {
 
     $('#sit-button').on('click', function() {
       // tells server that you're joining as player
-      socket.emit('deal me in', {name: player.name});
+      socket.emit('deal me in', {name: player.name, money: player.money});
+
       $('#money-box').children().removeClass('hidden');
       $('.primary').attr({'id': 'player-hand'});
       $sitButton.remove();
@@ -403,21 +404,23 @@ function assignNewPlayer(newPlayer) {
       if (!$(this).attr('id')) {
         $(this).attr({'id': newPlayer.id});
         $(this).addClass('occupied');
-        let $playerName = $('<p>').text(`${newPlayer.name} / $${newPlayer.bet} / ${newPlayer.total}`);
-        $(this).prev().append($playerName);
+        $(this).prev().find('.hand-player-name').text(newPlayer.name);
+        newPlayer.bet ? $(this).prev().find('.hand-player-bet').text(`$${newPlayer.bet}`) : '';
+        newPlayer.total ? $(this).prev().find('.hand-player-total').text(newPlayer.total) : '';
+        $(this).prev().find('.hand-player-money').text(`$${newPlayer.money}`);
         newPlayer.id = null;
         return false;
       }
     });
     // ...assign them to the center spot if all the others are filled
     if (players.length === 5) {
-      $('.primary').first().addClass('occupied')
+      $('.primary').first().addClass('occupied');
       $('.primary').first().attr({'id': newPlayer.id});
     };
   }
 }
 
-
+// 'player left' IS THE SERVER TELLING YOU THAT A PLAYER LEFT
 socket.on('player left', function(data) {
   // 'data' is leftPlayer
   if (data.leftPlayer.id !== socket.id) {
@@ -436,18 +439,22 @@ function removePlayer(leftPlayer) {
         $(this).attr({'id': ''});
         $(this).removeClass('occupied');
         $(this).children().remove();
-        $(this).prev().children().remove();
+        $(this).prev().find('p').text('');
         // if there is a non-you user in the primary hand spot, put them in this now-empty spot
         // so you have the option of playing
         if ($primaryHand.attr('id') && $primaryHand.attr('id') !== 'player-hand') {
           $(this).attr({'id': $primaryHand.attr('id')});
           $primaryHand.attr({'id': ''});
+
           $(this).addClass('occupied');
           $primaryHand.removeClass('occupied');
-          $(this).append($primaryHand.children())
+
+          $(this).append($primaryHand.children());
           $primaryHand.children().remove();
+
+          $(this).prev().children().remove();
           $(this).prev().append($primaryHand.prev().children());
-          $primaryHand.prev().children().remove();
+          $primaryHand.prev().find('p').text('');
         }
       };
     })
@@ -455,6 +462,7 @@ function removePlayer(leftPlayer) {
       $primaryHand.attr({'id': ''});
       $primaryHand.removeClass('occupied');
       $primaryHand.children().remove();
+      $primaryHand.prev().find('p').text('');
     }
   }
 }
@@ -511,6 +519,13 @@ function setBet(betAmount) {
   };
 };
 
+// 'player bet' IS THE SERVER LETTING US KNOW SOMEONE ELSE'S BET
+socket.on('player bet', function(data) {
+  // 'data' is otherPlayer
+  $(`#${data.otherPlayer.id}`).prev().find('.hand-player-bet').text(`$${data.otherPlayer.bet}`);
+  $(`#${data.otherPlayer.id}`).prev().find('.hand-player-money').text(`$${data.otherPlayer.money}`);
+});
+
 // 'deal cards' RECEIVES THE INITIAL DEALT CARD DATA
 socket.on('deal cards', function(data) {
   // 'data' is players, dealer
@@ -532,7 +547,10 @@ function dealCards(players, dealer) {
   let $messageBox = $('#message');
   let $dealButton = $('#deal-button');
 
+  // just in case there are any card divs for whatever reason...
   $('.hand').children().remove();
+  $('.hand-player-total').text('');
+
   $messageBox.html('<p>Dealing \'em out!</p>');
   $('#message p').delay(1000).fadeOut();
 
@@ -594,6 +612,10 @@ function dealCards(players, dealer) {
       }, timeout);
     timeout += 250;
     }
+
+    setTimeout(function() {
+      $(`#${otherPlayer.id}`).prev().find('.hand-player-total').text(otherPlayer.total);
+    }, timeout);
   });
 
   
@@ -670,6 +692,18 @@ socket.on('your turn', function() {
   });
 });
 
+// 'whose turn' IS THE SERVER TELLING YOU WHOSE TURN IT IS (NOT YOURS, DUMMY)
+socket.on('whose turn', function(data) {
+  // 'data' is id, the id of the player whose turn it is
+
+  //$('.hand-player-name').css({'background': ''});
+  $('.hand-player-name').removeClass('selected');
+  if (data.id !== socket.id) {
+    //$(`#${data.id}`).prev().find('.hand-player-name').css({'background': 'linear-gradient(to right, rgba(255,215,0,0), rgba(255,215,0,.5), rgba(255,215,0,0))'});
+    $(`#${data.id}`).prev().find('.hand-player-name').addClass('selected');
+  }
+});
+
 // 'new card' RECEIVES NEW CARD DATA WHEN A PLAYER (ANY PLAYER) HITS
 socket.on('new card', function(data) {
   hitMe(data.player, data.card, data.total);
@@ -691,6 +725,7 @@ function hitMe(recipient, card, total) {
   } else {
     $newCard.attr('id', `${recipient.id}-card-${recipient.hand.length}`);
     $(`#${recipient.id}`).append($newCard);
+    $(`#${recipient.id}`).prev().find('.hand-player-total').text(recipient.total);
   }
 
   $newCard.removeClass('removed');
@@ -860,6 +895,15 @@ function centify(amount) {
   }
 };
 
+socket.on('update money', function(data) {
+  // 'data' is players
+  data.players.forEach((otherPlayer) => {
+    if (otherPlayer.id !== socket.id) {
+      $(`#${otherPlayer.id}`).prev().find('.hand-player-money').text(`$${otherPlayer.money}`);
+    }
+  })
+});
+
 // 'reset board' IS THE SERVER TELLING THE USERS TO CLEAR THE BOARD
 socket.on('reset board', function() {
   resetBoard();
@@ -867,7 +911,7 @@ socket.on('reset board', function() {
 
 function resetBoard() {
   $('.hand').children().remove();
-  $('.hand').prev().children().remove();
+  $('.hand').prev().find('.hand-player-total').text('');
   $('#message').text(' ');
   $('#player-box').addClass('hidden');
   $('#dealer-box').addClass('hidden');
