@@ -975,6 +975,16 @@ socket.on('new message', function(data) {
   $('#chat-messages').prepend($message);
 });
 
+socket.on('name change', function(data) {
+  $(`#${data.id}`).prev().find('.hand-player-name').text(data.name);
+
+  let $name = $('<span>', {'class': 'chat-username'}).text(`::: `);
+  let $text = $('<span>', {'class': 'chat-text'}).text(`${data.text}`);
+  let $message = $('<p>', {'class': 'notification', 'id': 'name-change-notification'}).append($name).append($text);
+
+  $('#chat-messages').prepend($message);
+});
+
 socket.on('user left', function(data) {
   let $name = $('<span>', {'class': 'chat-username'}).text(`::: `);
   let $text = $('<span>', {'class': 'chat-text'}).text(`${data.user.name} left`);
