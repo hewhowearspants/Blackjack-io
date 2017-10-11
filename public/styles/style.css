@@ -384,7 +384,7 @@ input {
   justify-content: center;
   height: 40px;
   box-sizing: border-box;
-  z-index: 5;
+  /* z-index: 5; */
   transform: translateY(-65px);
 }
 
@@ -393,19 +393,26 @@ button {
   font-weight: 800;
   font-size: 1em;
   letter-spacing: 1px;
-  border: solid 2px rgba(255,255,255,0);
-  border-radius: 10px;
+  /* border: solid 2px rgba(255,255,255,0); */
+  /* border-radius: 10px; */
   margin: 0px 5px;
   box-shadow: 2px 2px 2px black;
   transition: .25s all;
-  background-color: lightgrey;
+  /* background-color: lightgrey; */
+  background-color: black;
+  color: lightgoldenrodyellow;
+  border: none;
+  border-bottom: 2px solid goldenrod;
   outline: transparent;
 }
 
 button:hover {
-  background-color: #333;
-  color: #eee;
-  border: solid 2px rgba(255,255,255,.75);
+  /* background-color: #333; */
+  /* color: #eee; */
+  color: black;
+  background-color: goldenrod;
+  border-bottom: solid 2px rgba(0,0,0,.75);
+  
   animation: flashingborder .75s linear infinite alternate;
   cursor: pointer;
   border-radius: 0px;
@@ -413,13 +420,13 @@ button:hover {
 
 button:active {
   box-shadow: none;
-  color: white;
-  background-color: lightgray;
+  color: lightgoldenrodyellow;
+  background-color: black;
 }
 
 @keyframes flashingborder {
   50% {
-    border: solid 2px rgba(255,255,255,0);
+    border-bottom: solid 2px rgba(0,0,0,0);
   }
 }
 
@@ -552,11 +559,11 @@ button:active {
 
 .subdued:hover {
   animation: none;
-  background-color: lightgrey;
-  color: black;
+  background-color: black; 
+  color: lightgoldenrodyellow; 
   cursor: default;
   border: none;
-  border-radius: 10px;
+  /* border-radius: 10px; */
 }
 
 .hidden {
