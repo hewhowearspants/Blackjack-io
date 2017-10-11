@@ -161,6 +161,7 @@ function endGame() {
         message: 'BUSTED!',
       });
     } else if (dealer.total > 21 && player.total <= 21) {
+      player.money += player.bet * 2;
       io.to(player.id).emit('game over', {
         dealerHiddenCard: dealer.hand[0].img, 
         dealerTotal: dealer.total,
@@ -168,6 +169,7 @@ function endGame() {
         message: `Dealer busts! YOU WIN $${player.bet}!`,
       });
     } else if (dealer.total === player.total) {
+      player.money += player.bet;
       io.to(player.id).emit('game over', {
         dealerHiddenCard: dealer.hand[0].img, 
         dealerTotal: dealer.total,
@@ -175,6 +177,7 @@ function endGame() {
         message: 'PUSH!',
       });
     } else if (player.total > dealer.total) {
+      player.money += player.bet * 2;
       io.to(player.id).emit('game over', {
         dealerHiddenCard: dealer.hand[0].img, 
         dealerTotal: dealer.total,
@@ -202,6 +205,8 @@ function endGame() {
       });
     };
   });
+
+  io.sockets.emit('update money', {players: players});
 }
 
 function resetGame() {
@@ -279,7 +284,8 @@ io.on('connection', function(socket) {
       id: socket.id,
       name: data.name,
       hand: [],
-      bet: 5,
+      bet: 0,
+      money: data.money,
       total: 0,
     }
     players.push(newPlayer);
@@ -294,9 +300,12 @@ io.on('connection', function(socket) {
     players.forEach((player) => {
       if (player.id === socket.id) {
         player.bet = data.bet;
+        player.money -= player.bet;
         console.log(`${player.name} bet ${data.bet}`);
         betCount++;
         console.log(`${betCount} out of ${players.length} have bet so far`);
+
+        socket.broadcast.emit('player bet', {otherPlayer: player});
       }
     });
 
