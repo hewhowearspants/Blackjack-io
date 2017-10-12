@@ -56,7 +56,7 @@ function prefetchDeckImages() {
 
 // PLAYER MUST INPUT A NAME BEFORE JOINING THE GAME
 function inputName() {
-  let $inputName = $('<input>', {'type': 'text', 'id': 'input-name', 'formmethod': 'post', 'placeholder': 'enter your name'});
+  let $inputName = $('<input>', {'type': 'text', 'id': 'input-name', 'formmethod': 'post', 'size': '20', 'maxlength': '20', 'placeholder': 'enter your name'});
   let $submitName = $('<input>', {'type': 'submit', 'id': 'submit-name', 'value': 'GO'});
   $('body').append($inputName);
   //$('body').append($submitName);
@@ -114,7 +114,7 @@ function setUpTable () {
   let $quitButton = $('<div>', {'id': 'quit-button', 'class': 'menu-button'}).html('<i class="fa fa-sign-out" aria-hidden="true"></i>');
 
   let $profileGreeting = $('<p>', {'id': 'profile-greeting'}).html(`Hi, ${player.name}!<br/>Don't like being called ${player.name}?`);
-  let $inputNameChange = $('<input>', {'type': 'text', 'id': 'input-name-change', 'formmethod': 'post', 'placeholder': 'change your name'});
+  let $inputNameChange = $('<input>', {'type': 'text', 'id': 'input-name-change', 'formmethod': 'post', 'size': '20', 'maxlength': '20', 'placeholder': 'change your name'});
   let $submitNameChange = $('<input>', {'type': 'submit', 'id': 'submit-name-change', 'value': 'CHANGE'});
 
   let $infoPanelOverlay = $('<div>', {'id': 'info-panel-overlay'});
