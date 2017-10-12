@@ -464,6 +464,58 @@ io.on('connection', function(socket) {
       io.sockets.emit('reset board');
       resetGame();
     }
+  });
+
+  socket.on('left user', function() {
+    users.forEach((user, index) => {
+      if (socket.id === user.id) {
+        console.log(`${user.name} disconnected!`);
+        users.splice(index, 1);
+        messages.push({name: '::', text: `${user.name} left`});
+        io.sockets.emit('user left', {user: user});
+      }
+    });
+
+    players.forEach((player, index) => {
+      console.log(`${player.name} no longer playing!`);
+      if (socket.id === player.id) {
+        players.splice(index, 1);
+        io.sockets.emit('player left', {leftPlayer: player});
+      }
+    });
+
+    playersLeftToPlay.forEach((player, index) => {
+      if (player.id === socket.id) {
+        playersLeftToPlay.splice(index, 1);
+        if (index === 0 && playersLeftToPlay[0]) {
+          io.to(playersLeftToPlay[0].id).emit('your turn');
+          io.sockets.emit('whose turn', {id: playersLeftToPlay[0].id});
+        }
+      }
+    });
+
+    if (betCount === players.length && players.length !== 0 && !gameInProgress) {
+      setTimeout(function() {
+        gameInProgress = true;
+        betCount = 0;
+        dealCards();
+        io.sockets.emit('deal cards', {
+          players: players, 
+          dealer: [
+            { img: '../images/card-back.jpg' },
+            { img: dealer.hand[1].img }
+          ]
+        });
+        io.sockets.emit('sit uninvite');
+      }, 1000);
+    }
+
+    if (players.length === 0) {
+      dealer = {hand: [], total: 0};
+      console.log('no more players! resetting...');
+      io.sockets.emit('reset board');
+      resetGame();
+    }
   })
 
   socket.on('disconnect', function() {
