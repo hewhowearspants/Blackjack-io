@@ -121,7 +121,7 @@ function setUpTable () {
   let $infoPanel = $('<div>', {'id': 'info-panel'});
   let $infoContent = $('<p>', {'id': 'info-content', 'class': 'menu-content'});
   let $profileContent = $('<div>', {'id': 'profile-content', 'class': 'menu-content'});
-  let $quitContent = $('<div>', {'id': 'quit-content', 'class': 'menu-content'}).html('<p>Are you sure you want to quit?</p>');
+  let $quitContent = $('<div>', {'id': 'quit-content', 'class': 'menu-content'}).html('<p>Do you want to quit?</p>');
   let $quitConfirmButton = $('<button>', {'id': 'quit-confirm-button'}).text('QUIT');
 
   let $chatButton = $('<div>', {'id': 'chat-button'}).html('<i class="fa fa-comments" aria-hidden="true"></i>')
