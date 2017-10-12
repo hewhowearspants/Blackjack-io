@@ -498,10 +498,6 @@ function placeBet(turn) {
   let $inputBet = $('<input>', {'type': 'number', 'id': 'input-bet', 'min': 1, 'max': `${player.money}`, 'value': `${player.bet || 5}`, 'formmethod': 'post'});
   let $submitBet = $('<input>', {'type': 'submit', 'id': 'submit-bet', 'value': 'BET'});
   let $messageBox = $('#message');
-  let $dealButton = $('#deal-button');
-
-  $dealButton.addClass('subdued');
-  $dealButton.off('click');
 
   // $messageBox.html('<p>Place your bet: </p>');
   $messageBox.html('');
@@ -565,7 +561,6 @@ function dealCards(players, dealer) {
   // console.log('deal em out!');
 
   let $messageBox = $('#message');
-  let $dealButton = $('#deal-button');
 
   // just in case there are any card divs for whatever reason...
   $('.hand').children().remove();
@@ -803,7 +798,6 @@ function endGame(dealerHiddenCard, dealerTotal, winStatus, message) {
   // console.log('game finished!');
 
   let $messageBox = $('#message');
-  let $dealButton = $('#deal-button');
   let $hitButton = $('#hit-button');
   let $standButton = $('#stand-button');
   let $dealerFirstCard = $('#dealer-hand div:nth-child(1)')
