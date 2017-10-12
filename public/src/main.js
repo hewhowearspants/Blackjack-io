@@ -653,6 +653,11 @@ function dealCards(players, dealer) {
 
       $('#stand-button').text('STAND');
       $('#stand-button').removeClass('removed');
+
+      $('#double-button').removeClass('removed');
+
+      $('#split-button').removeClass('removed');
+
       socket.emit('player ready');
     }, timeout);
   }
@@ -665,28 +670,43 @@ socket.on('your turn', function() {
   console.log('my turn!');
   let $hitButton = $('#hit-button');
   let $standButton = $('#stand-button');
+  let $doubleButton = $('#double-button');
+  let $splitButton = $('#split-button');
 
   $('#message').html('<p>Your turn!</p>');
   $('#message p').delay(1000).fadeOut();
 
   $hitButton.removeClass('subdued');
   $standButton.removeClass('subdued');
+  $doubleButton.removeClass('subdued');
+  
+  if (player.hand[0].realValue === player.hand[1].realValue) {
+    $splitButton.removeClass('subdued');
+    $splitButton.on('click', function() {
+      socket.emit('split');
+    });
+  }
 
   $hitButton.on('click', function() {
-    console.log('hit me!');
     socket.emit('hit me');
+
+    $('#double-button').addClass('subdued');
+    $('#double-button').off('click');
   });
 
   $standButton.on('click', function() {
     socket.emit('stand');
 
-    let $hitButton = $('#hit-button');
-    let $standButton = $('#stand-button');
-    $hitButton.addClass('subdued');
-    $standButton.addClass('subdued');
-    $hitButton.off('click');
-    $standButton.off('click');
+    $('#button-bar').children().addClass('subdued');
+    $('#button-bar').children().off('click');
   });
+
+  $doubleButton.on('click', function() {
+    socket.emit('double down');
+
+    $('#button-bar').children().addClass('subdued');
+    $('#button-bar').children().off('click');
+  })
 });
 
 // 'whose turn' IS THE SERVER TELLING YOU WHOSE TURN IT IS (NOT YOURS, DUMMY)
@@ -783,6 +803,8 @@ function endGame(dealerHiddenCard, dealerTotal, winStatus, message) {
   let $messageBox = $('#message');
   let $hitButton = $('#hit-button');
   let $standButton = $('#stand-button');
+  let $doubleButton = $('#double-button');
+  let $splitButton = $('#split-button');
   let $dealerFirstCard = $('#dealer-hand div:nth-child(1)')
 
   $dealerFirstCard.removeClass('flyin');
@@ -814,6 +836,9 @@ function endGame(dealerHiddenCard, dealerTotal, winStatus, message) {
       $('#player-money p').text(`$${centify(player.money)}`);
       localStorage.setItem('playerMoney', player.money);
     }  
+
+    $doubleButton.addClass('removed');
+    $splitButton.addClass('removed');
 
     // buttons to let players opt to play again or not
     $hitButton.removeClass('subdued');
