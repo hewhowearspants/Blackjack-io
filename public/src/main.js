@@ -111,6 +111,7 @@ function setUpTable () {
   let $menuButtons = $('<div>', {'id': 'menu-buttons'}).slideUp();
   let $infoButton = $('<div>', {'id': 'info-button', 'class': 'menu-button selected'}).html('<i class="fa fa-question" aria-hidden="true"></i>');
   let $profileButton = $('<div>', {'id': 'profile-button', 'class': 'menu-button'}).html('<i class="fa fa-user" aria-hidden="true"></i>');
+  let $quitButton = $('<div>', {'id': 'quit-button', 'class': 'menu-button'}).html('<i class="fa fa-sign-out" aria-hidden="true"></i>');
 
   let $profileGreeting = $('<p>', {'id': 'profile-greeting'}).html(`Hi, ${player.name}!<br/>Don't like being called ${player.name}?`);
   let $inputNameChange = $('<input>', {'type': 'text', 'id': 'input-name-change', 'formmethod': 'post', 'placeholder': 'change your name'});
@@ -118,9 +119,10 @@ function setUpTable () {
 
   let $infoPanelOverlay = $('<div>', {'id': 'info-panel-overlay'});
   let $infoPanel = $('<div>', {'id': 'info-panel'});
-  let $infoContent = $('<p>', {'id': 'info-content'});
-  let $profileContent = $('<div>', {'id': 'profile-content'});
-  let $okButton = $('<button>', {'id': 'ok-button'}).text('OK');
+  let $infoContent = $('<p>', {'id': 'info-content', 'class': 'menu-content'});
+  let $profileContent = $('<div>', {'id': 'profile-content', 'class': 'menu-content'});
+  let $quitContent = $('<div>', {'id': 'quit-content', 'class': 'menu-content'}).html('<p>Are you sure you want to quit?</p>');
+  let $quitConfirmButton = $('<button>', {'id': 'quit-confirm-button'}).text('QUIT');
 
   let $chatButton = $('<div>', {'id': 'chat-button'}).html('<i class="fa fa-comments" aria-hidden="true"></i>')
   let $chatContainer = $('<div>', {'id': 'chat-container'});
@@ -138,6 +140,7 @@ function setUpTable () {
     );
 
   $profileContent.append($profileGreeting).append($inputNameChange).append($submitNameChange);
+  $quitContent.append($quitConfirmButton);
 
 
   $('body').append($cardTable);
@@ -146,10 +149,11 @@ function setUpTable () {
   $('body').append($chatButton);
   //$('body').append($infoPanelOverlay);
 
-  $menuButtons.append($infoButton).append($profileButton);
+  $menuButtons.append($infoButton).append($profileButton).append($quitButton);
   $infoPanelOverlay.append($infoPanel);
   $infoPanel.append($infoContent);
   $infoPanel.append($profileContent);
+  $infoPanel.append($quitContent);
   $infoPanel.fadeIn();
   $profileContent.fadeOut();
 
@@ -206,6 +210,7 @@ function setUpTable () {
     $('#players-container').append($handContainer);
   }
 
+  // ALL OF BELOW HANDLES THE MENU
   $('#menu-button').on('click', function() {
     if ($('#info-panel-overlay').length === 0) {
       $('#menu-button').css({'color': 'rgba(255,255,255,0.5)'});
@@ -257,7 +262,7 @@ function setUpTable () {
         $('#profile-button').on('click', function() {
           $('.menu-button').removeClass('selected');
           $(this).addClass('selected');
-          $infoContent.fadeOut(1, function() {
+          $('.menu-content').fadeOut(1, function() {
             $profileContent.fadeIn(1);
           });
         });
@@ -265,8 +270,30 @@ function setUpTable () {
         $('#info-button').on('click', function() {
           $('.menu-button').removeClass('selected');
           $(this).addClass('selected');
-          $profileContent.fadeOut(1, function() {
+          $('.menu-content').fadeOut(1, function() {
             $infoContent.fadeIn(1);
+          });
+        });
+
+        $('#quit-button').on('click', function() {
+          $('.menu-button').removeClass('selected');
+          $(this).addClass('selected');
+          $('.menu-content').fadeOut(1, function() {
+            $quitContent.fadeIn(1);
+            $('#quit-confirm-button').on('click', function() {
+              $menuButtons.slideUp(250, function() {
+                $infoPanelOverlay.fadeOut(250, function() {
+                  $('#card-table').remove();
+                  $('#menu-button').css({'color': 'white'});
+                  $('#info-panel-overlay').remove();
+                  $('#menu-button').remove();
+                  $('#chat-button').remove();
+                  $('#chat-container').remove();
+                  socket.emit('left user');
+                  inputName();
+                });
+              });
+            });
           });
         });
       });
