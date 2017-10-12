@@ -647,8 +647,10 @@ function dealCards(players, dealer) {
   if ($('.primary').attr('id') === 'player-hand') {
     setTimeout(function () {
       $('#player-box').removeClass('hidden');
+
       $('#hit-button').text('HIT');
       $('#hit-button').removeClass('removed');
+
       $('#stand-button').text('STAND');
       $('#stand-button').removeClass('removed');
       socket.emit('player ready');
@@ -656,27 +658,6 @@ function dealCards(players, dealer) {
   }
 
 };
-
-// DISPLAYS APPROPRIATE MESSAGE IF PLAYER OR DEALER GETS BLACKJACK (21 with two cards)
-//** MAYBE MOVE THIS SERVER-SIDE */
-// function testForBlackjack() {
-//   // console.log('checking for blackjack...');
-
-//   let $messageBox = $('#message');
-
-//   if (player.total === 21 && dealer.total === 21) {
-//     pushMoney(player);
-//     $messageBox.html('PUSH!');
-//     return true;
-//   } else if (player.total === 21) {
-//     winMoney(player, (3/2));
-//     $messageBox.html(`Blackjack pays 3:2!</p>You win $${centify(player.bet * (3/2))}!`);
-//     return true;
-//   } else if (dealer.total === 21) {
-//     $messageBox.html('Dealer has blackjack!<br/>Dealer wins.');
-//     return true;
-//   };
-// };
 
 // 'your turn' IS THE SERVER NOTIFYING PLAYER IT IS THEIR TURN
 // ACTIVATES THEIR HIT/STAND BUTTONS
