@@ -40,7 +40,8 @@ p {
 
 #menu-button,
 #info-button,
-#profile-button {
+#profile-button,
+#quit-button {
   height: 40px;
   width: 40px;
   font-size: 25px;
@@ -96,8 +97,7 @@ p {
   background-color: rgba(0,0,0,.6);
 }
 
-#info-content,
-#profile-content {
+.menu-content {
   height: 100%;
   overflow: auto;
   background: rgba(0,0,0,.8);
@@ -105,19 +105,22 @@ p {
   border-radius: 10px;
 }
 
-#profile-content {
+#profile-content,
+#quit-content {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
 }
 
-#profile-content p {
+#profile-content p,
+#quit-content p {
   font-size: 18px;
   margin: 10px;
 }
 
-#submit-name-change {
+#submit-name-change,
+#quit-content button {
   background: transparent;
   border: none;
   border-bottom: 2px solid goldenrod;
@@ -126,14 +129,16 @@ p {
   outline: transparent;
 }
 
-#submit-name-change:hover {
+#submit-name-change:hover,
+#quit-content button:hover {
   border-bottom: 2px solid lightgoldenrodyellow;
   background-color: goldenrod;
   color: black;
   cursor: pointer;
 }
 
-#submit-name-change:active {
+#submit-name-change:active,
+#quit-content button:active {
   background-color: lightgoldenrodyellow;
   border-bottom: 2px solid goldenrod;
 }
@@ -405,10 +410,9 @@ input {
 #input-bet {
   padding: 3px;
   font-weight: 100;
-  font-size: 16px;
+  font-size: 1.2em;
   text-align: center;
   outline: transparent;
-  /* border: solid 2px goldenrod; */
   border: none;
   border-radius: 1px; 
   background-color: rgba(0,0,0,.75);
@@ -421,8 +425,9 @@ input {
   border: none;
   border-bottom: solid 2px goldenrod;
   border-radius: 1px; 
-  font-size: 18px;
+  font-size: 1.2em;
   font-weight: 800;
+  letter-spacing: 2px;
   box-shadow: 2px 2px 2px black;
   background-color: black;
   outline: transparent;
@@ -454,21 +459,17 @@ input {
   justify-content: center;
   height: 40px;
   box-sizing: border-box;
-  /* z-index: 5; */
   transform: translateY(-65px);
 }
 
 button {
   font-family: 'Dosis', sans-serif;
-  font-weight: 800;
-  font-size: 1em;
-  letter-spacing: 1px;
-  /* border: solid 2px rgba(255,255,255,0); */
-  /* border-radius: 10px; */
+  font-weight: 500;
+  font-size: 1.2em;
+  letter-spacing: 2px;
   margin: 0px 5px;
   box-shadow: 2px 2px 2px black;
   transition: .25s all;
-  /* background-color: lightgrey; */
   background-color: black;
   color: lightgoldenrodyellow;
   border: none;
@@ -628,6 +629,7 @@ button:active {
   border: none;
   box-shadow: none;
   font-weight: 100;
+  font-size: 1em;
 }
 
 #chat-submit:hover {
