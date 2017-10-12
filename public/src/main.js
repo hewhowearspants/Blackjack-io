@@ -433,7 +433,7 @@ function assignNewPlayer(newPlayer) {
         $(this).addClass('occupied');
         $(this).prev().find('.hand-player-name').text(newPlayer.name);
         newPlayer.bet ? $(this).prev().find('.hand-player-bet').text(`$${newPlayer.bet}`) : '';
-        newPlayer.total ? $(this).prev().find('.hand-player-total').text(newPlayer.total) : '';
+        newPlayer.displayTotal ? $(this).prev().find('.hand-player-total').text(newPlayer.displayTotal) : '';
         $(this).prev().find('.hand-player-money').text(`$${newPlayer.money}`);
         newPlayer.id = null;
         return false;
@@ -556,12 +556,6 @@ socket.on('player bet', function(data) {
 // 'deal cards' RECEIVES THE INITIAL DEALT CARD DATA
 socket.on('deal cards', function(data) {
   // 'data' is players, dealer
-  data.players.forEach((serverPlayer) => {
-    if (serverPlayer.id === socket.id) {
-      player.hand = serverPlayer.hand;
-      player.total = serverPlayer.total;
-    }
-  })
 
   dealCards(data.players, data.dealer);
 
@@ -583,13 +577,20 @@ function dealCards(players, dealer) {
 
   players.forEach((serverPlayer) => {
     if (serverPlayer.id === socket.id) {
+      player.hand = serverPlayer.hand;
+      player.total = serverPlayer.total;
+      player.displayTotal = serverPlayer.displayTotal;
+
       player.hand.forEach((card) => {
         let $newCard = ($('<div>', {'class': 'card removed'}));
         $newCard.css('background-image', `url('${card.img}')`);
         $('#player-hand').append($newCard);
       });
-      $('#player-total p').text(player.total);
+
+      $('#player-total p').text(player.displayTotal);
+
     } else {
+
       serverPlayer.hand.forEach((card) => {
         let $newCard = ($('<div>', {'class': 'card removed'}));
 
@@ -733,11 +734,11 @@ socket.on('whose turn', function(data) {
 
 // 'new card' RECEIVES NEW CARD DATA WHEN A PLAYER (ANY PLAYER) HITS
 socket.on('new card', function(data) {
-  hitMe(data.player, data.card, data.total);
+  hitMe(data.player, data.card);
 })
 
 // ADDS A CARD TO THE INDICATED PLAYER'S HAND, (will eventually) UPDATES PLAYER TOTAL
-function hitMe(recipient, card, total) {
+function hitMe(recipient, card) {
   // console.log(`${turn.name} hits!`);
   let $newCard = ($('<div>', {'class': 'card removed'}));
 
@@ -745,14 +746,15 @@ function hitMe(recipient, card, total) {
 
   if (recipient.id === socket.id) {
     player.hand.push(card);
-    player.total = total;
-    $(`#player-total p`).text(total);
+    player.total = recipient.total;
+    player.displayTotal = recipient.displayTotal;
+    $(`#player-total p`).text(player.displayTotal);
     $newCard.attr('id', `player-card-${player.hand.length}`);
     $(`#player-hand`).append($newCard);
   } else {
     $newCard.attr('id', `${recipient.id}-card-${recipient.hand.length}`);
     $(`#${recipient.id}`).append($newCard);
-    $(`#${recipient.id}`).prev().find('.hand-player-total').text(recipient.total);
+    $(`#${recipient.id}`).prev().find('.hand-player-total').text(recipient.displayTotal);
   }
 
   $newCard.removeClass('removed');
