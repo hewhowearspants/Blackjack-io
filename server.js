@@ -73,7 +73,9 @@ function dealCards() {
     console.log(`${player.name} receives ${secondCard.value} of ${secondCard.suit}`);
 
     player.total = calculateHand(player.hand);
+    player.displayTotal = `${player.total}`;
     player = checkForAce(player);
+
   });
 
   // deal two for the dealer
@@ -84,10 +86,14 @@ function dealCards() {
   dealer.hand.push(secondCard);
   console.log(`Dealer receives ${secondCard.value} of ${secondCard.suit}`)
   dealer.total = calculateHand(dealer.hand);
+  dealer.displayTotal = `${dealer.hand}`;
   dealer = checkForAce(dealer);
 
   console.log(`${deck.length} cards left in shoe`);
+
 }
+
+
 
 function calculateHand(hand) {
   return hand.reduce((total, card) => {
@@ -97,7 +103,8 @@ function calculateHand(hand) {
 
 function checkForAce(player) {
   if (hasAce(player.hand) && (player.total + 10 <= 21)) {
-    player.total += 10
+    player.displayTotal = `${player.total} (${player.total + 10})`;
+    player.total += 10;
   }
 
   return player;
@@ -132,6 +139,7 @@ function dealerTurn() {
     }, timeout);
 
     dealer.total = calculateHand(dealer.hand);
+    dealer.displayTotal = `${dealer.hand}`;
     dealer = checkForAce(dealer);
     timeout += 250;
   }
@@ -214,6 +222,7 @@ function resetGame() {
     player.bet = 0;
     player.hand = [];
     player.total = 0;
+    player.displayTotal = '';
   })
   dealer.hand = [];
   dealer.total = 0;
@@ -305,6 +314,7 @@ io.on('connection', function(socket) {
       bet: 0,
       money: data.money,
       total: 0,
+      displayTotal: '',
     }
     players.push(newPlayer);
     console.log(`new player! ${newPlayer.id}`)
@@ -364,9 +374,10 @@ io.on('connection', function(socket) {
         console.log(`${deck.length} cards left`);
         player.hand.push(newCard);
         player.total = calculateHand(player.hand);
+        player.displayTotal = `${player.total}`;
         player = checkForAce(player);
         
-        io.sockets.emit('new card', {player: player, card: newCard, total: player.total});
+        io.sockets.emit('new card', {player: player, card: newCard});
         
         // if player busts...
         if (player.total > 21) {
