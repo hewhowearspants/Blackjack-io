@@ -106,6 +106,8 @@ function setUpTable () {
   let $buttons = ($('<div>', {'id': 'button-bar'}));
   let $hitButton = ($('<button>', {'class': 'button removed subdued', 'id': 'hit-button'})).text('HIT');
   let $standButton = ($('<button>', {'class': 'button removed subdued', 'id': 'stand-button'})).text('STAND');
+  let $doubleButton = ($('<button>', {'class': 'button removed subdued', 'id': 'double-button'})).text('DOUBLE');
+  let $splitButton = ($('<button>', {'class': 'button removed subdued', 'id': 'split-button'})).text('SPLIT');
 
   let $menuButton = $('<div>', {'id': 'menu-button'}).html('<i class="fa fa-bars" aria-hidden="true"></i>');
   let $menuButtons = $('<div>', {'id': 'menu-buttons'}).slideUp();
@@ -183,6 +185,8 @@ function setUpTable () {
   $('#card-table').append($buttons);
   $('#button-bar').append($hitButton);
   $('#button-bar').append($standButton);
+  $('#button-bar').append($doubleButton);
+  $('#button-bar').append($splitButton);
 
   $('#card-table').append($playersContainer);
 
