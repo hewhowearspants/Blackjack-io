@@ -337,7 +337,7 @@ io.on('connection', function(socket) {
       displayTotal: '',
     }
     players.push(newPlayer);
-    console.log(`new player! ${newPlayer.id}`)
+    console.log(`new player! ${newPlayer.name} / ${newPlayer.money}`);
     io.sockets.emit('new player', {newPlayer: newPlayer});
     if (players.length === 5) {
       io.sockets.emit('sit uninvite');

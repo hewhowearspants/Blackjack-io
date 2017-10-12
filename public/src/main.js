@@ -311,11 +311,9 @@ function setUpTable () {
       });
     }
   });
+  // ALL OF ABOVE HANDLES THE MENU
 
-  $('#ok-button').on('click', function(){
-    $infoPanelOverlay.addClass('removed');
-  });
-
+  // minimize chat window after a second
   setTimeout(function() {
     $chatContainer.children().fadeToggle(250, 'swing', function() {
         $chatContainer.height(40);
@@ -346,10 +344,7 @@ function setUpTable () {
     return false;
   });
 
-  //player.$hand = $('#player-hand');
-  //dealer.$hand = $('#dealer-hand');
-
-  // PLACEHOLDER TO SKIP NAME INPUT, REMOVE FOR PRODUCTION
+  // PLACEHOLDER TO SKIP NAME INPUT, COMMENT OUT FOR PRODUCTION
   //socket.emit('new user', { name: player.name });
 };
 
