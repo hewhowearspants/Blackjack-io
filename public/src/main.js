@@ -616,14 +616,7 @@ function dealCards(players, dealer) {
 
   var timeout = 0;
 
-  for (let i = 1; i <= dealer.length; i++) {
-    setTimeout(function() {
-      $(`#dealer-hand div:nth-child(${i})`).removeClass('hidden');
-      $(`#dealer-hand div:nth-child(${i})`).addClass('flyin');
-    }, timeout);
-    timeout += 250;
-  };
-
+  // deal the cards for you, the player, first
   for (let i = 1; i <= player.hand.length; i++) {
     setTimeout(function() {
       $(`#player-hand div:nth-child(${i})`).removeClass('hidden');
@@ -632,6 +625,7 @@ function dealCards(players, dealer) {
     timeout += 250;
   };
 
+  // deal the cards for the other players and display their totals
   players.forEach((otherPlayer) => {
     for (let i = 1; i <= otherPlayer.hand.length; i++) {
       setTimeout(function() {
@@ -642,10 +636,17 @@ function dealCards(players, dealer) {
     }
 
     setTimeout(function() {
-      $(`#${otherPlayer.id}`).prev().find('.hand-player-total').text(otherPlayer.total);
+      $(`#${otherPlayer.id}`).prev().find('.hand-player-total').text(otherPlayer.displayTotal);
     }, timeout);
   });
 
+  for (let i = 1; i <= dealer.length; i++) {
+    setTimeout(function() {
+      $(`#dealer-hand div:nth-child(${i})`).removeClass('hidden');
+      $(`#dealer-hand div:nth-child(${i})`).addClass('flyin');
+    }, timeout);
+    timeout += 250;
+  };
   
   if ($('.primary').attr('id') === 'player-hand') {
     setTimeout(function () {
