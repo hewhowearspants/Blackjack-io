@@ -116,7 +116,7 @@ p {
 #profile-content p,
 #quit-content p {
   font-size: 18px;
-  margin: 10px;
+  margin: 20px 0;
 }
 
 #submit-name-change,
@@ -678,6 +678,20 @@ button:active {
 
   h1 {
     font-size: 2em;
+  }
+
+  #info-panel {
+    width: calc(100vw - 84px);
+  }
+
+  #profile-content p,
+  #quit-content p {
+    font-size: 15px;
+    margin: 20px 0;
+  }
+
+  #chat-content {
+    font-weight: 200;
   }
   
   .container {
