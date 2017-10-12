@@ -160,15 +160,17 @@ function endGame() {
 
   players.forEach((player) => {
     playerList[player.id] = true;
-
+    console.log(`Checking ${player.name} win status...`);
     if (player.total > 21) {
+      console.log(`${player.name} busted!`)
       io.to(player.id).emit('game over', {
         dealerHiddenCard: dealer.hand[0].img,
         dealerTotal: dealer.total,
         status: 'lose',
-        message: 'BUSTED!',
+        message: '',
       });
-    } else if (dealer.total > 21 && player.total <= 21) {
+    } else if (dealer.total > 21 && (player.total < 21 || (player.total === 21 && player.hand.length > 2))) {
+      console.log(`${player.name} won because dealer bust!`);
       player.money += player.bet * 2;
       io.to(player.id).emit('game over', {
         dealerHiddenCard: dealer.hand[0].img, 
@@ -177,6 +179,7 @@ function endGame() {
         message: `Dealer busts! YOU WIN $${player.bet}!`,
       });
     } else if (dealer.total === player.total) {
+      console.log(`${player.name} pushed!`)
       player.money += player.bet;
       io.to(player.id).emit('game over', {
         dealerHiddenCard: dealer.hand[0].img, 
@@ -185,19 +188,34 @@ function endGame() {
         message: 'PUSH!',
       });
     } else if (player.total > dealer.total) {
-      player.money += player.bet * 2;
+      if (player.total === 21 && player.hand.length === 2) {
+        console.log(`${player.name} won by blackjack!`)
+        var message = '';
+      } else {
+        console.log(`${player.name} won!`)
+        player.money += player.bet * 2;
+        var message = `YOU WIN $${player.bet}!`;
+      }
+
       io.to(player.id).emit('game over', {
         dealerHiddenCard: dealer.hand[0].img, 
         dealerTotal: dealer.total,
         status: 'win',
-        message: `YOU WIN $${player.bet}!`,
+        message: message,
       });
     } else if (dealer.total > player.total) {
+      console.log(`${player.name} lost.`)
+      let message = 'Dealer wins.';
+
+      if (dealer.total === 21 && dealer.hand.length === 2) {
+        message += ' Dealer has blackjack.';
+      }
+
       io.to(player.id).emit('game over', {
         dealerHiddenCard: dealer.hand[0].img, 
         dealerTotal: dealer.total,
         status: 'lose',
-        message: `Dealer wins.`,
+        message: message,
       });
     }
   });
@@ -276,7 +294,9 @@ io.on('connection', function(socket) {
           { img: dealer.hand[1].img }
         ],
       })
-      socket.emit('whose turn', {id: playersLeftToPlay[0].id});
+      if (playersLeftToPlay[0]) {
+        socket.emit('whose turn', {id: playersLeftToPlay[0].id});
+      }
     }
 
     messages.push({name: '::', text: `${data.name} has joined`});
@@ -358,11 +378,51 @@ io.on('connection', function(socket) {
     playersReadyCount++;
     console.log(`${socket.id} is ready`)
     if (playersReadyCount === players.length) {
-      playersLeftToPlay = [...players];
-      io.to(playersLeftToPlay[0].id).emit('your turn');
-      io.sockets.emit('whose turn', {id: playersLeftToPlay[0].id});
+      testForBlackjacks();
     };
   });
+
+  function testForBlackjacks() {
+    // if dealer gets blackjack, game is over
+    if (dealer.total === 21) {
+      console.log('dealer has blackjack! game over');
+
+      endGame();
+
+      setTimeout(function() {
+        resetGame();
+      }, 1000);
+
+    } else {
+      playersLeftToPlay = [...players];
+
+      console.log('checking players for blackjack...');
+      playersLeftToPlay.forEach((player, index, array) => {
+        if (player.total === 21) {
+          console.log(`${player.name} has blackjack!`);
+          player.money += (player.bet + (player.bet * 1.5));
+          // let player know their turn is over
+          io.to(player.id).emit('turn over');
+          io.sockets.emit('player bet', {otherPlayer: player});
+          // remove them from the play order
+          array.splice(index, 1);
+          console.log(array.length);
+        }
+        if (array.length === 0) {
+          endGame();
+
+          setTimeout(function() {
+            resetGame();
+          }, 1000);
+        }
+      });
+    }
+
+    if(playersLeftToPlay.length > 0) {
+      io.to(playersLeftToPlay[0].id).emit('your turn');
+      io.sockets.emit('whose turn', {id: playersLeftToPlay[0].id});
+    }
+  }
 
   socket.on('hit me', function() {
     let newCard = deck.shift();
