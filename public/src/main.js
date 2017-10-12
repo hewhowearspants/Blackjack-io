@@ -809,12 +809,6 @@ function endGame(dealerHiddenCard, dealerTotal, winStatus, message) {
     $dealerFirstCard.css('background-image', `url(${dealerHiddenCard}`);
   }, 500);
 
-  $hitButton.off('click');
-  $hitButton.addClass('subdued');
-
-  $standButton.off('click');
-  $standButton.addClass('subdued');
-
   if (winStatus) {
     // players get win statuses, so if user is a player, gives them their money, resets their bet, 
     // and gives them the option to either play another game or bow out
