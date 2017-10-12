@@ -655,15 +655,6 @@ function dealCards(players, dealer) {
       $('#stand-button').text('STAND');
       $('#stand-button').removeClass('removed');
       socket.emit('player ready');
-
-      //** MAYBE MAKE THIS SERVER-SIDE */
-      // tests if either player or dealer gets Blackjack (21 with two cards)
-      // ends the game if so, resumes game if not
-      // if(testForBlackjack()) {
-      //   endGame();
-      // } else {
-      //   startGame();
-      // };
     }, timeout);
   }
 
@@ -792,41 +783,6 @@ socket.on('new dealer card', function(data) {
     $newCard.addClass('flyin');
   }, timeout);
 });
-
-// RETURNS INDICATED PLAYER'S TOTAL VALUE OF THEIR HAND
-//** MOVED TO SERVER SIDE, WILL LIKELY DELETE */
-// function calculateHand(turn) {
-//   //console.log(`calculating ${turn.name} hand total...`);
-//   return turn.hand.reduce((total, card) => {
-//     return total += card.realValue;
-//   }, 0);
-
-// };
-
-// ADDS 10 TO PLAYER'S TOTAL IF THEY HAVE AN ACE AND IT WON'T PUT THEM OVER 21
-// DISPLAYS BOTH POSSIBLE TOTALS
-//** MOVED TO SERVER SIDE, WILL LIKELY DELETE */
-// function checkForAce(turn) {
-//   if (hasAce(turn) && (turn.total + 10 <= 21)) {
-//     $(`#${turn.name}-total p`).text(`${turn.total} (${turn.total + 10})`)
-//     turn.total += 10;
-//   };
-
-// };
-
-// RETURNS WHETHER THE INDICATED PLAYER HAS AN ACE IN THEIR HAND
-//** MOVED TO SERVER SIDE, WILL LIKELY DELETE */
-// function hasAce(turn) {
-//   let hasAce = false;
-
-//   turn.hand.forEach ((card) => {
-//     if (card.value === 'A') {
-//       hasAce = true;
-//     };
-//   });
-
-//   return hasAce;
-// };
 
 // 'game over' LETS PLAYERS KNOW THAT THE GAME IS OVER
 socket.on('game over', function(data) {
