@@ -621,17 +621,19 @@ function dealCards(players, dealer) {
 
   // deal the cards for the other players and display their totals
   players.forEach((otherPlayer) => {
-    for (let i = 1; i <= otherPlayer.hand.length; i++) {
-      setTimeout(function() {
-        $(`#${otherPlayer.id} div:nth-child(${i})`).removeClass('hidden');
-        $(`#${otherPlayer.id} div:nth-child(${i})`).addClass('flyin');
-      }, timeout);
-    timeout += 250;
-    }
+    if (otherPlayer.id !== socket.id) {
+      for (let i = 1; i <= otherPlayer.hand.length; i++) {
+        setTimeout(function() {
+          $(`#${otherPlayer.id} div:nth-child(${i})`).removeClass('hidden');
+          $(`#${otherPlayer.id} div:nth-child(${i})`).addClass('flyin');
+        }, timeout);
+      timeout += 250;
+      }
 
-    setTimeout(function() {
-      $(`#${otherPlayer.id}`).prev().find('.hand-player-total').text(otherPlayer.displayTotal);
-    }, timeout);
+      setTimeout(function() {
+        $(`#${otherPlayer.id}`).prev().find('.hand-player-total').text(otherPlayer.displayTotal);
+      }, timeout);
+    }
   });
 
   for (let i = 1; i <= dealer.length; i++) {
