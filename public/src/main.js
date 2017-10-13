@@ -166,13 +166,15 @@ function setUpTable () {
   let $chatInput = $('<input>', {'id': 'chat-input', 'autocomplete': 'off'});
   let $chatSubmit = $('<button>', {'id': 'chat-submit'}).text('SEND');
 
-  $infoContent.html("<p>Blackjack, also known as 21, is a card game where a player faces off against a dealer. The dealer and the player each initially get two cards. The player can only see one of the dealer's cards. The cards's are worth face value, except Aces and face cards (J, Q, K), which are 1 or 11 and 10, respectively.</p><br/>"
+  $credits = $('<div>', {'id': 'credits', 'class': 'info-content'}).html('<p>©2017 Ryan Edwards</p><p>Sounds from <a href="https://www.zapsplat.com">zapsplat.com</a> and <a href="http://kenney.nl/">kenney.nl</a></p>');
+  $description = $('<div>', {'id': 'description', 'class':'info-content'}).html("<h2>What is Blackjack?</h2><br/><p>Blackjack, also known as 21, is a card game where a player faces off against a dealer. The dealer and the player each initially get two cards. The player can only see one of the dealer's cards. The cards's are worth face value, except Aces and face cards (J, Q, K), which are 1 or 11 and 10, respectively.</p><br/>"
     +"<p>The player's goal is to get the sum of their cards higher than the sum of the dealer's cards, without that sum going over 21 ('BUST'). The player can request additional cards (or 'HIT') if they want to increase their chances of beating the dealer. When the player is satisfied, and has not gone over 21, they can end their turn (or 'STAND').</p><br/>"
     +"<p>When the player has ended their turn, if sum of the dealer's hand is less than 16, the dealer will 'HIT' until their hand is worth more than 16, at which point, the dealer stands. If the dealer 'BUSTS', the player automatically wins.</p><br/>"
     +"<p>After the dealer stands, the dealer's hidden card is revealed to the player, and if the sum of the player's hand is higher than the dealer, the player wins. If they are equal, then it is a tie game, or 'PUSH'.</p><br/>"
     +"<p>Blackjack is frequently played in casinos, and players bet a certain amount on winning. If the player wins, they get double their money back. If the player and dealer 'PUSH', the player gets only their initial bet back.</p>"
     );
 
+  $infoContent.append($credits).append($description);
   $profileContent.append($profileGreeting).append($inputNameChange).append($submitNameChange);
   $quitContent.append($quitConfirmButton);
   $soundContent.append($soundToggle).append($musicPlayer);
