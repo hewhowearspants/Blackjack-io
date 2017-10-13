@@ -216,10 +216,10 @@ function setUpTable () {
   $('#total-box').append($dealerTotal);
 
   $('#card-table').append($buttons);
+  $('#button-bar').append($splitButton);
+  $('#button-bar').append($doubleButton);
   $('#button-bar').append($hitButton);
   $('#button-bar').append($standButton);
-  $('#button-bar').append($doubleButton);
-  $('#button-bar').append($splitButton);
 
   $('#card-table').append($playersContainer);
 
@@ -759,6 +759,8 @@ socket.on('your turn', function() {
 
     $('#double-button').addClass('subdued');
     $('#double-button').off('click');
+    $('#split-button').addClass('subdued');
+    $('#split-button').off('click');
   });
 
   $standButton.on('click', function() {
