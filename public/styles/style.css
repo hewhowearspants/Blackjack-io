@@ -94,6 +94,7 @@ p {
   right: 0;
   bottom: 0;
   left: 0;
+  height: 100vh;
   z-index: 499;
   background-color: rgba(0,0,0,.6);
 }
@@ -752,6 +753,14 @@ button:active {
   #quit-content p {
     font-size: 15px;
     margin: 20px 0;
+  }
+
+  #sound-toggle span {
+    font-weight: 400;
+  }
+
+  #sound-toggle span.selected {
+    font-weight: 600;
   }
 
   #chat-content {
