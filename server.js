@@ -160,6 +160,9 @@ function endGame() {
 
   players.forEach((player) => {
     playerList[player.id] = true;
+    if (player.doubleDown) {
+      player.bet /= 2;
+    }
     console.log(`Checking ${player.name} win status...`);
     if (player.total > 21) {
       console.log(`${player.name} busted!`)
@@ -241,6 +244,8 @@ function resetGame() {
     player.hand = [];
     player.total = 0;
     player.displayTotal = '';
+    player.doubleDown = false;
+    player.split = false;
   })
   dealer.hand = [];
   dealer.total = 0;
@@ -335,6 +340,8 @@ io.on('connection', function(socket) {
       money: data.money,
       total: 0,
       displayTotal: '',
+      doubleDown: false,
+      split: false,
     }
     players.push(newPlayer);
     console.log(`new player! ${newPlayer.name} / ${newPlayer.money}`);
@@ -423,6 +430,17 @@ io.on('connection', function(socket) {
       io.sockets.emit('whose turn', {id: playersLeftToPlay[0].id});
     }
   }
+
+  socket.on('double down', function() {
+    players.forEach((player) => {
+      if (player.id === socket.id) {
+        console.log(`${player.name} doubles down! From $${player.bet} to $${player.bet * 2}!`);
+        player.money -= player.bet;
+        player.bet *= 2;
+        io.sockets.emit('player bet', {otherPlayer: player});
+      }
+    });
+  })
 
   socket.on('hit me', function() {
     let newCard = deck.shift();

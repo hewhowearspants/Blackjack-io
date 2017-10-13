@@ -746,7 +746,7 @@ socket.on('your turn', function() {
 
   if (player.money >= player.bet) {
     $doubleButton.removeClass('subdued');
-    
+
     $doubleButton.on('click', function() {
       player.doubleDown = true;
       player.money -= player.bet;
@@ -1011,6 +1011,11 @@ function resetGame() {
   
   player.hand = [];
   dealer.hand = [];
+
+  if (player.doubleDown) {
+    player.bet /= 2;
+    player.doubleDown = false;
+  }
 
   if($('.primary').attr('id') === 'player-hand' && player.money > 0) {
     $('#button-bar').children().addClass('removed');
