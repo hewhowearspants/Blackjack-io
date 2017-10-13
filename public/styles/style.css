@@ -193,6 +193,22 @@ p {
   border-radius: 5px;
 }
 
+#credits {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+#credits a {
+  color: inherit;
+}
+
+#description h2 {
+  text-align: center;
+  margin: 10px 0px 0px;
+}
+
 #info-panel p {
   text-align: justify;
   text-shadow: 2px 2px 2px #000;
