@@ -121,6 +121,43 @@ p {
   margin: 20px 0;
 }
 
+.sound-content {
+  width: 100%;
+}
+
+#sound-toggle {
+  height: 50px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  font-weight: 500;
+  cursor: default;
+}
+
+#sound-toggle span {
+  margin-left: 10px;
+  padding-left: 5px;
+  width: 40px;
+  cursor: pointer;
+  color: grey;
+  font-weight: 300;
+}
+
+#sound-toggle span.selected {
+  color: white;
+  font-weight: 500;
+}
+
+#sound-toggle span:hover {
+  color: white;
+}
+
+#music-player {
+  flex: 1;
+  height: calc(100% - 50px);
+}
+
 #submit-name-change,
 #quit-content button {
   background: transparent;
@@ -700,8 +737,15 @@ button:active {
     font-size: 2em;
   }
 
+  .menu-content {
+    border-radius: 00px 0px 0px 10px;
+    box-sizing: border-box;
+  }
+
   #info-panel {
-    width: calc(100vw - 84px);
+    margin: 40px 0px 40px 42px;
+    width: calc(100vw - 42px);
+    height: calc(100vh - 80px);
   }
 
   #profile-content p,
@@ -753,6 +797,15 @@ button:active {
   #money-box, 
   #total-box {
     width:48%;
+  }
+
+  #button-bar {
+    width: 60%;
+    flex-wrap: wrap;
+  }
+
+  #button-bar button {
+    margin: 5px 5px;
   }
 
   .player-container .hand-container:nth-child(1) {
