@@ -14,6 +14,33 @@ var socket = io({query: {
   bet: player.bet,
 }});
 
+var playSound = false;
+
+var chipSound = document.createElement('audio');
+chipSound.setAttribute('src', '../sounds/chip.wav');
+
+// plays a random card sound for the indicated action
+function playCardSound(action) {
+  if (action === 'slide') {
+    var randNum = Math.ceil(Math.random() * 8);
+    var fileType = '.wav';
+  } else if (action === 'flip') {
+    var randNum = Math.ceil(Math.random() * 3);
+    var fileType = '.mp3';
+  }
+
+  action = action.charAt(0).toUpperCase() + action.slice(1);
+
+  var cardSound = document.createElement('audio');
+  cardSound.setAttribute('src', `../sounds/card${action}${randNum}${fileType}`);
+
+  if (cardSound.paused) {
+    cardSound.play();
+  } else {
+    cardSound.currentTime = 0;
+  }
+}
+
 if (playerWallet) {
   player.money = playerWallet;
 } else {
@@ -114,17 +141,22 @@ function setUpTable () {
   let $infoButton = $('<div>', {'id': 'info-button', 'class': 'menu-button selected'}).html('<i class="fa fa-question" aria-hidden="true"></i>');
   let $profileButton = $('<div>', {'id': 'profile-button', 'class': 'menu-button'}).html('<i class="fa fa-user" aria-hidden="true"></i>');
   let $quitButton = $('<div>', {'id': 'quit-button', 'class': 'menu-button'}).html('<i class="fa fa-sign-out" aria-hidden="true"></i>');
+  let $soundButton = $('<div>', {'id': 'sound-button', 'class': 'menu-button'}).html('<i class="fa fa-volume-up" aria-hidden="true"></i>');
 
   let $profileGreeting = $('<p>', {'id': 'profile-greeting'}).html(`Hi, ${player.name}!<br/>Don't like being called ${player.name}?`);
   let $inputNameChange = $('<input>', {'type': 'text', 'id': 'input-name-change', 'formmethod': 'post', 'size': '20', 'maxlength': '20', 'placeholder': 'change your name'});
   let $submitNameChange = $('<input>', {'type': 'submit', 'id': 'submit-name-change', 'value': 'CHANGE'});
 
-  let $infoPanelOverlay = $('<div>', {'id': 'info-panel-overlay'});
+  let $infoPanelOverlay = $('<div>', {'id': 'info-panel-overlay', 'style': 'display: none'});
   let $infoPanel = $('<div>', {'id': 'info-panel'});
   let $infoContent = $('<p>', {'id': 'info-content', 'class': 'menu-content'});
-  let $profileContent = $('<div>', {'id': 'profile-content', 'class': 'menu-content'});
-  let $quitContent = $('<div>', {'id': 'quit-content', 'class': 'menu-content'}).html('<p>Do you want to quit?</p>');
+  let $profileContent = $('<div>', {'id': 'profile-content', 'class': 'menu-content'}).hide();
+  let $quitContent = $('<div>', {'id': 'quit-content', 'class': 'menu-content'}).html('<p>Do you want to quit?</p>').hide();
+  let $soundContent = $('<div>', {'id': 'sound-content', 'class': 'menu-content'}).hide();
   let $quitConfirmButton = $('<button>', {'id': 'quit-confirm-button'}).text('QUIT');
+
+  let $soundToggle = $('<div>', {'id': 'sound-toggle', 'class': 'sound-content'}).html('<p>SOUND: <span id="sound-toggle-on" class="sound-toggle">ON</span><span id="sound-toggle-off" class="sound-toggle selected">OFF</span></p>');
+  let $musicPlayer = $('<div>', {'id': 'music-player', 'class': 'sound-content'}).html('<iframe width="100%" height="100%" scrolling="no" frameborder="no" src="https://w.soundcloud.com/player/?url=https%3A//api.soundcloud.com/playlists/359716067&amp;color=%23ff9900&amp;auto_play=false&amp;hide_related=true&amp;show_comments=false&amp;show_user=false&amp;show_reposts=false&amp;show_teaser=false"></iframe>');
 
   let $chatButton = $('<div>', {'id': 'chat-button'}).html('<i class="fa fa-comments" aria-hidden="true"></i>')
   let $chatContainer = $('<div>', {'id': 'chat-container'});
@@ -143,19 +175,20 @@ function setUpTable () {
 
   $profileContent.append($profileGreeting).append($inputNameChange).append($submitNameChange);
   $quitContent.append($quitConfirmButton);
-
+  $soundContent.append($soundToggle).append($musicPlayer);
 
   $('body').append($cardTable);
   $('body').append($menuButton);
   $('body').append($chatContainer);
   $('body').append($chatButton);
-  //$('body').append($infoPanelOverlay);
+  $('body').append($infoPanelOverlay);
 
-  $menuButtons.append($infoButton).append($profileButton).append($quitButton);
+  $menuButtons.append($infoButton).append($profileButton).append($soundButton).append($quitButton);
   $infoPanelOverlay.append($infoPanel);
   $infoPanel.append($infoContent);
   $infoPanel.append($profileContent);
   $infoPanel.append($quitContent);
+  $infoPanel.append($soundContent);
   $infoPanel.fadeIn();
   $profileContent.fadeOut();
 
@@ -276,6 +309,26 @@ function setUpTable () {
           $(this).addClass('selected');
           $('.menu-content').fadeOut(1, function() {
             $infoContent.fadeIn(1);
+          });
+        });
+
+        $('#sound-button').on('click', function() {
+          $('.menu-button').removeClass('selected');
+          $(this).addClass('selected');
+          $('.menu-content').fadeOut(1, function() {
+            $soundContent.fadeIn(1);
+          });
+
+          $('#sound-toggle-on').on('click', function() {
+            playSound = true;
+            $('#sound-toggle-off').removeClass('selected');
+            $(this).addClass('selected');
+          });
+
+          $('#sound-toggle-off').on('click', function() {
+            playSound = false;
+            $('#sound-toggle-on').removeClass('selected');
+            $(this).addClass('selected');
           });
         });
 
@@ -523,10 +576,15 @@ function setBet(betAmount) {
   if (betAmount > 0 && betAmount <= player.money) {
     player.bet = betAmount;
     player.money -= player.bet;
+    
+    if (playSound === true) {
+      chipSound.play();
+    }
+    
     $('#player-money p').text(`$${centify(player.money)}`);
     $('#player-bet p').text(`$${player.bet}`);
     $messageBox.children().remove();
-
+  
     socket.emit('place bet', {name: player.name, bet: player.bet});
 
   } else {
@@ -615,6 +673,9 @@ function dealCards(players, dealer) {
     setTimeout(function() {
       $(`#player-hand div:nth-child(${i})`).removeClass('hidden');
       $(`#player-hand div:nth-child(${i})`).addClass('flyin');
+      if (playSound === true) {
+        playCardSound('slide');
+      }
     }, timeout);
     timeout += 250;
   };
@@ -626,6 +687,9 @@ function dealCards(players, dealer) {
         setTimeout(function() {
           $(`#${otherPlayer.id} div:nth-child(${i})`).removeClass('hidden');
           $(`#${otherPlayer.id} div:nth-child(${i})`).addClass('flyin');
+          if (playSound === true) {
+            playCardSound('slide');
+          }
         }, timeout);
       timeout += 250;
       }
@@ -640,6 +704,9 @@ function dealCards(players, dealer) {
     setTimeout(function() {
       $(`#dealer-hand div:nth-child(${i})`).removeClass('hidden');
       $(`#dealer-hand div:nth-child(${i})`).addClass('flyin');
+      if (playSound === true) {
+        playCardSound('slide');
+      }
     }, timeout);
     timeout += 250;
   };
@@ -679,7 +746,7 @@ socket.on('your turn', function() {
   $hitButton.removeClass('subdued');
   $standButton.removeClass('subdued');
   $doubleButton.removeClass('subdued');
-  
+
   if (player.hand[0].realValue === player.hand[1].realValue) {
     $splitButton.removeClass('subdued');
     $splitButton.on('click', function() {
@@ -748,6 +815,9 @@ function hitMe(recipient, card) {
 
   $newCard.removeClass('removed');
   $newCard.addClass('flyin');
+  if (playSound === true) {
+    playCardSound('slide');
+  }
 
 };
 
@@ -786,6 +856,9 @@ socket.on('new dealer card', function(data) {
   setTimeout(function() {
     $newCard.removeClass('removed');
     $newCard.addClass('flyin');
+    if (playSound === true) {
+      playCardSound('slide');
+    }
   }, timeout);
 });
 
@@ -809,6 +882,10 @@ function endGame(dealerHiddenCard, dealerTotal, winStatus, message) {
 
   $dealerFirstCard.removeClass('flyin');
   $dealerFirstCard.addClass('loop');
+  if (playSound === true) {
+    playCardSound('flip');
+  }
+
   setTimeout(function() {
     $('#dealer-box').removeClass('hidden');
     $dealerFirstCard.css('background-image', `url(${dealerHiddenCard}`);
