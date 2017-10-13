@@ -743,7 +743,10 @@ socket.on('your turn', function() {
 
   $hitButton.removeClass('subdued');
   $standButton.removeClass('subdued');
-  $doubleButton.removeClass('subdued');
+
+  if (player.money >= player.bet) {
+    $doubleButton.removeClass('subdued');
+  }
 
   if (player.hand[0].realValue === player.hand[1].realValue) {
     $splitButton.removeClass('subdued');
