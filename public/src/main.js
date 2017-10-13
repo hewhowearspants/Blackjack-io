@@ -620,6 +620,7 @@ function dealCards(players, dealer) {
   // just in case there are any card divs for whatever reason...
   $('.hand').children().remove();
   $('.hand-player-total').text('');
+  $('#dealer-box').addClass('hidden');
 
   $messageBox.html('<p>Dealing \'em out!</p>');
   $('#message p').delay(1000).fadeOut();
