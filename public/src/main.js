@@ -249,58 +249,53 @@ function setUpTable () {
 
   // ALL OF BELOW HANDLES THE MENU
   $('#menu-button').on('click', function() {
-    if ($('#info-panel-overlay').length === 0) {
+    if ($('#info-panel-overlay:visible').length === 0) {
       $('#menu-button').css({'color': 'rgba(255,255,255,0.5)'});
-      $('body').append($infoPanelOverlay);
-
-      $inputNameChange.keypress(function(event) {
-        let name = $inputNameChange.val();
-
-        if (event.keyCode == 13 || event.which == 13) {
-          if (name !== '') { 
-            player.name = name;
-            $inputNameChange.val('');
-            $('#profile-greeting').html(`Hi, ${player.name}!<br/>Don't like being called ${player.name}?`);
-            
-            // let server know there's a new user in town
-            socket.emit('name change', { name: player.name });
-          } else {
-            $('#input-name-change').attr("placeholder", "enter a name!");
-
-            setTimeout(function() {
-              $('#input-name-change').attr('placeholder', 'change your name');
-            }, 1000);
-          }
-        };
-      });
-
-      $submitNameChange.on('click', function() {
-        let name = $inputNameChange.val();
-
-        if (name !== '') {
-          player.name = name;
-          $inputNameChange.val('');
-          $('#profile-greeting').html(`Hi, ${player.name}!<br/>Don't like being called ${player.name}?`);
-          
-          // let server know you've changed your name
-          socket.emit('name change', { name: player.name });
-        } else {
-          $('#input-name-change').attr('placeholder', 'enter a name!');
-
-          setTimeout(function() {
-            $('#input-name-change').attr('placeholder', 'change your name');
-          }, 1000);
-        }
-      });
+      //$('body').append($infoPanelOverlay);
 
       $infoPanelOverlay.fadeIn(250);
       $infoPanelOverlay.append($menuButtons);
+
       $menuButtons.slideDown(250, () => {
         $('#profile-button').on('click', function() {
           $('.menu-button').removeClass('selected');
           $(this).addClass('selected');
           $('.menu-content').fadeOut(1, function() {
             $profileContent.fadeIn(1);
+          });
+          $inputNameChange.keypress(function(event) {
+            let name = $inputNameChange.val();
+
+            if (event.keyCode == 13 || event.which == 13) {
+              if (name !== '') { 
+                player.name = name;
+                $inputNameChange.val('');
+                $('#profile-greeting').html(`Hi, ${player.name}!<br/>Don't like being called ${player.name}?`);
+                // let server know there's a new user in town
+                socket.emit('name change', { name: player.name });
+              } else {
+                $('#input-name-change').attr("placeholder", "enter a name!");
+                setTimeout(function() {
+                  $('#input-name-change').attr('placeholder', 'change your name');
+                }, 1000);
+              }
+            };
+          });
+
+          $submitNameChange.on('click', function() {
+            let name = $inputNameChange.val();
+            if (name !== '') {
+              player.name = name;
+              $inputNameChange.val('');
+              $('#profile-greeting').html(`Hi, ${player.name}!<br/>Don't like being called ${player.name}?`);
+              // let server know you've changed your name
+              socket.emit('name change', { name: player.name });
+            } else {
+              $('#input-name-change').attr('placeholder', 'enter a name!');
+              setTimeout(function() {
+                $('#input-name-change').attr('placeholder', 'change your name');
+              }, 1000);
+            }
           });
         });
 
@@ -359,7 +354,7 @@ function setUpTable () {
       $menuButtons.slideUp(250, function() {
         $infoPanelOverlay.fadeOut(250, function() {
           $('#menu-button').css({'color': 'white'});
-          $infoPanelOverlay.remove();
+          //$infoPanelOverlay.remove();
         });
       });
     }
