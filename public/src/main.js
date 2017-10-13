@@ -746,6 +746,24 @@ socket.on('your turn', function() {
 
   if (player.money >= player.bet) {
     $doubleButton.removeClass('subdued');
+    
+    $doubleButton.on('click', function() {
+      player.doubleDown = true;
+      player.money -= player.bet;
+      player.bet *= 2;
+      $('#player-money p').text(`$${centify(player.money)}`);
+      $('#player-bet p').text(`$${player.bet}`);
+
+      socket.emit('double down');
+
+      socket.emit('hit me');
+      if (player.total <= 21) {
+        socket.emit('stand');
+      }
+
+      $('#button-bar').children().addClass('subdued');
+      $('#button-bar').children().off('click');
+    });
   }
 
   if (player.hand[0].realValue === player.hand[1].realValue) {
@@ -771,12 +789,6 @@ socket.on('your turn', function() {
     $('#button-bar').children().off('click');
   });
 
-  $doubleButton.on('click', function() {
-    socket.emit('double down');
-
-    $('#button-bar').children().addClass('subdued');
-    $('#button-bar').children().off('click');
-  })
 });
 
 // 'whose turn' IS THE SERVER TELLING YOU WHOSE TURN IT IS (NOT YOURS, DUMMY)
