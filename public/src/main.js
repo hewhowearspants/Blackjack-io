@@ -854,7 +854,7 @@ socket.on('turn over', function() {
     localStorage.setItem('playerMoney', player.money);
   } else if (player.total === 21 && player.hand.length === 2) {
     player.money += (player.bet + (player.bet * 1.5));
-    $('#message').html(`<p>BLACKJACK! YOU WIN $${player.bet + (player.bet * 1.5)}!</p>`);
+    $('#message').html(`<p>BLACKJACK! YOU WIN $${player.bet * 1.5}!</p>`);
     $('#message p').delay(1000).fadeOut();
     $('#player-bet p').html('$0');
     $('#player-money p').text(`$${centify(player.money)}`);
