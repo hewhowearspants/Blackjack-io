@@ -127,7 +127,7 @@ function setUpTable () {
   let $messageBox = ($('<div>', {'class': 'text-container', 'id': 'message-box'}));
   let $message = ($('<div>', {'class': 'text-box', 'id': 'message'}));
   let $totalBox = ($('<div>', {'class': 'text-container', 'id': 'total-box'}));
-  let $playerTotal = ($('<div>', {'class': 'text-box hidden', 'id': 'player-box'})).html('<span id="player-total">Player <p>0</p> </span>');
+  let $playerTotal = ($('<div>', {'class': 'text-box hidden', 'id': 'player-box'})).html(`<span id="player-total">${player.name} <p>0</p> </span>`);
   let $dealerTotal = ($('<div>', {'class': 'text-box hidden', 'id': 'dealer-box'})).html('<span id="dealer-total">Dealer <p>0</p> </span>');
 
   let $buttons = ($('<div>', {'id': 'button-bar'}));
@@ -273,6 +273,7 @@ function setUpTable () {
                 player.name = name;
                 $inputNameChange.val('');
                 $('#profile-greeting').html(`Hi, ${player.name}!<br/>Don't like being called ${player.name}?`);
+                $('#player-total').html(`${player.name} <p>${$('#player-total p').text()}</p>`);
                 // let server know there's a new user in town
                 socket.emit('name change', { name: player.name });
               } else {
