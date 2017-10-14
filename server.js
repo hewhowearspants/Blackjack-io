@@ -245,7 +245,7 @@ function resetGame() {
     player.total = 0;
     player.displayTotal = '';
     player.doubleDown = false;
-    player.split = false;
+    player.splitHand = null;
   })
   dealer.hand = [];
   dealer.total = 0;
@@ -341,7 +341,7 @@ io.on('connection', function(socket) {
       total: 0,
       displayTotal: '',
       doubleDown: false,
-      split: false,
+      splitHand: null,
     }
     players.push(newPlayer);
     console.log(`new player! ${newPlayer.name} / ${newPlayer.money}`);
@@ -450,10 +450,15 @@ io.on('connection', function(socket) {
         
         console.log(`${player.name} hits, dealing ${newCard.value} of ${newCard.suit}`);
         console.log(`${deck.length} cards left`);
-        player.hand.push(newCard);
-        player.total = calculateHand(player.hand);
-        player.displayTotal = `${player.total}`;
-        player = checkForAce(player);
+        if (player.splitHand === null) {
+          player.hand.push(newCard);
+          player.total = calculateHand(player.hand).total;
+          player.displayTotal = calculateHand(player.hand).displayTotal;
+        } else {
+          player.hand[splitHand].push(newCard);
+          player.total[splitHand] = calculateHand(player.hand[splitHand]).total;
+          player.displayTotal[splitHand] = calculateHand(player.hand[splitHand]).displayTotal;
+        }
         
         io.sockets.emit('new card', {player: player, card: newCard});
         
