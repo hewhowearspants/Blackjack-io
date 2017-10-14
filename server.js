@@ -437,6 +437,7 @@ io.on('connection', function(socket) {
         console.log(`${player.name} doubles down! From $${player.bet} to $${player.bet * 2}!`);
         player.money -= player.bet;
         player.bet *= 2;
+        player.doubleDown = true;
         io.sockets.emit('player bet', {otherPlayer: player});
       }
     });
