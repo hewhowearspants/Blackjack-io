@@ -72,9 +72,8 @@ function dealCards() {
     player.hand.push(secondCard);
     console.log(`${player.name} receives ${secondCard.value} of ${secondCard.suit}`);
 
-    player.total = calculateHand(player.hand);
-    player.displayTotal = `${player.total}`;
-    player = checkForAce(player);
+    player.total = calculateHand(player.hand).total;
+    player.displayTotal = calculateHand(player.hand).displayTotal;
 
   });
 
@@ -85,29 +84,29 @@ function dealCards() {
   console.log(`Dealer receives ${firstCard.value} of ${firstCard.suit}`)
   dealer.hand.push(secondCard);
   console.log(`Dealer receives ${secondCard.value} of ${secondCard.suit}`)
-  dealer.total = calculateHand(dealer.hand);
-  dealer.displayTotal = `${dealer.hand}`;
-  dealer = checkForAce(dealer);
+  dealer.total = calculateHand(dealer.hand).total;
+  dealer.displayTotal = calculateHand(dealer.hand).displayTotal;
 
   console.log(`${deck.length} cards left in shoe`);
 
 }
 
-
-
 function calculateHand(hand) {
-  return hand.reduce((total, card) => {
+  let total = hand.reduce((total, card) => {
     return total += card.realValue;
   }, 0);
-}
 
-function checkForAce(player) {
-  if (hasAce(player.hand) && (player.total + 10 <= 21)) {
-    player.displayTotal = `${player.total} (${player.total + 10})`;
-    player.total += 10;
+  let displayTotal = `${total}`;
+
+  if (hasAce(hand) && total + 10 <= 21) {
+    displayTotal = `${total} (${total + 10})`;
+    total += 10;
   }
 
-  return player;
+  return {
+    total: total,
+    displayTotal: displayTotal
+  };
 }
 
 function hasAce(hand) {
@@ -138,9 +137,8 @@ function dealerTurn() {
       io.sockets.emit('new dealer card', {card: newCard});
     }, timeout);
 
-    dealer.total = calculateHand(dealer.hand);
-    dealer.displayTotal = `${dealer.hand}`;
-    dealer = checkForAce(dealer);
+    dealer.total = calculateHand(dealer.hand).total;
+    dealer.displayTotal = calculateHand(dealer.hand).displayTotal;
     timeout += 250;
   }
 
