@@ -160,9 +160,7 @@ function endGame() {
 
   players.forEach((player) => {
     playerList[player.id] = true;
-    if (player.doubleDown) {
-      player.bet /= 2;
-    }
+    
     console.log(`Checking ${player.name} win status...`);
     if (player.total > 21) {
       console.log(`${player.name} busted!`)
@@ -220,6 +218,10 @@ function endGame() {
         status: 'lose',
         message: message,
       });
+    }
+
+    if (player.doubleDown) {
+      player.bet /= 2;
     }
   });
 
