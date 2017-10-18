@@ -335,7 +335,7 @@ h1 #io {
   align-items: center;
   text-align: center;
   height: 150px;
-  width: 150px;
+  width: 180px;
   margin: 10px 0 -50px;
   border-radius: 20px;
   box-sizing: border-box; 
@@ -344,6 +344,28 @@ h1 #io {
 
 .player-container .hand {
   background-color: rgba(0,0,0,0);
+}
+
+.split-hand {
+  position: relative;
+}
+
+.split-hand.selected::before {
+  content: '';
+  border-top: 10px solid gold;
+  border-left: 10px solid transparent;
+  border-right: 10px solid transparent;
+  border-radius: 35%;
+  position: absolute;
+  top: -10px;
+  left: 25%;
+  animation: bouncing 0.8s ease-in-out infinite;
+}
+
+@keyframes bouncing {
+  50% {
+    top: -20px;
+  }
 }
 
 .hand.occupied {
@@ -365,7 +387,7 @@ h1 #io {
   border-radius: 6px;
   display: inline-block;
   margin: 0px -40px;
-  background-size: cover;
+  background-size: contain;
   background-repeat: no-repeat;
 }
 
@@ -373,8 +395,13 @@ h1 #io {
   transform: perspective(500px) rotateY(0deg);
 }
 
+#dealer-hand div:first-child {
+  background-size: cover;
+}
+
 #dealer-card-1 {
   transform: perspective(500px) rotateY(180deg);
+  background-size: cover;
 }
 
 /* ALL INFORMATION ELEMENTS IN THE CENTER */
@@ -754,6 +781,10 @@ button:active {
     font-size: 2em;
   }
 
+  #credits {
+    font-size: 10px;
+  }
+
   .menu-content {
     border-radius: 00px 0px 0px 10px;
     box-sizing: border-box;
@@ -793,6 +824,11 @@ button:active {
     justify-content: space-between;
     width: 100%;
     margin: 10px 0;
+    font-size: 1em;
+  }
+
+  .text-box p, .text-box span {
+    font-size: 1em;
   }
 
   #message-box {
@@ -825,12 +861,12 @@ button:active {
   }
 
   #button-bar {
-    width: 60%;
+    width: 70%;
     flex-wrap: wrap;
   }
 
   #button-bar button {
-    margin: 5px 5px;
+    margin: 3px 5px;
   }
 
   .player-container .hand-container:nth-child(1) {
