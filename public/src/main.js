@@ -760,6 +760,8 @@ function playerTurn() {
   let $messageBox = $('#message');
   let $message = $('#message p');
 
+  $('.split-hand').removeClass('selected');
+  
   if (player.splitHand === null) {
     $messageBox.html('<p>Your turn!</p>');
     $('#message p').delay(1000).fadeOut();
