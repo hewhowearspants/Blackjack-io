@@ -1158,7 +1158,7 @@ function endGame(dealerHiddenCard, dealerTotal, winStatus, message) {
     }
 
     $('#sit-button').on('click', function() {
-      socket.emit('deal me in', {name: player.name});
+      socket.emit('deal me in', {name: player.name, money: player.money});
 
       $('.hand').children().remove();
       $('#message').text(' ');
