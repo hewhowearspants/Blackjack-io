@@ -572,6 +572,12 @@ io.on('connection', function(socket) {
           player.splitHand++;
         } 
 
+        let playerIndex = playersLeftToPlay.findIndex((findPlayer) => {
+          return findPlayer.id === player.id;
+        });
+
+        playersLeftToPlay[playerIndex] = player;
+
         io.sockets.emit('player split', {player: player});
       }
     })
@@ -588,6 +594,7 @@ io.on('connection', function(socket) {
           endPlayerTurn(player);
         } else {
           player.splitHand++;
+          socket.broadcast.emit('whose turn', {player: player});
           if (player.total[player.splitHand] === 21) {
             player.money += player.bet * 1.5;
             io.to(player.id).emit('turn over');
@@ -595,6 +602,7 @@ io.on('connection', function(socket) {
               endPlayerTurn(player);
             } else {
               player.splitHand++;
+              socket.broadcast.emit('whose turn', {player: player});
             }
           }
         }

@@ -911,6 +911,7 @@ socket.on('player split', function(data) {
     let $splitHand2 = $('<div>', {'id': `${playerId}-1`, 'class': 'split-hand'}).append($secondCard).append($newCard2);;
 
     $(`#${playerId}`).append($splitHand1).append($splitHand2);
+    $(`#${playerId}-${data.player.splitHand}`).addClass('selected');
 
     $(`#${playerId}-0`).animate({
       left: "-=5px",
@@ -938,17 +939,15 @@ socket.on('player split', function(data) {
 // 'whose turn' IS THE SERVER TELLING YOU WHOSE TURN IT IS (NOT YOURS, DUMMY)
 socket.on('whose turn', function(data) {
   // 'data' is player, the player whose turn it is
-  console.log(data);
-  if (data.player.id === null) {
-    $('.hand-player-name').removeClass('selected');
-  } else if (data.player.id !== socket.id) {
-    if (data.player.splitHand === null || data.player.splitHand + 1 === data.player.hand[data.player.splitHand].length) {
-      $('.hand-player-name').removeClass('selected');
-      if (data.player.id !== socket.id) {
-        $(`#${data.player.id}`).prev().find('.hand-player-name').addClass('selected');
-      }
-    } else {
-      $(`#${data.player.id}`).children().removeClass('selected');
+  $('.hand-player-name').removeClass('selected');
+  $(`.split-hand`).removeClass('selected');
+
+  if (data.player.id !== socket.id) {
+    console.log(`${data.player.name}'s turn!`);
+    console.log(data.player);
+    $(`#${data.player.id}`).prev().find('.hand-player-name').addClass('selected');
+    if (data.player.splitHand !== null) {
+      //$(`#${data.player.id}`).children().removeClass('selected');
       $(`#${data.player.id}-${data.player.splitHand}`).addClass('selected');
     }
   }
