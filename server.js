@@ -597,6 +597,7 @@ io.on('connection', function(socket) {
           socket.broadcast.emit('whose turn', {player: player});
           if (player.total[player.splitHand] === 21) {
             player.money += player.bet * 1.5;
+            socket.broadcast.emit('update money', {players: players});
             io.to(player.id).emit('turn over');
             if (player.splitHand + 1 === player.hand.length) {
               endPlayerTurn(player);
