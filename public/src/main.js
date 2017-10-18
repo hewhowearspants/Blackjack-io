@@ -156,7 +156,7 @@ function setUpTable () {
   let $quitConfirmButton = $('<button>', {'id': 'quit-confirm-button'}).text('QUIT');
 
   let $soundToggle = $('<div>', {'id': 'sound-toggle', 'class': 'sound-content'}).html('<p>SOUND: <span id="sound-toggle-on" class="sound-toggle">ON</span><span id="sound-toggle-off" class="sound-toggle selected">OFF</span></p>');
-  let $musicPlayer = $('<div>', {'id': 'music-player', 'class': 'sound-content'}).html('<iframe width="100%" height="100%" scrolling="no" frameborder="no" src="https://w.soundcloud.com/player/?url=https%3A//api.soundcloud.com/playlists/359716067&amp;color=%23ff9900&amp;auto_play=false&amp;hide_related=true&amp;show_comments=false&amp;show_user=false&amp;show_reposts=false&amp;show_teaser=false"></iframe>');
+  let $musicPlayer = $('<div>', {'id': 'music-player', 'class': 'sound-content'}).html('<iframe width="100%" height="100%" scrolling="no" frameborder="no" src="https://w.soundcloud.com/player/?url=https%3A//api.soundcloud.com/playlists/359716067&amp;color=%23000000&amp;auto_play=false&amp;hide_related=true&amp;show_comments=false&amp;show_user=false&amp;show_reposts=false&amp;show_teaser=false"></iframe>');
 
   let $chatButton = $('<div>', {'id': 'chat-button'}).html('<i class="fa fa-comments" aria-hidden="true"></i>')
   let $chatContainer = $('<div>', {'id': 'chat-container'});
