@@ -940,11 +940,11 @@ socket.on('player split', function(data) {
 socket.on('whose turn', function(data) {
   // 'data' is player, the player whose turn it is
   $('.hand-player-name').removeClass('selected');
-  $(`.split-hand`).removeClass('selected');
 
   if (data.player.id !== socket.id) {
     console.log(`${data.player.name}'s turn!`);
     console.log(data.player);
+    $(`.split-hand`).removeClass('selected');
     $(`#${data.player.id}`).prev().find('.hand-player-name').addClass('selected');
     if (data.player.splitHand !== null) {
       //$(`#${data.player.id}`).children().removeClass('selected');
