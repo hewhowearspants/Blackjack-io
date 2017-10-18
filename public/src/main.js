@@ -83,7 +83,7 @@ function prefetchDeckImages() {
 
 // PLAYER MUST INPUT A NAME BEFORE JOINING THE GAME
 function inputName() {
-  let $inputName = $('<input>', {'type': 'text', 'id': 'input-name', 'formmethod': 'post', 'size': '20', 'maxlength': '20', 'placeholder': 'enter your name'});
+  let $inputName = $('<input>', {'type': 'text', 'id': 'input-name', 'formmethod': 'post', 'size': '20', 'maxlength': '20', 'placeholder': 'who are you?'});
   let $submitName = $('<input>', {'type': 'submit', 'id': 'submit-name', 'value': 'GO'});
   $('body').append($inputName);
   //$('body').append($submitName);
@@ -91,23 +91,37 @@ function inputName() {
   $inputName.keypress(function(event) {
     let name = $inputName.val();
     if (event.keyCode == 13 || event.which == 13) {
+      if (name !== '') {
+        player.name = name;
+        $inputName.remove();
+        $submitName.remove();
+        // let server know there's a new user in town
+        socket.emit('new user', { name: player.name });
+        setUpTable();
+      } else {
+        $('#input-name').attr("placeholder", "enter a name!");
+        setTimeout(function() {
+          $('#input-name').attr('placeholder', 'who are you?');
+        }, 1000);
+      }
+    };
+  });
+
+  $submitName.on('click', function() {
+    let name = $inputName.val();
+    if (name !== '') {
       player.name = name;
       $inputName.remove();
       $submitName.remove();
       // let server know there's a new user in town
       socket.emit('new user', { name: player.name });
       setUpTable();
-    };
-  });
-
-  $submitName.on('click', function() {
-    let name = $inputName.val();
-    player.name = name;
-    $inputName.remove();
-    $submitName.remove();
-    // let server know there's a new user in town
-    socket.emit('new user', { name: player.name });
-    setUpTable();
+    } else {
+      $('#input-name-change').attr("placeholder", "enter a name!");
+      setTimeout(function() {
+        $('#input-name-change').attr('placeholder', 'change your name');
+      }, 1000);
+    }
   });
 }
 
