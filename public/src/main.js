@@ -4,7 +4,7 @@ console.log('main.js loaded');
 let deck = [];
 let playerWallet = parseInt(localStorage.getItem('playerMoney')) || 1000;
 let playerName = localStorage.getItem('playerName') || 'player';
-let player = {name: playerName, hand: [], money: playerWallet, bet: 0};
+let player = {name: playerName, hand: [], money: playerWallet, bet: 0, splitHand: null};
 let dealer = {name: 'dealer', hand: []};
 let users = [];
 let players = [];
@@ -734,45 +734,55 @@ function dealCards(players, dealer) {
 // ACTIVATES THEIR HIT/STAND BUTTONS
 socket.on('your turn', function() {
   console.log('my turn!');
+  playerTurn();
+
+});
+
+function playerTurn() {
   let $hitButton = $('#hit-button');
   let $standButton = $('#stand-button');
   let $doubleButton = $('#double-button');
   let $splitButton = $('#split-button');
+  let $messageBox = $('#message');
+  let $message = $('#message p');
 
-  $('#message').html('<p>Your turn!</p>');
-  $('#message p').delay(1000).fadeOut();
+  if (player.splitHand === null) {
+    $messageBox.html('<p>Your turn!</p>');
+    $('#message p').delay(1000).fadeOut();
+  } else {
+    $(`#player-hand-${player.splitHand}`).addClass('selected');
+  }
 
   $hitButton.removeClass('subdued');
   $standButton.removeClass('subdued');
 
-  if (player.money >= player.bet) {
+  // currently player cannot double or split if they've already split
+  // re-enable when you've accounted for that
+  if (player.money >= player.bet && player.splitHand === null) {
     $doubleButton.removeClass('subdued');
 
     $doubleButton.on('click', function() {
-      player.doubleDown = true;
-      player.money -= player.bet;
-      player.bet *= 2;
-      $('#player-money p').text(`$${centify(player.money)}`);
-      $('#player-bet p').text(`$${player.bet}`);
-
-      socket.emit('double down');
-
-      socket.emit('hit me');
-      if (player.total <= 21) {
-        socket.emit('stand');
-      }
-
-      $('#button-bar').children().addClass('subdued');
-      $('#button-bar').children().off('click');
+      doubleDown();
     });
   }
 
-  if (player.hand[0].realValue === player.hand[1].realValue) {
-    $splitButton.removeClass('subdued');
-    $splitButton.on('click', function() {
-      socket.emit('split');
-    });
-  }
+  if (player.splitHand === null) {
+    if (player.hand[0].realValue === player.hand[1].realValue) {
+      $splitButton.removeClass('subdued');
+      
+      $splitButton.on('click', function() {
+        splitHand();
+      });
+    } 
+  } //else {
+  //   if (player.hand[player.splitHand][0].realValue === player.hand[player.splitHand][1].realValue) {
+  //     $splitButton.removeClass('subdued');
+      
+  //     $splitButton.on('click', function() {
+  //       splitHand();
+  //     });
+  //   }
+  // }
 
   $hitButton.on('click', function() {
     socket.emit('hit me');
@@ -784,23 +794,149 @@ socket.on('your turn', function() {
   });
 
   $standButton.on('click', function() {
-    socket.emit('stand');
-
-    $('#button-bar').children().addClass('subdued');
-    $('#button-bar').children().off('click');
+    stand();
   });
+}
 
+function doubleDown() {
+  socket.emit('double down');
+
+  player.doubleDown = true;
+  player.money -= player.bet;
+  player.bet *= 2;
+
+  $('#player-money p').text(`$${centify(player.money)}`);
+  $('#player-bet p').text(`$${player.bet}`);
+
+  socket.emit('hit me');
+
+  if (player.total <= 21) {
+    socket.emit('stand');
+  }
+
+  $('#button-bar').children().addClass('subdued');
+  $('#button-bar').children().off('click');
+}
+
+function splitHand() {
+  socket.emit('split');
+
+  player.splitHand = 0;
+  console.log(`splitHand: ${player.splitHand}`);
+  player.money -= player.bet;
+  player.hand = [[player.hand[0]], [player.hand[1]]];
+
+  $('#player-hand').children().removeClass('flyin');
+
+  let $firstCard = $('#player-hand div:nth-child(1)');
+  let $secondCard = $('#player-hand div:nth-child(2)');
+  let $splitHand1 = $('<div>', {'id': 'player-hand-0', 'class': 'split-hand'}).append($firstCard);
+  let $splitHand2 = $('<div>', {'id': 'player-hand-1', 'class': 'split-hand'}).append($secondCard);
+
+  $('#player-hand').append($splitHand1).append($splitHand2);
+
+  $('#player-hand-0').animate({
+    left: "-=20px",
+    top: "-=10px",
+  }, 250);
+  $('#player-hand-1').animate({
+    right: "-=20px",
+    bottom: "-=10px",
+  }, 250);
+
+  $('#button-bar').children().addClass('subdued').off('click');
+  $('#player-money p').text(`$${centify(player.money)}`);
+  $('#player-bet p').html(`$${player.bet} x <span id='split-bet'>${player.hand.length}</span>`);
+
+}
+
+function stand() {
+  socket.emit('stand');
+
+  $('#button-bar').children().addClass('subdued');
+  $('#button-bar').children().off('click');
+
+  if (player.splitHand !== null) {
+    $('#player-hand').children().removeClass('selected');
+    if (player.splitHand + 1 !== player.hand.length) {
+      player.splitHand++;
+      $(`#player-hand-${player.splitHand}`).addClass('selected');
+      console.log(`splitHand: ${player.splitHand}`);
+      playerTurn();
+    }
+  }
+
+}
+
+socket.on('player split', function(data) {
+  let newCard1 = data.player.hand[0][1];
+  let newCard2 = data.player.hand[1][1];
+  let $newCard1 = ($('<div>', {'class': 'card removed'}));
+  $newCard1.css('background-image', `url('${newCard1.img}')`);
+  let $newCard2 = ($('<div>', {'class': 'card removed'}));
+  $newCard2.css('background-image', `url('${newCard2.img}')`);
+
+  if (data.player.id === socket.id) {
+    console.log(data.player);
+    var playerId = 'player-hand';
+    player.hand = data.player.hand;
+    player.total = data.player.total;
+    player.displayTotal = data.player.displayTotal;
+    $('#player-total p').text(`${player.displayTotal.join(' / ')}`);
+    $(`#player-hand-0`).append($newCard1);
+    $(`#player-hand-1`).append($newCard2);
+
+    playerTurn();
+  } else {
+    var playerId = `${data.player.id}`;
+    // CODE HERE TO RENDER OTHER PLAYER SPLITTING
+    $(`#${playerId}`).children().removeClass('flyin');
+    let $firstCard = $(`#${playerId} div:nth-child(1)`);
+    let $secondCard = $(`#${playerId} div:nth-child(2)`);
+    let $splitHand1 = $('<div>', {'id': `${playerId}-0`, 'class': 'split-hand'}).append($firstCard).append($newCard1);
+    let $splitHand2 = $('<div>', {'id': `${playerId}-1`, 'class': 'split-hand'}).append($secondCard).append($newCard2);;
+
+    $(`#${playerId}`).append($splitHand1).append($splitHand2);
+
+    $(`#${playerId}-0`).animate({
+      left: "-=5px",
+      top: "-=5px",
+    }, 250);
+    $(`#${playerId}-1`).animate({
+      right: "-=5px",
+      bottom: "-=5px",
+    }, 250);
+
+    $(`#${playerId}`).prev().find('.hand-player-total').text(data.player.displayTotal.join('/'));
+    $(`#${playerId}`).prev().find('.hand-player-money').text(`$${centify(data.player.money)}`);
+    $(`#${playerId}`).prev().find('.hand-player-bet').html(`$${data.player.bet}x<span id='split-bet'>${data.player.hand.length}</span>`);
+  }
+
+  $newCard1.removeClass('removed');
+  $newCard1.addClass('flyin');
+  $newCard2.removeClass('removed');
+  $newCard2.addClass('flyin');
+  if (playSound === true) {
+    playCardSound('slide');
+  }
 });
 
 // 'whose turn' IS THE SERVER TELLING YOU WHOSE TURN IT IS (NOT YOURS, DUMMY)
 socket.on('whose turn', function(data) {
-  // 'data' is id, the id of the player whose turn it is
-
-  //$('.hand-player-name').css({'background': ''});
-  $('.hand-player-name').removeClass('selected');
-  if (data.id !== socket.id) {
-    //$(`#${data.id}`).prev().find('.hand-player-name').css({'background': 'linear-gradient(to right, rgba(255,215,0,0), rgba(255,215,0,.5), rgba(255,215,0,0))'});
-    $(`#${data.id}`).prev().find('.hand-player-name').addClass('selected');
+  // 'data' is player, the player whose turn it is
+  console.log(data);
+  if (data.player.id === null) {
+    $('.hand-player-name').removeClass('selected');
+  } else if (data.player.id !== socket.id) {
+    if (data.player.splitHand === null || data.player.splitHand + 1 === data.player.hand[data.player.splitHand].length) {
+      $('.hand-player-name').removeClass('selected');
+      if (data.player.id !== socket.id) {
+        $(`#${data.player.id}`).prev().find('.hand-player-name').addClass('selected');
+      }
+    } else {
+      $(`#${data.player.id}`).children().removeClass('selected');
+      $(`#${data.player.id}-${data.player.splitHand}`).addClass('selected');
+    }
   }
 });
 
@@ -816,17 +952,32 @@ function hitMe(recipient, card) {
 
   $newCard.css('background-image', `url('${card.img}')`);
 
-  if (recipient.id === socket.id) {
-    player.hand.push(card);
-    player.total = recipient.total;
-    player.displayTotal = recipient.displayTotal;
-    $(`#player-total p`).text(player.displayTotal);
-    $newCard.attr('id', `player-card-${player.hand.length}`);
-    $(`#player-hand`).append($newCard);
+  if(recipient.splitHand === null) {
+    if (recipient.id === socket.id) {
+      player.hand.push(card);
+      player.total = recipient.total;
+      player.displayTotal = recipient.displayTotal;
+      $(`#player-total p`).text(player.displayTotal);
+      $newCard.attr('id', `player-card-${player.hand.length}`);
+      $(`#player-hand`).append($newCard);
+    } else {
+      $newCard.attr('id', `${recipient.id}-card-${recipient.hand.length}`);
+      $(`#${recipient.id}`).append($newCard);
+      $(`#${recipient.id}`).prev().find('.hand-player-total').text(recipient.displayTotal);
+    }
   } else {
-    $newCard.attr('id', `${recipient.id}-card-${recipient.hand.length}`);
-    $(`#${recipient.id}`).append($newCard);
-    $(`#${recipient.id}`).prev().find('.hand-player-total').text(recipient.displayTotal);
+    if (recipient.id === socket.id) {
+      player.hand[player.splitHand].push(card);
+      player.total[player.splitHand] = recipient.total[player.splitHand];
+      player.displayTotal[player.splitHand] = recipient.displayTotal[player.splitHand];
+      $(`#player-total p`).text(player.displayTotal.join(' / '));
+      $newCard.attr('id', `player-card-${player.splitHand}-${player.hand[player.splitHand].length}`);
+      $(`#player-hand-${player.splitHand}`).append($newCard);
+    } else {
+      $newCard.attr('id', `${recipient.id}-${recipient.splitHand}-card-${recipient.hand.length}`);
+      $(`#${recipient.id}-${recipient.splitHand}`).append($newCard);
+      $(`#${recipient.id}`).prev().find('.hand-player-total').text(recipient.displayTotal.join('/'));
+    }
   }
 
   $newCard.removeClass('removed');
@@ -848,18 +999,40 @@ socket.on('turn over', function() {
   $hitButton.off('click');
   $standButton.off('click');
 
-  if (player.total > 21) {
-    $('#message').html('<p>BUST</p>');
-    $('#message p').delay(1000).fadeOut();
-    $('#player-bet p').html('$0');
-    localStorage.setItem('playerMoney', player.money);
-  } else if (player.total === 21 && player.hand.length === 2) {
-    player.money += (player.bet + (player.bet * 1.5));
-    $('#message').html(`<p>BLACKJACK! YOU WIN $${player.bet * 1.5}!</p>`);
-    $('#message p').delay(1000).fadeOut();
-    $('#player-bet p').html('$0');
-    $('#player-money p').text(`$${centify(player.money)}`);
-    localStorage.setItem('playerMoney', player.money);
+  if (player.splitHand === null) {
+    if (player.total > 21) {
+      $('#message').append($('<p>').text(`BUST!`).delay(1000).fadeOut());
+      $('#player-bet p').html('$0');
+      localStorage.setItem('playerMoney', player.money);
+    } else if (player.total === 21 && player.hand.length === 2) {
+      player.money += (player.bet + (player.bet * 1.5));
+      $('#message').append($('<p>').text(`BLACKJACK! YOU WIN $${player.bet * 1.5}!`).delay(1000).fadeOut());
+      $('#player-money p').text(`$${centify(player.money)}`);
+      $('#player-bet p').html('$0');
+      localStorage.setItem('playerMoney', player.money);
+    }
+  } else {
+    if (player.total[player.splitHand] > 21) {
+      $('#message').append($('<p>').text(`BUST!`).delay(1000).fadeOut());
+      if (parseInt($('#split-bet')[0].textContent) - 1 !== 0) {
+        $('#split-bet').text(`${parseInt($('#split-bet')[0].textContent) - 1}`);
+      } else {
+        $('#player-bet p').text('$0');
+      }
+    } else if (player.total[player.splitHand] === 21 && player.hand[player.splitHand].length === 2) {
+      player.money += (player.bet + (player.bet * 1.5));
+      $('#message').append($('<p>').text(`BLACKJACK! YOU WIN $${player.bet * 1.5}!`).delay(1000).fadeOut());
+      $('#player-money p').text(`$${centify(player.money)}`);
+      $('#player-bet p').html('$0');
+      localStorage.setItem('playerMoney', player.money);
+    }
+    $(`#player-hand-${player.splitHand}`).removeClass('selected');
+    if (player.splitHand + 1 !== player.hand.length) {
+      player.splitHand++;
+      playerTurn();
+    } else {
+      $('#button-bar').children().addClass('subdued').off('click');
+    }
   }
 });
 
@@ -928,7 +1101,29 @@ function endGame(dealerHiddenCard, dealerTotal, winStatus, message) {
       $('#player-bet p').html('$0');
       $('#player-money p').text(`$${centify(player.money)}`);
       localStorage.setItem('playerMoney', player.money);
-    }  
+    } else if (typeof winStatus === 'object') {
+      winStatus.forEach((status, index) => {
+        if (status === 'win') {
+          if (player.total[index] === 21 && player.hand[index].length === 2) {
+            player.money = player.money;
+          } else {
+            player.money += player.bet * 2;
+            $('#player-bet p').html('$0');
+            $('#player-money p').text(`$${centify(player.money)}`);
+            localStorage.setItem('playerMoney', player.money);
+          }
+        } else if (status === 'push') {
+          player.money += player.bet;
+          $('#player-bet p').html('$0');
+          $('#player-money p').text(`$${centify(player.money)}`);
+          localStorage.setItem('playerMoney', player.money);
+        } else if (status === 'lose') {
+          $('#player-bet p').html('$0');
+          $('#player-money p').text(`$${centify(player.money)}`);
+          localStorage.setItem('playerMoney', player.money);
+        }
+      })
+    }
 
     $doubleButton.addClass('removed');
     $splitButton.addClass('removed');
@@ -966,6 +1161,11 @@ function endGame(dealerHiddenCard, dealerTotal, winStatus, message) {
   }
 
   if (message !== '') {
+    if (typeof message === 'object') {
+      message = message.filter((msg) => {
+        return msg !== '';
+      }).join('<br/>');
+    }
     $messageBox.html(`<p>${message}</p>`);
   }
   $('#message p').delay(1000).fadeOut();
@@ -1016,6 +1216,10 @@ function resetGame() {
   if (player.doubleDown) {
     player.bet /= 2;
     player.doubleDown = false;
+  }
+
+  if (player.splitHand) {
+    player.splitHand = null;
   }
 
   if($('.primary').attr('id') === 'player-hand' && player.money > 0) {

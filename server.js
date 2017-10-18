@@ -124,7 +124,9 @@ function hasAce(hand) {
 function dealerTurn() {
   let timeout = 0;
 
-  io.sockets.emit('whose turn', {id: null});
+  io.sockets.emit('whose turn', {player: {id: null}});
+
+  console.log(`dealer turn! ${dealer.total}`);
 
   while (dealer.total < 17) {
     let newCard = deck.shift();
@@ -160,61 +162,111 @@ function endGame() {
     playerList[player.id] = true;
     
     console.log(`Checking ${player.name} win status...`);
-    if (player.total > 21) {
-      console.log(`${player.name} busted!`)
-      io.to(player.id).emit('game over', {
-        dealerHiddenCard: dealer.hand[0].img,
-        dealerTotal: dealer.total,
-        status: 'lose',
-        message: '',
-      });
-    } else if (dealer.total > 21 && (player.total < 21 || (player.total === 21 && player.hand.length > 2))) {
-      console.log(`${player.name} won because dealer bust!`);
-      player.money += player.bet * 2;
-      io.to(player.id).emit('game over', {
-        dealerHiddenCard: dealer.hand[0].img, 
-        dealerTotal: dealer.total,
-        status: 'win',
-        message: `Dealer busts! YOU WIN $${player.bet}!`,
-      });
-    } else if (dealer.total === player.total) {
-      console.log(`${player.name} pushed!`)
-      player.money += player.bet;
-      io.to(player.id).emit('game over', {
-        dealerHiddenCard: dealer.hand[0].img, 
-        dealerTotal: dealer.total,
-        status: 'push', 
-        message: 'PUSH!',
-      });
-    } else if (player.total > dealer.total) {
-      if (player.total === 21 && player.hand.length === 2) {
-        console.log(`${player.name} won by blackjack!`)
-        var message = '';
-      } else {
-        console.log(`${player.name} won!`)
+    if (player.splitHand === null) {
+      if (player.total > 21) {
+        console.log(`${player.name} busted!`)
+        io.to(player.id).emit('game over', {
+          dealerHiddenCard: dealer.hand[0].img,
+          dealerTotal: dealer.total,
+          status: 'lose',
+          message: '',
+        });
+      } else if (dealer.total > 21 && (player.total < 21 || (player.total === 21 && player.hand.length > 2))) {
+        console.log(`${player.name} won because dealer bust!`);
         player.money += player.bet * 2;
-        var message = `YOU WIN $${player.bet}!`;
-      }
+        io.to(player.id).emit('game over', {
+          dealerHiddenCard: dealer.hand[0].img, 
+          dealerTotal: dealer.total,
+          status: 'win',
+          message: `Dealer busts! YOU WIN $${player.bet}!`,
+        });
+      } else if (dealer.total === player.total) {
+        console.log(`${player.name} pushed!`)
+        player.money += player.bet;
+        io.to(player.id).emit('game over', {
+          dealerHiddenCard: dealer.hand[0].img, 
+          dealerTotal: dealer.total,
+          status: 'push', 
+          message: 'PUSH!',
+        });
+      } else if (player.total > dealer.total) {
+        if (player.total === 21 && player.hand.length === 2) {
+          console.log(`${player.name} won by blackjack!`)
+          var message = '';
+        } else {
+          console.log(`${player.name} won!`)
+          player.money += player.bet * 2;
+          var message = `YOU WIN $${player.bet}!`;
+        }
 
-      io.to(player.id).emit('game over', {
-        dealerHiddenCard: dealer.hand[0].img, 
-        dealerTotal: dealer.total,
-        status: 'win',
-        message: message,
+        io.to(player.id).emit('game over', {
+          dealerHiddenCard: dealer.hand[0].img, 
+          dealerTotal: dealer.total,
+          status: 'win',
+          message: message,
+        });
+      } else if (dealer.total > player.total) {
+        console.log(`${player.name} lost.`)
+        let message = 'Dealer wins.';
+
+        if (dealer.total === 21 && dealer.hand.length === 2) {
+          message += ' Dealer has blackjack.';
+        }
+
+        io.to(player.id).emit('game over', {
+          dealerHiddenCard: dealer.hand[0].img, 
+          dealerTotal: dealer.total,
+          status: 'lose',
+          message: message,
+        });
+      }
+    } else {
+      let splitStatuses = [];
+      let splitMessages = [];
+      player.total.forEach((total, index) => {
+        if (total > 21) {
+          console.log(`${player.name} hand ${index + 1} busted!`);
+          splitStatuses.push('lose');
+          splitMessages.push(``);
+
+        } else if (dealer.total > 21 && (total < 21 || (total === 21 && player.hand[index].length > 2))) {
+          console.log(`${player.name} hand won because dealer bust!`);
+          player.money += player.bet * 2;
+          splitStatuses.push('win');
+          splitMessages.push(`Dealer busts! Hand ${index + 1} won $${player.bet}!`);
+
+        } else if (dealer.total === total) {
+          console.log(`${player.name} hand ${index + 1} pushed!`);
+          player.money += player.bet;
+          splitStatuses.push('push');
+          splitMessages.push(`Hand ${index + 1} pushed!`);
+
+        } else if (total > dealer.total) {
+          if (total === 21 && player.hand[index].length === 2) {
+            console.log(`${player.name} hand ${index + 1} won by blackjack!`);
+            splitStatuses.push('win');
+            splitMessages.push('');
+          } else {
+            console.log(`${player.name} hand ${index + 1} won!`)
+            player.money += player.bet * 2;
+            splitStatuses.push('win');
+            splitMessages.push(`Hand ${index + 1} wins $${player.bet}!`);
+          }
+        } else if (dealer.total > total) {
+          console.log(`${player.name} hand ${index + 1} lost.`)
+          let message = `Dealer beat hand ${index + 1}.`;
+          if (dealer.total === 21 && dealer.hand.length === 2) {
+            message += ' Dealer has blackjack.';
+          }
+          splitStatuses.push('lose');
+          splitMessages.push(message);
+        }
       });
-    } else if (dealer.total > player.total) {
-      console.log(`${player.name} lost.`)
-      let message = 'Dealer wins.';
-
-      if (dealer.total === 21 && dealer.hand.length === 2) {
-        message += ' Dealer has blackjack.';
-      }
-
       io.to(player.id).emit('game over', {
         dealerHiddenCard: dealer.hand[0].img, 
         dealerTotal: dealer.total,
-        status: 'lose',
-        message: message,
+        status: splitStatuses,
+        message: splitMessages,
       });
     }
 
@@ -300,7 +352,7 @@ io.on('connection', function(socket) {
         ],
       })
       if (playersLeftToPlay[0]) {
-        socket.emit('whose turn', {id: playersLeftToPlay[0].id});
+        socket.emit('whose turn', {player: playersLeftToPlay[0]});
       }
     }
 
@@ -427,7 +479,7 @@ io.on('connection', function(socket) {
 
     if(playersLeftToPlay.length > 0) {
       io.to(playersLeftToPlay[0].id).emit('your turn');
-      io.sockets.emit('whose turn', {id: playersLeftToPlay[0].id});
+      io.sockets.emit('whose turn', {player: playersLeftToPlay[0]});
     }
   }
 
@@ -456,56 +508,115 @@ io.on('connection', function(socket) {
           player.total = calculateHand(player.hand).total;
           player.displayTotal = calculateHand(player.hand).displayTotal;
         } else {
-          player.hand[splitHand].push(newCard);
-          player.total[splitHand] = calculateHand(player.hand[splitHand]).total;
-          player.displayTotal[splitHand] = calculateHand(player.hand[splitHand]).displayTotal;
+          player.hand[player.splitHand].push(newCard);
+          player.total[player.splitHand] = calculateHand(player.hand[player.splitHand]).total;
+          player.displayTotal[player.splitHand] = calculateHand(player.hand[player.splitHand]).displayTotal;
         }
         
         io.sockets.emit('new card', {player: player, card: newCard});
         
         // if player busts...
-        if (player.total > 21) {
+        if (player.total > 21 || player.total[player.splitHand] > 21) {
           console.log(`${player.name} busted!`);
-          let bustedPlayer;
           
-          playersLeftToPlay.forEach((player, index) => {
-            if (player.id === socket.id) {
-              bustedPlayer = player;
-              playersLeftToPlay.splice(index, 1);
+          // if player has not split or if they are on their last split hand
+          if (player.splitHand === null || player.splitHand + 1 === player.hand.length) {
+            let playerIndex = playersLeftToPlay.findIndex((player) => {
+              return player.id === socket.id;
+            });
+
+            let bustedPlayer = playersLeftToPlay[playerIndex];
+
+            playersLeftToPlay.splice(playerIndex, 1);
+            // if there are still players left
+            if (playersLeftToPlay.length) {
+              io.to(bustedPlayer.id).emit('turn over');
+              console.log(`player turn: ${playersLeftToPlay[0].id}`);
+              io.to(playersLeftToPlay[0].id).emit('your turn');
+              io.sockets.emit('whose turn', {player: playersLeftToPlay[0]});
+            } else {
+              io.to(bustedPlayer.id).emit('turn over');
+              dealerTurn();
             }
-          });
-          
-          // if there are still players left
-          if (playersLeftToPlay.length) {
-            io.to(bustedPlayer.id).emit('turn over');
-            console.log(`player turn: ${playersLeftToPlay[0].id}`);
-            io.to(playersLeftToPlay[0].id).emit('your turn');
-            io.sockets.emit('whose turn', {id: playersLeftToPlay[0].id});
           } else {
-            io.to(bustedPlayer.id).emit('turn over');
-            dealerTurn();
+            player.splitHand++;
+            io.to(player.id).emit('turn over');
+            io.sockets.emit('whose turn', {player: player});
           }
         }
       }
     })
   });
 
+  socket.on('split', function() {
+    let newCard1 = deck.shift();
+    let newCard2 = deck.shift();
+
+    players.forEach((player) => {
+      if (player.id === socket.id) {
+        console.log(`${player.name} splits!`);
+        player.splitHand = 0;
+        player.hand = [[player.hand[0], newCard1], [player.hand[1], newCard2]];
+        player.money -= player.bet;
+        player.total = [];
+        player.displayTotal = [];
+
+        for (let i = 0; i < player.hand.length; i++) {
+          player.total[i] = calculateHand(player.hand[i]).total;
+          player.displayTotal[i] = calculateHand(player.hand[i]).displayTotal;
+        }
+        
+        if (player.total[0] === 21) {
+          player.money += player.bet * 1.5;
+          socket.emit('turn over');
+          player.splitHand++;
+        } 
+
+        io.sockets.emit('player split', {player: player});
+      }
+    })
+  });
+
   socket.on('stand', function() {
-    let finishedPlayer;
+
     playersLeftToPlay.forEach((player, index) => {
       if (player.id === socket.id) {
-        finishedPlayer = player;
-        playersLeftToPlay.splice(index, 1);
+
+        // if player hasn't split their hand OR
+        // if the player has split their hand and has played all of their hands
+        if (player.splitHand === null || player.splitHand + 1 === player.hand.length) {
+          endPlayerTurn(player);
+        } else {
+          player.splitHand++;
+          if (player.total[player.splitHand] === 21) {
+            player.money += player.bet * 1.5;
+            io.to(player.id).emit('turn over');
+            if (player.splitHand + 1 === player.hand.length) {
+              endPlayerTurn(player);
+            } else {
+              player.splitHand++;
+            }
+          }
+        }
+
       }
     });
+    
+  });
 
+  function endPlayerTurn(finishedPlayer) {
+    let playerIndex = playersLeftToPlay.findIndex((player) => {
+      return player.id === finishedPlayer.id;
+    });
+
+    playersLeftToPlay.splice(playerIndex, 1);
     if (playersLeftToPlay.length) {
-      io.to(playersLeftToPlay[0].id).emit('your turn');
-      io.sockets.emit('whose turn', {id: playersLeftToPlay[0].id});
+          io.to(playersLeftToPlay[0].id).emit('your turn');
+          io.sockets.emit('whose turn', {player: playersLeftToPlay[0]});
     } else {
       dealerTurn();
     }
-  })
+  }
 
   socket.on('leave game', function() {
     players.forEach((player, index) => {
@@ -522,7 +633,7 @@ io.on('connection', function(socket) {
         playersLeftToPlay.splice(index, 1);
         if (index === 0 && playersLeftToPlay[0]) {
           io.to(playersLeftToPlay[0].id).emit('your turn');
-          io.sockets.emit('whose turn', {id: playersLeftToPlay[0].id});
+          io.sockets.emit('whose turn', {player: playersLeftToPlay[0]});
         }
       }
     });
@@ -573,7 +684,7 @@ io.on('connection', function(socket) {
         playersLeftToPlay.splice(index, 1);
         if (index === 0 && playersLeftToPlay[0]) {
           io.to(playersLeftToPlay[0].id).emit('your turn');
-          io.sockets.emit('whose turn', {id: playersLeftToPlay[0].id});
+          io.sockets.emit('whose turn', {player: playersLeftToPlay[0]});
         }
       }
     });
@@ -625,7 +736,7 @@ io.on('connection', function(socket) {
         playersLeftToPlay.splice(index, 1);
         if (index === 0 && playersLeftToPlay[0]) {
           io.to(playersLeftToPlay[0].id).emit('your turn');
-          io.sockets.emit('whose turn', {id: playersLeftToPlay[0].id});
+          io.sockets.emit('whose turn', {player: playersLeftToPlay[0]});
         }
       }
     });
