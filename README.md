@@ -1,70 +1,50 @@
-# Blackjack
+# Blackjack.io
 
-![Screenshot](./assets/blackjack_screenshot.png)
+![Screenshot](./assets/Blackjack-io-screenshot-1.png)
+![Screenshot](./assets/Blackjack-io-screenshot-2.png)
+![Screenshot](./assets/Blackjack-io-screenshot-3.png)
+![Screenshot](./assets/Blackjack-io-screenshot-4.png)
+![Screenshot](./assets/Blackjack-io-screenshot-5.png)
+
+Play it here! ==> [blackjack-io.herokuapp.com/](http://blackjack-io.herokuapp.com/)
 
 ## What is Blackjack?
 
-Blackjack, also known as 21, is a card game where a player faces off against a dealer. The dealer and the player each initially get two cards. The player can only see one of the dealer's cards. The cards's are worth face value, except Aces and face cards (J, Q, K), which are 1 or 11 and 10, respectively.
+Blackjack, also known as 21, is a card game where players face off against a dealer. The dealer and the players each initially get two cards. The players can only see one of the dealer's cards. The cards are worth face value, except Aces and face cards (J, Q, K), which are 1 or 11 and 10, respectively.
 
-The player's goal is to get the sum of their cards higher than the sum of the dealer's cards, without that sum going over 21 ('BUST'). The player can request additional cards (or 'HIT') if they want to increase their chances of beating the dealer. When the player is satisfied, and has not gone over 21, they can end their turn (or 'STAND').
+Each player's goal is to get the sum of their cards higher than the sum of the dealer's cards, without that sum going over 21 ('BUST'). To join a game, each player must bet an amount of money.
 
-When the player has ended their turn, if sum of the dealer's hand is less than 16, the dealer will 'HIT' until their hand is worth more than 16, at which point, the dealer stands. If the dealer 'BUSTS', the player automatically wins.
+After the initial two-card deal, if the dealer has a blackjack, meaning their two cards add up to 21 (meaning an ace and a 10/J/Q/K), the game is immediately over and everyone at the table who does not also have a blackjack loses. Players who do have blackjack get only their initial bet back ('PUSH'). If the dealer does not have a blackjack, players who do have blackjack automatically win, and even get paid out 1.5x on top of their original bet!
 
-After the dealer stands, the dealer's hidden card is revealed to the player, and if the sum of the player's hand is higher than the dealer, the player wins. If they are equal, then it is a tie game, or 'PUSH'.
+If neither the dealer nor the player has a blackjack, the player then has up to four options:
 
-Blackjack is frequently played in casinos, and players bet a certain amount on winning. If the player wins, they get double their money back. If the player and dealer 'PUSH', the player gets only their initial bet back.
+'HIT': The player requests additional cards if they want to increase their chances of beating the dealer. If the new card puts the player's total over 21 ('BUST'), their turn is automatically over.
+'DOUBLE DOWN': The player doubles their original bet and gets just one additional card. After this, their turn is over, whether or not they 'BUST'.
+'SPLIT': If the player's initial two cards have the same value (including 10s and face cards), they can split those two cards into two separate hands, each of which get an extra card. From there, the player plays each split hand separately. This also essentially doubles the player's bet, as each split hand has their own separate bet equal to the player's original bet.
+'STAND': When the player is satisfied, and has not gone over 21, they can end their turn.
 
-I chose to make this game because I thought it would be a good test of my abilities to create a game using all of the concepts we had learned so far, from HTML to CSS to Javascript.
+When each player has ended their turn, if sum of the dealer's hand is less than 17, the dealer will 'HIT' until their hand is worth 17 or higher, at which point, the dealer stands. If the dealer 'BUSTS', the players automatically win.
+
+After the dealer stands, the dealer's hidden card is revealed to the players, and if the sum of the player's hand is higher than the dealer's, the player wins. If they are equal, then it is a tie game, or 'PUSH'. If the dealer's is higher than the player's, the player loses.
 
 ## Technical Discussion
 
-This game made heavy use of Javascript, and CSS, with a barebones HTML file that was filled in dynamically using jQuery.
+This game is a revamping of my earlier Blackjack web browser game that adds socket.io to make it a multiplayer game. This required offloading a lot of game functionality to a simple Node backend to handle the role of the dealer. It also makes heavy use of jQuery, Javascript, and CSS, with a barebones HTML file that is filled in dynamically.
+
+I must admit, implementing 'SPLIT' turned out to be more complicated than I expected, largely because the game was originally built around the assumption that players would only have one hand (essentially an array of Card objects). Splitting necessitated turning the array of objects into an array of arrays of objects, which, in and of itself, is not so bad, but when all of the game logic is built around handling an array of objects, whole functions and sections of code had re-thought to ensure they could handle split hands.
 
 ### Notes on Game Structure
 
-```javascript
-// ADDS A CARD TO THE INDICATED PLAYER'S HAND, UPDATES PLAYER TOTAL
-// ADJUSTS CALCULATION IF ACE IS PRESENT
-function hitMe(turn) {
-  let $newCard = ($('<div>', {'class': 'card removed'}));
-  let newCard = deck.shift();
+In addition to turning this into a multiplayer game, the game also includes card & chip sound effects and an embedded jazz music Soundcloud playlist curated by myself. They are turned off by default.
 
-  $newCard.css('background-image', `url('${newCard.img}')`);
+## The Making of Blackjack.io
 
-  turn.hand.push(newCard);
-  $newCard.attr('id', `${turn.name}-card-${turn.hand.length}`);
-  turn.$hand.append($newCard);
-
-  turn.total = calculateHand(turn);
-
-  $(`#${turn.name}-total p`).text(turn.total);
-
-  checkForAce(turn);
-
-};
-```
-Above is a code sample of my "hitMe" function. I feel it represents a good cross-section of my game structure.
-
-Some unforeseen challenges included realizing that setTimeout does not delay code execution and learning how to preload images so that my card animations would work properly when the game was deployed online.
-
-The latter challenge culminated in the below code snippet, which I was pleased when it worked right away:
-
-```javascript
-// PRELOADS CARD DECK IMAGES
-function prefetchDeckImages() {
-  deck.forEach((card) => {
-    let $imageLink = $('<link>', {'rel': 'prefetch', 'href': `${card.img}`});
-    $('head').append($imageLink);
-  });
-};
-```
-
-## The Making of Blackjack
-
-Thanks to Philip Zak for saying 'hey, you should make blackjack', and my wife Yue for putting up with my obsessively working on this game.  And all the guys at the table for the emotional support when CSS had me in a glass cage of emotion.
-
-Also thanks to the Queens County court system for letting me off the hook for jury duty, and the internet in general for having answers to all the questions.
+This version is the realization two things: following through on what I originally wanted to accomplish if I had more time for my original Blackjack game (implementing splitting and doubling down, adding music and sound, responsive design), as well as fulfilling something I wanted to do when I first learned socket.io, creating a multiplayer game, which I did as part of a group project in Grandmaster.io and now, finally, brought to Blackjack.
 
 ## Opportunities for Future Growth
 
-If I had more time, I would implement splitting hands and doubling down, as well as insurance for when the dealer is showing an ace, which indicates a possibly blackjack. I would also continue making the site more reactive and look better at various viewport standards. I might even add music and sound!
+I still have not implemented insurance, where the player can put down some money when the dealer is showing an ace, which indicates a possible blackjack. In the event of a blackjack, the player would then get their money back. I'd also like to implement a visual representation of the player's money as stacks of chips, which would just require getting some chip image assets and DOM manipulating the crap out of them.
+
+I'd also like to re-think the visual design of the game a bit more.
+
+And, of course, there are still some bugs that I'll be ironing out.
