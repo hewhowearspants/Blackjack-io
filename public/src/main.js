@@ -761,7 +761,7 @@ function playerTurn() {
   let $message = $('#message p');
 
   $('.split-hand').removeClass('selected');
-  
+
   if (player.splitHand === null) {
     $messageBox.html('<p>Your turn!</p>');
     $('#message p').delay(1000).fadeOut();
@@ -944,12 +944,9 @@ socket.on('whose turn', function(data) {
   $('.hand-player-name').removeClass('selected');
 
   if (data.player.id !== socket.id) {
-    console.log(`${data.player.name}'s turn!`);
-    console.log(data.player);
     $(`.split-hand`).removeClass('selected');
     $(`#${data.player.id}`).prev().find('.hand-player-name').addClass('selected');
     if (data.player.splitHand !== null) {
-      //$(`#${data.player.id}`).children().removeClass('selected');
       $(`#${data.player.id}-${data.player.splitHand}`).addClass('selected');
     }
   }
