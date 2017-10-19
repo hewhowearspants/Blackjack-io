@@ -56,7 +56,8 @@ p {
   position: absolute;
   top: 0;
   left: 0;
-  z-index: 500;
+  z-index: 501;
+  transform: translateZ(81px);
 }
 
 #menu-buttons {
@@ -95,7 +96,8 @@ p {
   bottom: 0;
   left: 0;
   height: 100vh;
-  z-index: 499;
+  z-index: 500;
+  transform: translateZ(81px);
   background-color: rgba(0,0,0,.6);
 }
 
@@ -641,7 +643,8 @@ button:active {
   width: 40px;
   font-size: 20px;
   position: absolute;
-  z-index: 501;
+  z-index: 401;
+  transform: translateZ(80px);
   top: 0;
   right: 0;
   display: flex;
@@ -655,7 +658,8 @@ button:active {
   width: 30vw;
   height: 35vh;
   position: fixed;
-  z-index: 500;
+  z-index: 400;
+  transform: translateZ(80px);
   display: flex;
   flex-direction: column;
   top: 0;
@@ -686,7 +690,7 @@ button:active {
   align-items: flex-start;
   overflow: auto;
   padding: 0px 5px;
-  font-weight: 100;
+  font-weight: 400;
   font-size: 14px;
 }
 
