@@ -750,13 +750,14 @@ function dealCards(players, dealer) {
 };
 
 // 'your turn' IS THE SERVER NOTIFYING PLAYER IT IS THEIR TURN
-// ACTIVATES THEIR HIT/STAND BUTTONS
 socket.on('your turn', function() {
-  console.log('my turn!');
+  //console.log('my turn!');
   playerTurn();
 
 });
 
+// PLAYERTURN ACTIVATES PLAYER BUTTONS.
+// ALSO ACCOUNTS FOR SPLIT HANDS
 function playerTurn() {
   let $hitButton = $('#hit-button');
   let $standButton = $('#stand-button');
@@ -843,7 +844,6 @@ function splitHand() {
   socket.emit('split');
 
   player.splitHand = 0;
-  console.log(`splitHand: ${player.splitHand}`);
   player.money -= player.bet;
   player.hand = [[player.hand[0]], [player.hand[1]]];
 
@@ -882,7 +882,7 @@ function stand() {
     if (player.splitHand + 1 !== player.hand.length) {
       player.splitHand++;
       $(`#player-hand-${player.splitHand}`).addClass('selected');
-      console.log(`splitHand: ${player.splitHand}`);
+
       playerTurn();
     }
   }
@@ -898,7 +898,6 @@ socket.on('player split', function(data) {
   $newCard2.css('background-image', `url('${newCard2.img}')`);
 
   if (data.player.id === socket.id) {
-    console.log(data.player);
     var playerId = 'player-hand';
     player.hand = data.player.hand;
     player.total = data.player.total;
