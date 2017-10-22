@@ -461,21 +461,23 @@ socket.on('new user', function(message) {
 // 'sit invite' CREATES A 'SIT' BUTTON FOR USER TO JOIN GAME AS PLAYER
 // WILL ONLY BE SENT IF THE SERVER'S gameInProgress IS false
 socket.on('sit invite', function() {
-  let $sitButton = $('<button>', {id: 'sit-button', style: 'align-self: flex-start; margin-top: 10px;'}).text('SIT');
+  let $sitButton = $('<button>', {class: 'sit-button', style: 'align-self: flex-start; margin-top: 10px;'}).text('SIT');
 
   // only add if there isn't already a sit button and you're not already playing
-  if($('#sit-button').length === 0 && $('.primary').attr('id') !== 'player-hand') {
+  if($('.sit-button').length === 0 && !$('.primary').attr('id')) {
     $('.primary').append($sitButton);
 
-    $('#sit-button').on('click', function() {
-      // tells server that you're joining as player
-      socket.emit('deal me in', {name: player.name, money: player.money});
+    if(!$._data($('.sit-button')[0], 'events')) {
+      $('.sit-button').on('click', function() {
+        // tells server that you're joining as player
+        socket.emit('deal me in', {name: player.name, money: player.money});
 
-      $('#money-box').children().removeClass('hidden');
-      $('.primary').attr({'id': 'player-hand'});
-      $sitButton.remove();
-      placeBet();
-    })
+        $('#money-box').children().removeClass('hidden');
+        $('.primary').attr({'id': 'player-hand'});
+        $sitButton.remove();
+        placeBet();
+      });
+    }
   }
 
 });
