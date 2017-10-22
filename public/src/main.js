@@ -511,9 +511,13 @@ function assignNewPlayer(newPlayer) {
       }
     });
     // ...assign them to the center spot if all the others are filled
-    if (players.length === 5) {
+    if (players.length === 5 && $('.other.occupied').length === 4 && $('.primary').attr('id') !== 'player-hand') {
       $('.primary').first().addClass('occupied');
       $('.primary').first().attr({'id': newPlayer.id});
+      $('.primary').prev().find('.hand-player-name').text(newPlayer.name);
+      newPlayer.bet ? $('.primary').prev().find('.hand-player-bet').text(`$${newPlayer.bet}`) : '';
+      newPlayer.displayTotal ? $('.primary').prev().find('.hand-player-total').text(newPlayer.displayTotal) : '';
+      $('.primary').prev().find('.hand-player-money').text(`$${newPlayer.money}`);
     };
   }
 }
