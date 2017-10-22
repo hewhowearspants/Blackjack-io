@@ -424,9 +424,11 @@ io.on('connection', function(socket) {
     let newPlayer = new Player(socket.id, data.name, data.money);
 
     players.push(newPlayer);
-    console.log(`new player! ${newPlayer.name} / ${newPlayer.money}`);
+
+    console.log(`new player! ${newPlayer.name} / ${players.length} players now`);
     io.sockets.emit('new player', {newPlayer: newPlayer});
-    if (players.length === 5) {
+
+    if (players.length >= 5) {
       io.sockets.emit('sit uninvite');
     }
   })
