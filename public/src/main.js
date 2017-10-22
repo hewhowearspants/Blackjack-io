@@ -1435,4 +1435,19 @@ socket.on('list users', function(data) {
   $('#chat-messages').prepend($userList);
 });
 
+//COMMENT OUT FOR PRODUCTION
+// socket.on('server reset', function() {
+//   $('#card-table').remove();
+//   $('#menu-button').css({'color': 'white'});
+//   $('#info-panel-overlay').remove();
+//   $('#menu-button').remove();
+//   $('#chat-button').remove();
+//   $('#chat-container').remove();
+
+//   if ($('#input-name').length === 0) {
+//     inputName();
+//   }
+//   $('body').append($('<p>').css({'color': 'red'}).text('SERVER RESET').delay(1000).fadeOut('slow', function() {$(this).remove()}));
+// })
+
 });
