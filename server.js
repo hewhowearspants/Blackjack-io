@@ -447,19 +447,7 @@ io.on('connection', function(socket) {
     });
 
     if (betCount === players.length) {
-      setTimeout(function() {
-        gameInProgress = true;
-        betCount = 0;
-        dealCards();
-        io.sockets.emit('deal cards', {
-          players: players, 
-          dealer: [
-            { img: '../images/card-back.jpg' },
-            { img: dealer.hand[1].img }
-          ]
-        });
-        io.sockets.emit('sit uninvite');
-      }, 1000);
+      setTimeout(startGame, 1000);
     }
   })
 
