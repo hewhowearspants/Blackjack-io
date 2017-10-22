@@ -580,17 +580,25 @@ function removePlayer(leftPlayer) {
 
 // PROVIDES INPUT FIELD FOR PLAYER TO INPUT BET AMOUNT
 function placeBet(turn) {
-  let $inputBet = $('<input>', {'type': 'number', 'id': 'input-bet', 'min': 1, 'max': `${player.money}`, 'value': `${player.bet || 5}`, 'formmethod': 'post'});
+  let $betForm = $('<div>', {'id': 'bet-form'});
+  let $inputBet = $('<input>', {'type': 'text', 'id': 'input-bet', 'min': 1, 'max': `${player.money}`, 'value': `${player.bet || 10}`, 'formmethod': 'post', 'size': '4'});
   let $submitBet = $('<input>', {'type': 'submit', 'id': 'submit-bet', 'value': 'BET'});
   let $messageBox = $('#message');
 
   // $messageBox.html('<p>Place your bet: </p>');
   $messageBox.html('');
-  $messageBox.append($inputBet);
-  $messageBox.append($submitBet);
+  $betForm.append($inputBet).append($submitBet);
+  $messageBox.append($betForm);
 
-  $inputBet.keypress(function(event) {
+  $inputBet.keyup(function(event) {
     let betAmount = parseInt($inputBet.val());
+    
+    setTimeout(function() {
+      console.log(event.target.value);
+      if (event.target.value.length > 2) {
+        $('#input-bet').attr({'size': `${event.target.value.length + 1}`})
+      }
+    }, 5);
     if (event.keyCode == 13 || event.which == 13) {
       setBet(betAmount);
     };
