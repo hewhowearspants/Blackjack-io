@@ -430,7 +430,7 @@ socket.on('welcome', function(data) {
   });
 
   $('#message').html(`<p>${data.greeting}!</p>`);
-  $('#message p').delay(1000).fadeOut();
+  $('#message p').delay(1000).fadeOut(400, function() {$(this).remove()});
 
   data.chatMessages.forEach((chatMessage) => {
     let $name = $('<span>', {'class': 'chat-username'}).text(`${chatMessage.name}: `);
@@ -643,7 +643,7 @@ function dealCards(players, dealer) {
   $('#dealer-box').addClass('hidden');
 
   $messageBox.html('<p>Dealing \'em out!</p>');
-  $('#message p').delay(1000).fadeOut();
+  $('#message p').delay(1000).fadeOut(400, function() {$(this).remove()});
 
   players.forEach((serverPlayer) => {
     if (serverPlayer.id === socket.id) {
@@ -1037,12 +1037,16 @@ socket.on('turn over', function() {
       }
     } else if (player.total[player.splitHand] === 21 && player.hand[player.splitHand].length === 2) {
       player.money += (player.bet + (player.bet * 1.5));
-      $('#message').append($('<p>').text(`BLACKJACK! YOU WIN $${player.bet * 1.5}!`).delay(1000).fadeOut());
+      //$('#message').append($('<p>').text(`BLACKJACK! YOU WIN $${player.bet * 1.5}!`).delay(1000).fadeOut());
+      $('#message').html(`<p>BLACKJACK! YOU WIN $${player.bet * 1.5}!</p>`);
+      $('#message p').delay(1000).fadeOut(400, function() {$(this).remove()});
       $('#player-money p').text(`$${centify(player.money)}`);
       $('#player-bet p').html('$0');
       localStorage.setItem('playerMoney', player.money);
     }
+
     $(`#player-hand-${player.splitHand}`).removeClass('selected');
+
     if (player.splitHand + 1 !== player.hand.length) {
       player.splitHand++;
       playerTurn();
@@ -1083,7 +1087,7 @@ function endGame(dealerHiddenCard, dealerTotal, winStatus, message) {
   let $standButton = $('#stand-button');
   let $doubleButton = $('#double-button');
   let $splitButton = $('#split-button');
-  let $dealerFirstCard = $('#dealer-hand div:nth-child(1)')
+  let $dealerFirstCard = $('#dealer-hand div:nth-child(1)');
 
   $dealerFirstCard.removeClass('flyin');
   $dealerFirstCard.addClass('loop');
