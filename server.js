@@ -345,7 +345,7 @@ function resetGame() {
 
 ////SOCKET.IO FUNCTIONALITY
 let players = [];
-let playersLeftToPlay = [];
+let activePlayers = [];
 let users = [];
 let messages = [];
 let dealer = {hand: [], total: 0};
@@ -357,7 +357,6 @@ io.on('connection', function(socket) {
   console.log('new connection from ' + socket.id);
   
   socket.on('new user', function(data) {
-    // let user = socket.handshake.query;
     console.log(`welcome ${data.name}!`);
 
     users.push({
@@ -382,8 +381,8 @@ io.on('connection', function(socket) {
           { img: dealer.hand[1].img }
         ],
       })
-      if (playersLeftToPlay[0]) {
-        socket.emit('whose turn', {player: playersLeftToPlay[0]});
+      if (activePlayers[0]) {
+        socket.emit('whose turn', {player: activePlayers[0]});
       }
     }
 
@@ -475,34 +474,34 @@ io.on('connection', function(socket) {
       }, 1000);
 
     } else {
-      playersLeftToPlay = [...players];
+      activePlayers = [...players];
 
       console.log('checking players for blackjack...');
-      playersLeftToPlay.forEach((player, index, array) => {
+      activePlayers = players.filter((player, index, array) => {
+
         if (player.total === 21) {
           console.log(`${player.name} has blackjack!`);
           player.money += (player.bet + (player.bet * 1.5));
           // let player know their turn is over
           io.to(player.id).emit('turn over');
           io.sockets.emit('player bet', {otherPlayer: player});
-          // remove them from the play order
-          array.splice(index, 1);
-          console.log(array.length);
         }
-        if (array.length === 0) {
-          endGame();
 
-          setTimeout(function() {
-            resetGame();
-          }, 1000);
-        }
+        return player.total < 21;
       });
+
+      if(activePlayers.length > 0) {
+        io.sockets.emit('whose turn', {player: activePlayers[0]});
+      } else {
+        endGame();
+
+        setTimeout(function() {
+          resetGame();
+        }, 1000);
+      }
     }
 
-    if(playersLeftToPlay.length > 0) {
-      io.to(playersLeftToPlay[0].id).emit('your turn');
-      io.sockets.emit('whose turn', {player: playersLeftToPlay[0]});
-    }
+    
   }
 
   socket.on('double down', function() {
@@ -543,19 +542,16 @@ io.on('connection', function(socket) {
           
           // if player has not split or if they are on their last split hand
           if (player.splitHand === null || player.splitHand + 1 === player.hand.length) {
-            let playerIndex = playersLeftToPlay.findIndex((player) => {
-              return player.id === socket.id;
-            });
+            let playerIndex = findById(activePlayers, socket.id);
 
-            let bustedPlayer = playersLeftToPlay[playerIndex];
+            let bustedPlayer = activePlayers[playerIndex];
 
-            playersLeftToPlay.splice(playerIndex, 1);
+            activePlayers.splice(playerIndex, 1);
             // if there are still players left
-            if (playersLeftToPlay.length) {
+            if (activePlayers.length) {
               io.to(bustedPlayer.id).emit('turn over');
-              console.log(`player turn: ${playersLeftToPlay[0].id}`);
-              io.to(playersLeftToPlay[0].id).emit('your turn');
-              io.sockets.emit('whose turn', {player: playersLeftToPlay[0]});
+              console.log(`player turn: ${activePlayers[0].id}`);
+              io.sockets.emit('whose turn', {player: activePlayers[0]});
             } else {
               io.to(bustedPlayer.id).emit('turn over');
               dealerTurn();
@@ -574,6 +570,7 @@ io.on('connection', function(socket) {
     let newCard1 = deck.shift();
     let newCard2 = deck.shift();
 
+
     players.forEach((player) => {
       if (player.id === socket.id) {
         console.log(`${player.name} splits!`);
@@ -587,18 +584,19 @@ io.on('connection', function(socket) {
           player.total[i] = calculateHand(player.hand[i]).total;
           player.displayTotal[i] = calculateHand(player.hand[i]).displayTotal;
         }
-        
-        if (player.total[0] === 21) {
-          player.money += player.bet * 1.5;
-          socket.emit('turn over');
+
+        let i = 0;
+
+        while (player.total[i] === 21) {
+          player.money += player.bet + (player.bet * 1.5);
           player.splitHand++;
-        } 
 
-        let playerIndex = playersLeftToPlay.findIndex((findPlayer) => {
-          return findPlayer.id === player.id;
-        });
+          i++;
+        }
 
-        playersLeftToPlay[playerIndex] = player;
+        // update activePlayers too
+        let playerIndex = findById(activePlayers, player.id);
+        activePlayers[playerIndex] = player;
 
         io.sockets.emit('player split', {player: player});
       }
