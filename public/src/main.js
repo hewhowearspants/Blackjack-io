@@ -542,6 +542,7 @@ function removePlayer(leftPlayer) {
     $('.other').each(function(index) {
       if ($(this).attr('id') === leftPlayer.id) {
         $(this).attr({'id': ''});
+        $(this).css({'width': '', 'border-radius': ''});
         $(this).removeClass('occupied');
         $(this).children().remove();
         $(this).prev().find('p').text('');
@@ -556,6 +557,11 @@ function removePlayer(leftPlayer) {
 
           $(this).append($primaryHand.children());
           $primaryHand.children().remove();
+
+          if ($primaryHand.children().attr('class') === 'split-hand') {
+            $(this).css({'width': '200px', 'border-radius': '20%'});
+            $primaryHand.css({'width': '', 'border-radius': ''});
+          }
 
           $(this).prev().children().remove();
           $(this).prev().append($primaryHand.prev().children());
@@ -648,6 +654,7 @@ function dealCards(players, dealer) {
 
   // just in case there are any card divs for whatever reason...
   $('.hand').children().remove();
+  $('.hand').css({'width': '', 'border-radius': ''});
   $('.hand-player-total').text('');
   $('#dealer-box').addClass('hidden');
 
@@ -863,16 +870,28 @@ function splitHand() {
   let $splitHand1 = $('<div>', {'id': 'player-hand-0', 'class': 'split-hand'}).append($firstCard);
   let $splitHand2 = $('<div>', {'id': 'player-hand-1', 'class': 'split-hand'}).append($secondCard);
 
+  $('#player-hand').css({'width': '200px'});
   $('#player-hand').append($splitHand1).append($splitHand2);
 
-  $('#player-hand-0').animate({
-    left: "-=20px",
-    top: "-=10px",
-  }, 250);
-  $('#player-hand-1').animate({
-    right: "-=20px",
-    bottom: "-=10px",
-  }, 250);
+  if (window.innerWidth > 700) {
+    $('#player-hand-0').animate({
+      left: "-=20px",
+      top: "-=10px",
+    }, 250);
+    $('#player-hand-1').animate({
+      right: "-=20px",
+      bottom: "-=10px",
+    }, 250);
+  } else {
+    $('#player-hand-0').animate({
+      left: "-=10px",
+      top: "-=10px",
+    }, 250);
+    $('#player-hand-1').animate({
+      right: "-=10px",
+      bottom: "-=10px",
+    }, 250);
+  }
 
   $('#button-bar').children().addClass('subdued').off('click');
   $('#player-money p').text(`$${centify(player.money)}`);
@@ -907,7 +926,6 @@ socket.on('player split', function(data) {
   $newCard2.css('background-image', `url('${newCard2.img}')`);
 
   if (data.player.id === socket.id) {
-    var playerId = 'player-hand';
     player.hand = data.player.hand;
     player.total = data.player.total;
     player.displayTotal = data.player.displayTotal;
@@ -925,6 +943,7 @@ socket.on('player split', function(data) {
     let $splitHand1 = $('<div>', {'id': `${playerId}-0`, 'class': 'split-hand'}).append($firstCard).append($newCard1);
     let $splitHand2 = $('<div>', {'id': `${playerId}-1`, 'class': 'split-hand'}).append($secondCard).append($newCard2);;
 
+    $(`#${playerId}`).css({'width': '200px', 'border-radius': '20%'});
     $(`#${playerId}`).append($splitHand1).append($splitHand2);
     $(`#${playerId}-${data.player.splitHand}`).addClass('selected');
 
@@ -1227,9 +1246,11 @@ socket.on('reset board', function() {
 });
 
 function resetBoard() {
+  $('.hand').css({'width': '', 'border-radius': ''});
   $('.hand').children().remove();
-  $('.hand').prev().find('.hand-player-total').text('');
-  $('#message').text(' ');
+  $('.hand p').text('');
+  $('.hand-player-total').text('');
+  $('#message').children().remove();
   $('#player-box').addClass('hidden');
   $('#dealer-box').addClass('hidden');
 }
@@ -1274,6 +1295,7 @@ function leaveGame() {
   dealer.hand = [];
 
   $('.hand').children().remove();
+  $('.hand').css({'width': '', 'border-radius': ''});
   $('#player-hand').attr({'id': ''});
   $('#message').text(' ');
   $('#player-box').addClass('hidden');
