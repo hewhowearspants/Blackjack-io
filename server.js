@@ -404,21 +404,20 @@ io.on('connection', function(socket) {
   });
 
   socket.on('name change', function(data) {
-    users.forEach((user) => {
-      if (user.id === socket.id) {
-        let oldName = user.name;
-        user.name = data.name;
-        console.log(`${oldName} is now ${user.name}`);
-        messages.push({name: '::', text: `${oldName} renamed to ${user.name}`});
-        io.sockets.emit('name change', {name: user.name, id: socket.id, text: `${oldName} renamed to ${user.name}`});
-      }
-    });
+    let userIndex = findById(users, socket.id);
+    let playerIndex = findById(players, socket.id);
+    let oldName = users[userIndex].name;
+    let newName = data.name;
 
-    players.forEach((player) => {
-      if (player.id === socket.id) {
-        player.name = data.name;
-      }
-    });
+    users[userIndex].name = newName;
+    if (playerIndex !== undefined) {
+      players[playerIndex].name = newName;
+    }
+    console.log(`${oldName} is now ${newName}`);
+
+    messages.push({name: '::', text: `${oldName} renamed to ${newName}`});
+    io.sockets.emit('name change', {name: newName, id: socket.id, text: `${oldName} renamed to ${newName}`});
+    
   });
 
   socket.on('deal me in', function(data) {
