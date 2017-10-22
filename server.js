@@ -19,10 +19,25 @@ var Card = function(suit,value,realValue) {
   this.realValue = realValue;
   this.img = `../images/Playing-Cards/${value}_of_${suit}.png`;
 };
+
+// Object prototype for creating Player objects
+var Player = function(id, name, money) {
+  this.id = id;
+  this.name = name;
+  this.money = money;
+  this.bet = 0;
+  this.hand = [];
+  this.total = 0;
+  this.displayTotal = '';
+  this.doubleDown = false;
+  this.splitHand = null;
+}
+
 let deck = [];
 // the number of 52-card decks in the dealer's shoe
 // casino's typically have 6
 let shoeSize = 6;
+
 deck = shuffleDeck();
 
 // CREATES 52 CARD OBJECTS USING OBJECT CONSTRUCTOR
@@ -30,6 +45,10 @@ function createDeck() {
   let suits = ['spades', 'clubs', 'hearts', 'diamonds'];
   let values = ['A','2','3','4','5','6','7','8','9','10','J','Q','K'];
   let realValues = [1,2,3,4,5,6,7,8,9,10,10,10,10];
+
+  // BROKEN OUT SO I CAN TEST BLACKJACK BEHAVIOR ON SPLIT HANDS
+  // [...] 
+  // [...] 
 
   suits.forEach((suit) => {
     values.forEach((value, index) => {
@@ -384,17 +403,8 @@ io.on('connection', function(socket) {
   });
 
   socket.on('deal me in', function(data) {
-    let newPlayer = {
-      id: socket.id,
-      name: data.name,
-      hand: [],
-      bet: 0,
-      money: data.money,
-      total: 0,
-      displayTotal: '',
-      doubleDown: false,
-      splitHand: null,
-    }
+    let newPlayer = new Player(socket.id, data.name, data.money);
+
     players.push(newPlayer);
     console.log(`new player! ${newPlayer.name} / ${newPlayer.money}`);
     io.sockets.emit('new player', {newPlayer: newPlayer});
