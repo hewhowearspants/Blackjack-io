@@ -198,34 +198,34 @@ function endGame() {
     console.log(`Checking ${player.name} win status...`);
     if (player.splitHand === null) {
       if (player.total > 21) {
-        console.log(`${player.name} busted!`)
-        io.to(player.id).emit('game over', {
-          dealerHiddenCard: dealer.hand[0].img,
-          dealerTotal: dealer.total,
-          status: 'lose',
-          message: '',
-        });
-      } else if (dealer.total > 21 && (player.total < 21 || (player.total === 21 && player.hand.length > 2))) {
-        console.log(`${player.name} won because dealer bust!`);
-        player.money += player.bet * 2;
-        io.to(player.id).emit('game over', {
-          dealerHiddenCard: dealer.hand[0].img, 
-          dealerTotal: dealer.total,
-          status: 'win',
-          message: `Dealer busts! YOU WIN $${player.bet}!`,
-        });
+        console.log(`${player.name} busted!`);
+
+        informUserOfGameOver(player.id, 'lose', '');
+
+      } else if (dealer.total > 21) {
+
+        if (player.total === 21 && player.hand.length === 2) {
+          console.log(`Dealer bust, but ${player.name} already won by blackjack`);
+          
+          var message = '';
+        } else if (player.total < 21 || (player.total === 21 && player.hand.length > 2)) {
+          console.log(`${player.name} won because dealer bust!`);
+
+          player.money += player.bet * 2;
+          var message = `Dealer busts! YOU WIN $${player.bet}!`;
+        }
+
+        informUserOfGameOver(player.id, 'win', message)
+
       } else if (dealer.total === player.total) {
         console.log(`${player.name} pushed!`)
         player.money += player.bet;
-        io.to(player.id).emit('game over', {
-          dealerHiddenCard: dealer.hand[0].img, 
-          dealerTotal: dealer.total,
-          status: 'push', 
-          message: 'PUSH!',
-        });
+
+        informUserOfGameOver(player.id, 'push', 'PUSH!');
+
       } else if (player.total > dealer.total) {
         if (player.total === 21 && player.hand.length === 2) {
-          console.log(`${player.name} won by blackjack!`)
+          console.log(`${player.name} already won by blackjack`)
           var message = '';
         } else {
           console.log(`${player.name} won!`)
@@ -233,13 +233,9 @@ function endGame() {
           var message = `YOU WIN $${player.bet}!`;
         }
 
-        io.to(player.id).emit('game over', {
-          dealerHiddenCard: dealer.hand[0].img, 
-          dealerTotal: dealer.total,
-          status: 'win',
-          message: message,
-        });
-      } else if (dealer.total > player.total) {
+        informUserOfGameOver(player.id, 'win', message);
+
+      } else if (dealer.total > player.total && dealer.total <= 21) {
         console.log(`${player.name} lost.`)
         let message = 'Dealer wins.';
 
@@ -247,12 +243,7 @@ function endGame() {
           message += ' Dealer has blackjack.';
         }
 
-        io.to(player.id).emit('game over', {
-          dealerHiddenCard: dealer.hand[0].img, 
-          dealerTotal: dealer.total,
-          status: 'lose',
-          message: message,
-        });
+        informUserOfGameOver(player.id, 'lose', message);
       }
     } else {
       let splitStatuses = [];
@@ -263,11 +254,17 @@ function endGame() {
           splitStatuses.push('lose');
           splitMessages.push(``);
 
-        } else if (dealer.total > 21 && (total < 21 || (total === 21 && player.hand[index].length > 2))) {
-          console.log(`${player.name} hand won because dealer bust!`);
-          player.money += player.bet * 2;
-          splitStatuses.push('win');
-          splitMessages.push(`Dealer busts! Hand ${index + 1} won $${player.bet}!`);
+        } else if (dealer.total > 21) {
+          if (total === 21 && player.hand[index].length === 2) {
+            console.log(`Dealer bust, but ${player.name} hand ${index + 1} already won by blackjack!`);
+            splitStatuses.push('win');
+            splitMessages.push('');
+          } else if (total < 21 || (total === 21 && player.hand[index].length > 2)) {
+            console.log(`${player.name} hand won because dealer bust!`);
+            player.money += player.bet * 2;
+            splitStatuses.push('win');
+            splitMessages.push(`Dealer busts! Hand ${index + 1} won $${player.bet}!`);
+          }
 
         } else if (dealer.total === total) {
           console.log(`${player.name} hand ${index + 1} pushed!`);
@@ -277,7 +274,7 @@ function endGame() {
 
         } else if (total > dealer.total) {
           if (total === 21 && player.hand[index].length === 2) {
-            console.log(`${player.name} hand ${index + 1} won by blackjack!`);
+            console.log(`${player.name} hand ${index + 1} already won by blackjack!`);
             splitStatuses.push('win');
             splitMessages.push('');
           } else {
@@ -296,12 +293,8 @@ function endGame() {
           splitMessages.push(message);
         }
       });
-      io.to(player.id).emit('game over', {
-        dealerHiddenCard: dealer.hand[0].img, 
-        dealerTotal: dealer.total,
-        status: splitStatuses,
-        message: splitMessages,
-      });
+
+      informUserOfGameOver(player.id, splitStatuses, splitMessages);
     }
 
     if (player.doubleDown) {
@@ -312,16 +305,20 @@ function endGame() {
   // for the spectator audience...
   users.forEach((user) => {
     if(!playerList[user.id]) {
-      io.to(user.id).emit('game over', {
-        dealerHiddenCard: dealer.hand[0].img,
-        dealerTotal: dealer.total,
-        status: '',
-        message: 'Game over!',
-      });
+      informUserOfGameOver(user.id, '', 'Game over!');
     };
   });
 
   io.sockets.emit('update money', {players: players});
+}
+
+function informUserOfGameOver(id, status, message) {
+  io.to(id).emit('game over', {
+    dealerHiddenCard: dealer.hand[0].img,
+    dealerTotal: dealer.total,
+    status: status,
+    message: message,
+  });
 }
 
 function resetGame() {
