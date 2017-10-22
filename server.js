@@ -359,6 +359,10 @@ let chatCommands = {
 
 io.on('connection', function(socket) {
   console.log('new connection from ' + socket.id);
+
+  //REMOVE FOR PRODUCTION, THIS IS JUST TO MAKE MY LIFE EASIER WHILE I MAKE CHANGES
+  //socket.emit('server reset');
+  //REMOVE FOR PRODUCTION
   
   socket.on('new user', function(data) {
     console.log(`welcome ${data.name}!`);
