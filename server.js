@@ -79,6 +79,13 @@ function shuffleDeck() {
   return shuffleDeck;
 };
 
+function startGame() {
+  gameInProgress = true;
+  betCount = 0;
+  dealCards();
+  io.sockets.emit('sit uninvite');
+}
+
 function dealCards() {
   console.log('initial deal');
   // deal two for each player
