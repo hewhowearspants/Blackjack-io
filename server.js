@@ -115,6 +115,14 @@ function dealCards() {
 
   console.log(`${deck.length} cards left in shoe`);
 
+  io.sockets.emit('deal cards', {
+    players: players, 
+    dealer: [
+      { img: '../images/card-back.jpg' },
+      { img: dealer.hand[1].img }
+    ]
+  });
+
 }
 
 function calculateHand(hand) {
