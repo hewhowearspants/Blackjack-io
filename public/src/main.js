@@ -773,53 +773,41 @@ function dealCards(players, dealer) {
 
 };
 
-// 'your turn' IS THE SERVER NOTIFYING PLAYER IT IS THEIR TURN
-socket.on('your turn', function() {
-  //console.log('my turn!');
-  playerTurn();
-
-});
-
-// PLAYERTURN ACTIVATES PLAYER BUTTONS.
+// PLAYERTURN ACTIVATES PLAYER BUTTONS
 // ALSO ACCOUNTS FOR SPLIT HANDS
 function playerTurn() {
   let $hitButton = $('#hit-button');
   let $standButton = $('#stand-button');
   let $doubleButton = $('#double-button');
   let $splitButton = $('#split-button');
-  let $messageBox = $('#message');
-  let $message = $('#message p');
-
-  $('.split-hand').removeClass('selected');
-
-  if (player.splitHand === null) {
-    $messageBox.html('<p>Your turn!</p>');
-    $('#message p').delay(1000).fadeOut();
-  } else {
-    $(`#player-hand-${player.splitHand}`).addClass('selected');
-  }
 
   $hitButton.removeClass('subdued');
   $standButton.removeClass('subdued');
 
-  // currently player cannot double or split if they've already split
+  // currently player cannot double down after they have split
   // re-enable when you've accounted for that
   if (player.money >= player.bet && player.splitHand === null) {
     $doubleButton.removeClass('subdued');
 
-    $doubleButton.on('click', function() {
-      doubleDown();
-    });
+    if(!$._data($('#double-button')[0], 'events')) {
+      $doubleButton.on('click', function() {
+        doubleDown();
+      });
+    }
   }
 
   if (player.splitHand === null) {
     if (player.hand[0].realValue === player.hand[1].realValue) {
       $splitButton.removeClass('subdued');
       
-      $splitButton.on('click', function() {
-        splitHand();
-      });
+      if (!$._data($('#split-button')[0], 'events')) {
+        $splitButton.on('click', function() {
+          splitHand();
+        });
+      }
     } 
+    // currently player cannot split again after they have split
+    // re-enable when you've accounted for that
   } //else {
   //   if (player.hand[player.splitHand][0].realValue === player.hand[player.splitHand][1].realValue) {
   //     $splitButton.removeClass('subdued');
@@ -830,18 +818,22 @@ function playerTurn() {
   //   }
   // }
 
-  $hitButton.on('click', function() {
-    socket.emit('hit me');
+  if (!$._data($('#hit-button')[0], 'events')) {
+    $hitButton.on('click', function() {
+      socket.emit('hit me');
 
-    $('#double-button').addClass('subdued');
-    $('#double-button').off('click');
-    $('#split-button').addClass('subdued');
-    $('#split-button').off('click');
-  });
+      $('#double-button').addClass('subdued');
+      $('#double-button').off('click');
+      $('#split-button').addClass('subdued');
+      $('#split-button').off('click');
+    });
+  }
 
-  $standButton.on('click', function() {
-    stand();
-  });
+  if (!$._data($('#stand-button')[0], 'events')) {
+    $standButton.on('click', function() {
+      stand();
+    });
+  }
 }
 
 function doubleDown() {
