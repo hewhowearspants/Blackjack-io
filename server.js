@@ -353,6 +353,10 @@ let betCount = 0;
 let playersReadyCount = 0;
 let gameInProgress = false;
 
+let chatCommands = {
+  '>userlist': () => { socket.emit('list users', {users: users}) },
+}
+
 io.on('connection', function(socket) {
   console.log('new connection from ' + socket.id);
   
@@ -604,207 +608,153 @@ io.on('connection', function(socket) {
   });
 
   socket.on('stand', function() {
+    let playerIndex = findById(activePlayers, socket.id);
+    //console.log(`STAND: searching for ${socket.id} in activePlayers (length of ${activePlayers.length}), playerIndex is ${playerIndex}`);
+    let player = activePlayers[playerIndex];
+    console.log(`${player.name} is standing`);
 
-    playersLeftToPlay.forEach((player, index) => {
-      if (player.id === socket.id) {
+    // if player hasn't split their hand OR
+    // if the player has split their hand and has played all of their hands
+    if (player.splitHand === null || player.splitHand + 1 >= player.hand.length) {
+      
+      endPlayerTurn(player.id);
 
-        // if player hasn't split their hand OR
-        // if the player has split their hand and has played all of their hands
-        if (player.splitHand === null || player.splitHand + 1 === player.hand.length) {
-          endPlayerTurn(player);
+    } else {
+      // if the player has split their hand and is not done playing all their hands
+      player.splitHand++;
+      io.sockets.emit('whose turn', {player: player});
+
+      if (player.total[player.splitHand] === 21) {
+        player.money += player.bet + (player.bet * 1.5);
+        socket.broadcast.emit('player bet', {otherPlayer: player});
+        io.to(player.id).emit('turn over');
+
+        if (player.splitHand + 1 === player.hand.length) {
+          endPlayerTurn(player.id);
         } else {
           player.splitHand++;
-          socket.broadcast.emit('whose turn', {player: player});
-          if (player.total[player.splitHand] === 21) {
-            player.money += player.bet * 1.5;
-            socket.broadcast.emit('update money', {players: players});
-            io.to(player.id).emit('turn over');
-            if (player.splitHand + 1 === player.hand.length) {
-              endPlayerTurn(player);
-            } else {
-              player.splitHand++;
-              socket.broadcast.emit('whose turn', {player: player});
-            }
-          }
+          io.sockets.emit('whose turn', {player: player});
         }
-
       }
-    });
+      activePlayers[playerIndex] = player;
+    }
+    
     
   });
 
-  function endPlayerTurn(finishedPlayer) {
-    let playerIndex = playersLeftToPlay.findIndex((player) => {
-      return player.id === finishedPlayer.id;
-    });
+  function endPlayerTurn(id) {
+    let playerIndex = findById(activePlayers, id);
 
-    playersLeftToPlay.splice(playerIndex, 1);
-    if (playersLeftToPlay.length) {
-          io.to(playersLeftToPlay[0].id).emit('your turn');
-          io.sockets.emit('whose turn', {player: playersLeftToPlay[0]});
+    activePlayers.splice(playerIndex, 1);
+    console.log(activePlayers);
+    if (activePlayers.length) {
+          io.sockets.emit('whose turn', {player: activePlayers[0]});
     } else {
       dealerTurn();
     }
   }
 
   socket.on('leave game', function() {
-    players.forEach((player, index) => {
-      if (player.id === socket.id) {
-        players.splice(index, 1);
-        io.sockets.emit('player left', {leftPlayer: player});
-        console.log(`${player.name} (${socket.id}) is out`);
-        io.sockets.emit('sit invite');
-      }
-    });
-
-    playersLeftToPlay.forEach((player, index) => {
-      if (player.id === socket.id) {
-        playersLeftToPlay.splice(index, 1);
-        if (index === 0 && playersLeftToPlay[0]) {
-          io.to(playersLeftToPlay[0].id).emit('your turn');
-          io.sockets.emit('whose turn', {player: playersLeftToPlay[0]});
-        }
-      }
-    });
+    removePlayer(socket.id);
 
     if (betCount === players.length && players.length !== 0 && !gameInProgress) {
-      setTimeout(function() {
-        gameInProgress = true;
-        betCount = 0;
-        dealCards();
-        io.sockets.emit('deal cards', {
-          players: players, 
-          dealer: [
-            { img: '../images/card-back.jpg' },
-            { img: dealer.hand[1].img }
-          ]
-        });
-        io.sockets.emit('sit uninvite');
-      }, 1000);
+      setTimeout(startGame, 1000);
     }
 
-    if (players.length === 0) {
-      console.log('no more players! resetting...');
-      io.sockets.emit('reset board');
-      resetGame();
-    }
   });
 
   socket.on('left user', function() {
-    users.forEach((user, index) => {
-      if (socket.id === user.id) {
-        console.log(`${user.name} disconnected!`);
-        users.splice(index, 1);
-        messages.push({name: '::', text: `${user.name} left`});
-        io.sockets.emit('user left', {user: user});
-      }
-    });
-
-    players.forEach((player, index) => {
-      console.log(`${player.name} no longer playing!`);
-      if (socket.id === player.id) {
-        players.splice(index, 1);
-        io.sockets.emit('player left', {leftPlayer: player});
-      }
-    });
-
-    playersLeftToPlay.forEach((player, index) => {
-      if (player.id === socket.id) {
-        playersLeftToPlay.splice(index, 1);
-        if (index === 0 && playersLeftToPlay[0]) {
-          io.to(playersLeftToPlay[0].id).emit('your turn');
-          io.sockets.emit('whose turn', {player: playersLeftToPlay[0]});
-        }
-      }
-    });
-
-    if (betCount === players.length && players.length !== 0 && !gameInProgress) {
-      setTimeout(function() {
-        gameInProgress = true;
-        betCount = 0;
-        dealCards();
-        io.sockets.emit('deal cards', {
-          players: players, 
-          dealer: [
-            { img: '../images/card-back.jpg' },
-            { img: dealer.hand[1].img }
-          ]
-        });
-        io.sockets.emit('sit uninvite');
-      }, 1000);
-    }
-
-    if (players.length === 0) {
-      dealer = {hand: [], total: 0};
-      console.log('no more players! resetting...');
-      io.sockets.emit('reset board');
-      resetGame();
-    }
+    disconnect(socket.id);
   })
 
   socket.on('disconnect', function() {
-    users.forEach((user, index) => {
-      console.log(`${user.name} disconnected!`);
-      if (socket.id === user.id) {
-        users.splice(index, 1);
-        messages.push({name: '::', text: `${user.name} left`});
-        io.sockets.emit('user left', {user: user});
-      }
-    });
+    console.log(`${socket.id} disconnect`)
+    disconnect(socket.id);
+  });
 
-    players.forEach((player, index) => {
-      console.log(`${player.name} no longer playing!`);
-      if (socket.id === player.id) {
-        players.splice(index, 1);
-        io.sockets.emit('player left', {leftPlayer: player});
-      }
-    });
+  function disconnect(id) {
+    removeUser(id);
 
-    playersLeftToPlay.forEach((player, index) => {
-      if (player.id === socket.id) {
-        playersLeftToPlay.splice(index, 1);
-        if (index === 0 && playersLeftToPlay[0]) {
-          io.to(playersLeftToPlay[0].id).emit('your turn');
-          io.sockets.emit('whose turn', {player: playersLeftToPlay[0]});
-        }
-      }
-    });
+    removePlayer(id);
 
     if (betCount === players.length && players.length !== 0 && !gameInProgress) {
-      setTimeout(function() {
-        gameInProgress = true;
-        betCount = 0;
-        dealCards();
-        io.sockets.emit('deal cards', {
-          players: players, 
-          dealer: [
-            { img: '../images/card-back.jpg' },
-            { img: dealer.hand[1].img }
-          ]
-        });
-        io.sockets.emit('sit uninvite');
-      }, 1000);
+      setTimeout(startGame, 1000);
     }
 
-    if (players.length === 0) {
-      dealer = {hand: [], total: 0};
-      console.log('no more players! resetting...');
-      io.sockets.emit('reset board');
-      resetGame();
+  }
+
+  function removeUser(id) {
+    let userIndex = findById(users, id);
+
+    if (userIndex >= 0) {
+      console.log(`${users[userIndex].name} disconnected!`);
+      messages.push({name: '::', text: `${users[userIndex].name} left`});
+      io.sockets.emit('user left', {user: users[userIndex]});
+
+      users.splice(userIndex, 1);
     }
-  });
+  }
+
+  function removePlayer(id) {
+    let playerIndex = findById(players, id);
+
+    if (playerIndex >= 0) {
+      console.log(`${players[playerIndex].name} no longer playing!`);
+      io.sockets.emit('player left', {leftPlayer: players[playerIndex]});
+      io.sockets.emit('sit invite');
+
+      players.splice(playerIndex, 1);
+
+      if (players.length === 0) {
+        dealer = {hand: [], total: 0};
+        console.log('no more players! resetting...');
+        io.sockets.emit('reset board');
+        resetGame();
+      }
+    }
+
+    if (gameInProgress) {
+      removeActivePlayer(id);
+    }
+
+  }
+
+  function removeActivePlayer(id) {
+    let playerIndex = findById(activePlayers, id);
+    
+    if (playerIndex >= 0) {
+      activePlayers.splice(playerIndex, 1);
+
+      if (playerIndex === 0 && activePlayers[0]) {
+        io.sockets.emit('whose turn', {player: activePlayers[0]});
+      } else {
+        dealerTurn();
+      }
+    }
+  }
+
+  function findById(array, id) {
+    for (let i = 0; i < array.length; i++) {
+      if (array[i].id == id) {
+        return i;
+      }
+    }
+  }
 
   socket.on('chat message', function(data) {
     if (messages.length > 100) {
       messages.pop();
     }
-    if (data.text === '>userlist') {
-      socket.emit('list users', users);
+    if (chatCommands[data.text]) {
+      // if the user types in a chat command, execute it.
+      chatCommands[data.text];
+
     } else {
       messages.push({name: data.name, text: data.text});
       io.sockets.emit('new message', {name: data.name, id: socket.id, text: data.text});
     }
   });
+
 });
 
 const port = process.env.PORT || 4000;
