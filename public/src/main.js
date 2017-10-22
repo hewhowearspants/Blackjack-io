@@ -249,9 +249,9 @@ function setUpTable () {
     let $handContainer = $('<div>', {'class': 'hand-container'});
     let $handUserInfo = $('<div>', {'class': 'hand-user-info'});
     let $handPlayerStats = $('<div>', {'class': 'hand-player-stats'});
-    let $handPlayerMoney = $('<p>', {'class': 'hand-player-money'});
-    let $handPlayerBet = $('<p>', {'class': 'hand-player-bet'});
-    let $handPlayerTotal = $('<p>', {'class': 'hand-player-total'});
+    let $handPlayerMoney = $('<p>', {'class': 'hand-player-money hand-player-stat'});
+    let $handPlayerBet = $('<p>', {'class': 'hand-player-bet hand-player-stat'});
+    let $handPlayerTotal = $('<p>', {'class': 'hand-player-total hand-player-stat'});
 
     $handPlayerStats.append($handPlayerMoney).append($handPlayerBet).append($handPlayerTotal);
 
