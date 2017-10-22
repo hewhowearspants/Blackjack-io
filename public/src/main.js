@@ -529,7 +529,10 @@ socket.on('player left', function(data) {
 // REMOVES A DEPARTING PLAYER FROM THE TABLE
 function removePlayer(leftPlayer) {
   console.log(`${leftPlayer.id} left! removing!`);
+  let playerIndex = findById(players, leftPlayer.id);
   let $primaryHand = $('.primary').first();
+
+  players.splice(playerIndex, 1);
 
   if (leftPlayer.id !== socket.id) {
     $('.other').each(function(index) {
@@ -1260,6 +1263,9 @@ function resetGame() {
 function leaveGame() {
   socket.emit('leave game');
 
+  let myIndex = findById(players, socket.id);
+  players.splice(myIndex, 1);
+
   player.hand = [];
   dealer.hand = [];
 
@@ -1274,9 +1280,17 @@ function leaveGame() {
   $('#button-bar').children().off('click');
 }
 
-
+//** STARTS THE GAME */
 inputName();
-//setUpTable();
+//** VERY IMPORTANT */
+
+function findById(array, id) {
+  for (let i = 0; i < array.length; i++) {
+    if (array[i].id == id) {
+      return i;
+    }
+  }
+}
 
 
 //** HERE ARE THE CHAT SOCKET INTERACTIONS **//
