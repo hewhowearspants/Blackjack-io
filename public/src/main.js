@@ -1075,7 +1075,7 @@ function hitMe(recipient, card) {
     } else {
       $newCard.attr('id', `${recipient.id}-${recipient.splitHand}-card-${recipient.hand.length}`);
       $(`#${recipient.id}-${recipient.splitHand}`).append($newCard);
-      $(`#${recipient.id}`).prev().find('.hand-player-total').text(recipient.displayTotal.join('/'));
+      $(`#${recipient.id}`).prev().find('.hand-player-total').html(recipient.displayTotal.join('<br/>'));
     }
   }
 

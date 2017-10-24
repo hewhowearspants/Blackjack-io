@@ -47,8 +47,8 @@ function createDeck() {
   let realValues = [1,2,3,4,5,6,7,8,9,10,10,10,10];
 
   // BROKEN OUT SO I CAN TEST BLACKJACK BEHAVIOR ON SPLIT HANDS
-  // [...] 
-  // [...] 
+  //  [...] 
+  //  [...] 
 
   suits.forEach((suit) => {
     values.forEach((value, index) => {
