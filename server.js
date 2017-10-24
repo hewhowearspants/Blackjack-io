@@ -106,6 +106,7 @@ function dealCards() {
   // deal two for the dealer
   let firstCard = deck.shift();
   let secondCard = deck.shift();
+
   dealer.hand.push(firstCard);
   console.log(`Dealer receives ${firstCard.value} of ${firstCard.suit}`)
   dealer.hand.push(secondCard);
@@ -501,6 +502,7 @@ io.on('connection', function(socket) {
     
   }
 
+  // 'double down' DEDUCTS ADD'L BET MONEY, DOUBLES PLAYER'S BET
   socket.on('double down', function() {
     let playerIndex = findById(players, socket.id);
     console.log(`${players[playerIndex].name} doubles down! From $${players[playerIndex].bet} to $${players[playerIndex].bet * 2}!`);
@@ -511,6 +513,7 @@ io.on('connection', function(socket) {
     io.sockets.emit('player bet', {otherPlayer: players[playerIndex]});
   })
 
+  // 'hit me' GETS A NEW CARD, ASSIGNS IT TO THE REQUESTING PLAYER
   socket.on('hit me', function() {
     let newCard = deck.shift();
 
@@ -531,33 +534,41 @@ io.on('connection', function(socket) {
         
         io.sockets.emit('new card', {player: player, card: newCard});
         
-        // if player busts...
+        
         if (player.total > 21 || player.total[player.splitHand] > 21) {
+          // if player busts with their new card!!!
           console.log(`${player.name} busted!`);
           
-          // if player has not split or if they are on their last split hand
           if (player.splitHand === null || player.splitHand + 1 >= player.hand.length) {
+            // if player has not split or if they are on their last split hand, remove from activePlayers
             let playerIndex = findById(activePlayers, socket.id);
-
             let bustedPlayer = activePlayers[playerIndex];
-            console.log(`splicing and dicing ${bustedPlayer.name}`);
+
             activePlayers.splice(playerIndex, 1);
-            // if there are still players left
+            io.to(bustedPlayer.id).emit('turn over');
+            
             if (activePlayers.length) {
-              io.to(bustedPlayer.id).emit('turn over');
-              console.log(`player turn: ${activePlayers[0].id}`);
+              // if there are still players left after removing the busted player...
+              console.log(`player turn: ${activePlayers[0].id} (${activePlayers[0].name})`);
               io.sockets.emit('whose turn', {player: activePlayers[0]});
             } else {
-              io.to(bustedPlayer.id).emit('turn over');
+              // otherwise, it's dealer's turn
+              console.log('dealer turn');
               dealerTurn();
             }
+
           } else {
+            // if player has not finished playing their split hands, move to next split hand
             player.splitHand++;
+
             if (player.total[player.splitHand] === 21) {
+              // if the next split hand is a blackjack, just skip it
               player.money += player.bet + (player.bet * 1.5);
               socket.broadcast.emit('player bet', {otherPlayer: player});
               io.to(player.id).emit('turn over');
 
+              // THIS IS KIND OF SUPERFLUOUS, since the player can only split once, the second split hand will
+              // always be their last split hand. This is just to accomodate possible future additional splits
               if (player.splitHand + 1 >= player.hand.length) {
                 endPlayerTurn(player.id);
               } else {
@@ -565,6 +576,7 @@ io.on('connection', function(socket) {
                 io.sockets.emit('whose turn', {player: player});
               }
             }
+
             io.to(player.id).emit('turn over');
             io.sockets.emit('whose turn', {player: player});
           }
@@ -573,6 +585,8 @@ io.on('connection', function(socket) {
     })
   });
 
+  // 'split' SELECTS TWO NEW CARDS FOR THE REQUESTING PLAYER, GIVES IT TO THEM, DEDUCTS ADDITIONAL BET
+  // CALCULATES TOTALS, AND CHECKS FOR BLACKJACKS
   socket.on('split', function() {
     let newCard1 = deck.shift();
     let newCard2 = deck.shift();
@@ -611,7 +625,8 @@ io.on('connection', function(socket) {
 
   socket.on('stand', function() {
     let playerIndex = findById(activePlayers, socket.id);
-    //console.log(`STAND: searching for ${socket.id} in activePlayers (length of ${activePlayers.length}), playerIndex is ${playerIndex}`);
+    console.log(activePlayers);
+    console.log(`STAND: searching for ${socket.id} in activePlayers (length of ${activePlayers.length}), playerIndex is ${playerIndex}`);
     let player = activePlayers[playerIndex];
     console.log(`${player.name} is standing`);
 
@@ -652,10 +667,9 @@ io.on('connection', function(socket) {
   function endPlayerTurn(id) {
     let playerIndex = findById(activePlayers, id);
 
-    console.log(activePlayers);
     console.log(`ending player turn for ${id}!!!`)
     activePlayers.splice(playerIndex, 1);
-    console.log(activePlayers);
+
     if (activePlayers.length) {
       io.sockets.emit('whose turn', {player: activePlayers[0]});
     } else {
