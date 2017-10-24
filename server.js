@@ -504,7 +504,7 @@ io.on('connection', function(socket) {
   socket.on('double down', function() {
     let playerIndex = findById(players, socket.id);
     console.log(`${players[playerIndex].name} doubles down! From $${players[playerIndex].bet} to $${players[playerIndex].bet * 2}!`);
-    
+
     players[playerIndex].money -= players[playerIndex].bet;
     players[playerIndex].bet *= 2;
     players[playerIndex].doubleDown = true;
