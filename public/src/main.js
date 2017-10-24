@@ -848,10 +848,6 @@ function doubleDown() {
 
   socket.emit('hit me');
 
-  if (player.total <= 21) {
-    socket.emit('stand');
-  }
-
   $('#button-bar').children().addClass('subdued');
   $('#button-bar').children().off('click');
 }
@@ -1059,6 +1055,10 @@ function hitMe(recipient, card) {
       $(`#player-total p`).text(player.displayTotal);
       $newCard.attr('id', `player-card-${player.hand.length}`);
       $(`#player-hand`).append($newCard);
+
+      if (player.doubleDown === true && player.total <= 21) {
+        socket.emit('stand');
+      }
     } else {
       $newCard.attr('id', `${recipient.id}-card-${recipient.hand.length}`);
       $(`#${recipient.id}`).append($newCard);
