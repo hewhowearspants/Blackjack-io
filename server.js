@@ -47,8 +47,8 @@ function createDeck() {
   let realValues = [1,2,3,4,5,6,7,8,9,10,10,10,10];
 
   // BROKEN OUT SO I CAN TEST BLACKJACK BEHAVIOR ON SPLIT HANDS
-  //  [...] 
-  //  [...] 
+  // [...] 
+  // [...] 
 
   suits.forEach((suit) => {
     values.forEach((value, index) => {
@@ -577,7 +577,6 @@ io.on('connection', function(socket) {
     let newCard1 = deck.shift();
     let newCard2 = deck.shift();
 
-
     players.forEach((player) => {
       if (player.id === socket.id) {
         console.log(`${player.name} splits!`);
@@ -620,6 +619,7 @@ io.on('connection', function(socket) {
     // if the player has split their hand and has played all of their hands
     if (player.splitHand === null || player.splitHand + 1 >= player.hand.length) {
       
+      console.log(`ending player turn for ${player.id} (${player.name})!`);
       endPlayerTurn(player.id);
 
     } else {
@@ -638,8 +638,12 @@ io.on('connection', function(socket) {
           player.splitHand++;
           io.sockets.emit('whose turn', {player: player});
         }
+      } else {
+        console.log(`reassigning ${player.id} (${player.name}) to activePlayers!!`);
+        activePlayers[playerIndex] = player;
+        console.log(activePlayers);
       }
-      activePlayers[playerIndex] = player;
+      
     }
     
     
@@ -648,10 +652,12 @@ io.on('connection', function(socket) {
   function endPlayerTurn(id) {
     let playerIndex = findById(activePlayers, id);
 
+    console.log(activePlayers);
+    console.log(`ending player turn for ${id}!!!`)
     activePlayers.splice(playerIndex, 1);
     console.log(activePlayers);
     if (activePlayers.length) {
-          io.sockets.emit('whose turn', {player: activePlayers[0]});
+      io.sockets.emit('whose turn', {player: activePlayers[0]});
     } else {
       dealerTurn();
     }
