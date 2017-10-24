@@ -553,6 +553,18 @@ io.on('connection', function(socket) {
             }
           } else {
             player.splitHand++;
+            if (player.total[player.splitHand] === 21) {
+              player.money += player.bet + (player.bet * 1.5);
+              socket.broadcast.emit('player bet', {otherPlayer: player});
+              io.to(player.id).emit('turn over');
+
+              if (player.splitHand + 1 >= player.hand.length) {
+                endPlayerTurn(player.id);
+              } else {
+                player.splitHand++;
+                io.sockets.emit('whose turn', {player: player});
+              }
+            }
             io.to(player.id).emit('turn over');
             io.sockets.emit('whose turn', {player: player});
           }
