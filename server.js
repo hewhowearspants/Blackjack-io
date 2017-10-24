@@ -502,15 +502,13 @@ io.on('connection', function(socket) {
   }
 
   socket.on('double down', function() {
-    players.forEach((player) => {
-      if (player.id === socket.id) {
-        console.log(`${player.name} doubles down! From $${player.bet} to $${player.bet * 2}!`);
-        player.money -= player.bet;
-        player.bet *= 2;
-        player.doubleDown = true;
-        io.sockets.emit('player bet', {otherPlayer: player});
-      }
-    });
+    let playerIndex = findById(players, socket.id);
+    console.log(`${players[playerIndex].name} doubles down! From $${players[playerIndex].bet} to $${players[playerIndex].bet * 2}!`);
+    
+    players[playerIndex].money -= players[playerIndex].bet;
+    players[playerIndex].bet *= 2;
+    players[playerIndex].doubleDown = true;
+    io.sockets.emit('player bet', {otherPlayer: players[playerIndex]});
   })
 
   socket.on('hit me', function() {
