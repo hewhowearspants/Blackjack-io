@@ -536,11 +536,11 @@ io.on('connection', function(socket) {
           console.log(`${player.name} busted!`);
           
           // if player has not split or if they are on their last split hand
-          if (player.splitHand === null || player.splitHand + 1 === player.hand.length) {
+          if (player.splitHand === null || player.splitHand + 1 >= player.hand.length) {
             let playerIndex = findById(activePlayers, socket.id);
 
             let bustedPlayer = activePlayers[playerIndex];
-
+            console.log(`splicing and dicing ${bustedPlayer.name}`);
             activePlayers.splice(playerIndex, 1);
             // if there are still players left
             if (activePlayers.length) {
